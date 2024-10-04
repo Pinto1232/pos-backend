@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "6J0gi9SVl1QkbVNj4vEE9M/P2isvQGu7sgCkraNypdk=",
+  "Source": "PosBackend",
+  "BasePath": "_content/PosBackend",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}
