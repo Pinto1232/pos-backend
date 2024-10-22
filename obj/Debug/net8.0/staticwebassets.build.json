@@ -1,11 +1,12 @@
 {
   "Version": 1,
-  "Hash": "6J0gi9SVl1QkbVNj4vEE9M/P2isvQGu7sgCkraNypdk=",
+  "Hash": "uLOkJTJs/lbq+KThUFLeb7UA68ivHkE1/LW9HJ8sz54=",
   "Source": "PosBackend",
   "BasePath": "_content/PosBackend",
   "Mode": "Default",
   "ManifestType": "Build",
   "ReferencedProjectsConfiguration": [],
   "DiscoveryPatterns": [],
-  "Assets": []
+  "Assets": [],
+  "Endpoints": []
 }

@@ -159,3 +159,6 @@ C:\Users\pinto\Documents\Development\pos-project\pos-backend\obj\Debug\net8.0\re
 C:\Users\pinto\Documents\Development\pos-project\pos-backend\obj\Debug\net8.0\PosBackend.pdb
 C:\Users\pinto\Documents\Development\pos-project\pos-backend\obj\Debug\net8.0\PosBackend.genruntimeconfig.cache
 C:\Users\pinto\Documents\Development\pos-project\pos-backend\obj\Debug\net8.0\ref\PosBackend.dll
+C:\Users\pinto\Documents\Development\pos-project\pos-backend\bin\Debug\net8.0\PosBackend.staticwebassets.endpoints.json
+C:\Users\pinto\Documents\Development\pos-project\pos-backend\obj\Debug\net8.0\staticwebassets.build.endpoints.json
+C:\Users\pinto\Documents\Development\pos-project\pos-backend\obj\Debug\net8.0\staticwebassets\msbuild.PosBackend.Microsoft.AspNetCore.StaticWebAssetEndpoints.props
