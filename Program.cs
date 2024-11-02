@@ -1,4 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using PosBackend.Models; // Ensure this matches your actual namespace
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,6 +14,29 @@ builder.Services.AddControllers();
 builder.Services.AddDbContext<PosDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// Configure Keycloak authentication
+var keycloakConfig = builder.Configuration.GetSection("Keycloak");
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.Authority = keycloakConfig["Authority"];
+    options.Audience = keycloakConfig["ClientId"];
+    options.RequireHttpsMetadata = false;
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidIssuer = keycloakConfig["Authority"],
+        ValidateAudience = true,
+        ValidAudience = keycloakConfig["ClientId"],
+        ValidateLifetime = true
+    };
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -23,6 +48,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseRouting();
+app.UseAuthentication(); // Add this line to enable authentication
 app.UseAuthorization();
 app.MapControllers();
 

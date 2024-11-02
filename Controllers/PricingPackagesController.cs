@@ -1,11 +1,14 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using PosBackend.Models;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace PosBackend.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class PricingPackagesController : ControllerBase
@@ -18,10 +21,14 @@ namespace PosBackend.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<PricingPackage>>> Get()
+        public async Task<ActionResult<IEnumerable<PricingPackage>>> Get([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var packages = await _context.PricingPackages.ToListAsync();
+            var packages = await _context.PricingPackages
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
             return Ok(packages);
         }
     }
-}
+} 

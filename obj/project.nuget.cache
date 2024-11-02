@@ -1,11 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "sbvFEME1OGY=",
+  "dgSpecHash": "QUeRsnmNFCY=",
   "success": true,
   "projectFilePath": "/Users/pintomanuel/Documents/Development/POS/pos-backend/PosBackend.csproj",
   "expectedPackageFiles": [
     "/Users/pintomanuel/.nuget/packages/humanizer.core/2.14.1/humanizer.core.2.14.1.nupkg.sha512",
-    "/Users/pintomanuel/.nuget/packages/microsoft.aspnetcore.authentication.jwtbearer/8.0.8/microsoft.aspnetcore.authentication.jwtbearer.8.0.8.nupkg.sha512",
+    "/Users/pintomanuel/.nuget/packages/identitymodel/7.0.0/identitymodel.7.0.0.nupkg.sha512",
+    "/Users/pintomanuel/.nuget/packages/microsoft.aspnetcore.authentication.jwtbearer/8.0.10/microsoft.aspnetcore.authentication.jwtbearer.8.0.10.nupkg.sha512",
     "/Users/pintomanuel/.nuget/packages/microsoft.aspnetcore.openapi/8.0.6/microsoft.aspnetcore.openapi.8.0.6.nupkg.sha512",
     "/Users/pintomanuel/.nuget/packages/microsoft.bcl.asyncinterfaces/6.0.0/microsoft.bcl.asyncinterfaces.6.0.0.nupkg.sha512",
     "/Users/pintomanuel/.nuget/packages/microsoft.codeanalysis.analyzers/3.3.3/microsoft.codeanalysis.analyzers.3.3.3.nupkg.sha512",

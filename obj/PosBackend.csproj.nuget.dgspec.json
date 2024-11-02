@@ -43,9 +43,13 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
+            "IdentityModel": {
+              "target": "Package",
+              "version": "[7.0.0, )"
+            },
             "Microsoft.AspNetCore.Authentication.JwtBearer": {
               "target": "Package",
-              "version": "[8.0.8, )"
+              "version": "[8.0.10, )"
             },
             "Microsoft.AspNetCore.OpenApi": {
               "target": "Package",
