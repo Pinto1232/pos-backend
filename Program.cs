@@ -37,6 +37,8 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+builder.Services.AddAuthorization();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -48,7 +50,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseRouting();
-app.UseAuthentication(); // Add this line to enable authentication
+app.UseAuthentication(); // Enable authentication
 app.UseAuthorization();
 app.MapControllers();
 

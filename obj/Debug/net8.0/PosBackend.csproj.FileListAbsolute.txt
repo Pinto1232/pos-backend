@@ -281,3 +281,4 @@ C:/Users/pinto/Documents/Development/pos-project/pos-backend/obj/Debug/net8.0/re
 /Users/pintomanuel/Documents/Development/POS/pos-backend/obj/Debug/net8.0/PosBackend.genruntimeconfig.cache
 /Users/pintomanuel/Documents/Development/POS/pos-backend/obj/Debug/net8.0/ref/PosBackend.dll
 /Users/pintomanuel/Documents/Development/POS/pos-backend/bin/Debug/net8.0/IdentityModel.dll
+/Users/pintomanuel/Documents/Development/POS/pos-backend/bin/Debug/net8.0/Microsoft.Bcl.TimeProvider.dll
