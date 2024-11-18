@@ -51,15 +51,15 @@ builder.Services.AddAuthentication(options =>
 })
 .AddJwtBearer(options =>
 {
-    options.Authority = keycloakConfig["Authority"];
-    options.Audience = keycloakConfig["ClientId"];
+    options.Authority = "http://localhost:8080/realms/pisval-pos-realm"; // Ensure this matches the issuer in the token
+    options.Audience = "account"; // Ensure this matches the audience in the token
     options.RequireHttpsMetadata = false;
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
-        ValidIssuer = keycloakConfig["Authority"],
+        ValidIssuer = "http://localhost:8080/realms/pisval-pos-realm", // Ensure this matches the issuer in the token
         ValidateAudience = true,
-        ValidAudience = keycloakConfig["ClientId"],
+        ValidAudience = "account", // Ensure this matches the audience in the token
         ValidateLifetime = true
     };
 });
