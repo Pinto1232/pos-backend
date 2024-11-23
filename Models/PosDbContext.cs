@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 
 namespace PosBackend.Models
 {
@@ -6,7 +7,7 @@ namespace PosBackend.Models
     {
         public PosDbContext(DbContextOptions<PosDbContext> options) : base(options) { }
 
-        public DbSet<PricingPackage> PricingPackages { get; set; }
+        public DbSet<PricingPackage>? PricingPackages { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -15,7 +16,7 @@ namespace PosBackend.Models
                 {
                     Id = 1,
                     Title = "Starter",
-                    Description = new List<string>
+                    DescriptionList = new List<string> // Use DescriptionList for seeding
                     {
                         "Select the essential modules and features for your business.",
                         "Ideal for small businesses or those new to POS systems."
@@ -29,7 +30,7 @@ namespace PosBackend.Models
                 {
                     Id = 2,
                     Title = "Growth",
-                    Description = new List<string>
+                    DescriptionList = new List<string> // Use DescriptionList for seeding
                     {
                         "Expand your business capabilities with advanced modules and features.",
                         "Designed for growing businesses looking to enhance their POS system."

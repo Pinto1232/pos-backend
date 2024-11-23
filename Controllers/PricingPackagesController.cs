@@ -23,6 +23,11 @@ namespace PosBackend.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<PricingPackage>>> Get([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
+            if (_context.PricingPackages == null)
+            {
+                return NotFound("Pricing packages not found.");
+            }
+
             var packages = await _context.PricingPackages
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
@@ -31,4 +36,4 @@ namespace PosBackend.Controllers
             return Ok(packages);
         }
     }
-} 
+}
