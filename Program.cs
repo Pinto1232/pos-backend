@@ -2,19 +2,32 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using PosBackend.Models; // Ensure this matches your actual namespace
+using PosBackend.Models; // <-- Adjust to your actual namespace
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// 1) CORS policy for http://localhost:3000
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("DevPolicy", policy =>
+    {
+        policy.WithOrigins("http://localhost:3000")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials(); // If you need cookies or auth headers
+    });
+});
+
+// 2) Swagger services
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "POS API", Version = "v1" });
+    // Optional: Add Bearer security definition
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         In = ParameterLocation.Header,
-        Description = "Please enter a valid token",
+        Description = "Enter 'Bearer' [space] and then your valid token.",
         Name = "Authorization",
         Type = SecuritySchemeType.Http,
         BearerFormat = "JWT",
@@ -31,19 +44,16 @@ builder.Services.AddSwaggerGen(c =>
                     Id = "Bearer"
                 }
             },
-            new string[] {}
+            Array.Empty<string>()
         }
     });
 });
-builder.Services.AddControllers();
 
-// Configure DbContext to use PostgreSQL
+// 3) EF Core with PostgreSQL (adjust your connection string in appsettings.json)
 builder.Services.AddDbContext<PosDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Configure Keycloak authentication
-var keycloakConfig = builder.Configuration.GetSection("Keycloak");
-
+// 4) Configure Keycloak + JWT Bearer Authentication
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -51,38 +61,63 @@ builder.Services.AddAuthentication(options =>
 })
 .AddJwtBearer(options =>
 {
-    options.Authority = "http://localhost:8080/realms/pisval-pos-realm"; // Ensure this matches the issuer in the token
-    options.Audience = "account"; // Ensure this matches the audience in the token
+    // For Keycloak 19+, the realm path is "http://localhost:8080/realms/<realm>"
+    options.Authority = "http://localhost:8080/realms/pisval-pos-realm";
+
+    // The default audience in many Keycloak realms is "account".
+    // If your tokens show a different "aud", put that here instead.
+    options.Audience = "account";
     options.RequireHttpsMetadata = false;
+
+    // Additional token validation settings
     options.TokenValidationParameters = new TokenValidationParameters
     {
+        // Example: enforce that the token's "iss" claim must match the below
         ValidateIssuer = true,
-        ValidIssuer = "http://localhost:8080/realms/pisval-pos-realm", // Ensure this matches the issuer in the token
+        ValidIssuer = "http://localhost:8080/realms/pisval-pos-realm",
+
         ValidateAudience = true,
-        ValidAudience = "account", // Ensure this matches the audience in the token
+        ValidAudience = "account",
+
         ValidateLifetime = true
     };
 });
 
+// 5) Add Authorization
 builder.Services.AddAuthorization();
 
+// 5.5) IMPORTANT: Add Controllers!
+builder.Services.AddControllers();
+
+// 6) Build the WebApplication
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// 7) Swagger + environment check
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
+    // Serve swagger at /swagger
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "POS API v1");
-        c.RoutePrefix = string.Empty;
+        c.RoutePrefix = "swagger"; // So your UI is at http://localhost:5107/swagger/index.html
     });
 }
 
-app.UseHttpsRedirection();
+// Optional: If you want pure HTTP on port 5107, comment out if it causes forced HTTPS
+// app.UseHttpsRedirection();
+
 app.UseRouting();
-app.UseAuthentication(); // Enable authentication
+
+// 8) Enable CORS before authentication/authorization
+app.UseCors("DevPolicy");
+
+// 9) Set up the authentication + authorization middlewares
+app.UseAuthentication();
 app.UseAuthorization();
+
+// 10) Map controllers
 app.MapControllers();
 
+// 11) Run the app
 app.Run();

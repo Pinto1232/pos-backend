@@ -1,16 +1,16 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
-using PosBackend.Models;
+using PosBackend.Models; // Adjust to your namespace
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace PosBackend.Controllers
 {
-    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize] // This endpoint requires a valid Keycloak token
     public class PricingPackagesController : ControllerBase
     {
         private readonly PosDbContext _context;
@@ -21,7 +21,9 @@ namespace PosBackend.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<PricingPackage>>> Get([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        public async Task<ActionResult<IEnumerable<PricingPackage>>> GetAll(
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10)
         {
             if (_context.PricingPackages == null)
             {
@@ -34,6 +36,14 @@ namespace PosBackend.Controllers
                 .ToListAsync();
 
             return Ok(packages);
+        }
+
+        // Example: A test unprotected endpoint
+        [HttpGet("public")]
+        [AllowAnonymous]
+        public ActionResult<string> PublicEndpoint()
+        {
+            return "Anyone can see this.";
         }
     }
 }
