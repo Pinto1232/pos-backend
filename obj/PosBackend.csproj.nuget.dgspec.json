@@ -1,25 +1,32 @@
 {
   "format": 1,
   "restore": {
-    "/Users/pintomanuel/Documents/Development/POS/pos-backend/PosBackend.csproj": {}
+    "C:\\Users\\pinto\\Documents\\Development\\POS\\pos-backend\\PosBackend.csproj": {}
   },
   "projects": {
-    "/Users/pintomanuel/Documents/Development/POS/pos-backend/PosBackend.csproj": {
+    "C:\\Users\\pinto\\Documents\\Development\\POS\\pos-backend\\PosBackend.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/pintomanuel/Documents/Development/POS/pos-backend/PosBackend.csproj",
+        "projectUniqueName": "C:\\Users\\pinto\\Documents\\Development\\POS\\pos-backend\\PosBackend.csproj",
         "projectName": "PosBackend",
-        "projectPath": "/Users/pintomanuel/Documents/Development/POS/pos-backend/PosBackend.csproj",
-        "packagesPath": "/Users/pintomanuel/.nuget/packages/",
-        "outputPath": "/Users/pintomanuel/Documents/Development/POS/pos-backend/obj/",
+        "projectPath": "C:\\Users\\pinto\\Documents\\Development\\POS\\pos-backend\\PosBackend.csproj",
+        "packagesPath": "C:\\Users\\pinto\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\pinto\\Documents\\Development\\POS\\pos-backend\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
         "configFilePaths": [
-          "/Users/pintomanuel/.nuget/NuGet/NuGet.Config"
+          "C:\\Users\\pinto\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
         ],
         "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -57,13 +64,13 @@
             },
             "Microsoft.EntityFrameworkCore": {
               "target": "Package",
-              "version": "[8.0.10, )"
+              "version": "[9.0.1, )"
             },
             "Microsoft.EntityFrameworkCore.Design": {
               "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
               "suppressParent": "All",
               "target": "Package",
-              "version": "[8.0.10, )"
+              "version": "[9.0.1, )"
             },
             "Microsoft.IdentityModel.Protocols.OpenIdConnect": {
               "target": "Package",
@@ -75,7 +82,7 @@
             },
             "Npgsql.EntityFrameworkCore.PostgreSQL": {
               "target": "Package",
-              "version": "[8.0.10, )"
+              "version": "[9.0.3, )"
             },
             "Swashbuckle.AspNetCore": {
               "target": "Package",
@@ -101,7 +108,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/8.0.403/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.400/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

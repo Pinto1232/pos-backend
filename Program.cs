@@ -2,11 +2,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using PosBackend.Models; // <-- Adjust to your actual namespace
+using PosBackend.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1) CORS policy for http://localhost:3000
+// 1) CORS policy
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("DevPolicy", policy =>
@@ -14,7 +14,7 @@ builder.Services.AddCors(options =>
         policy.WithOrigins("http://localhost:3000")
               .AllowAnyHeader()
               .AllowAnyMethod()
-              .AllowCredentials(); // If you need cookies or auth headers
+              .AllowCredentials();
     });
 });
 
@@ -23,7 +23,6 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "POS API", Version = "v1" });
-    // Optional: Add Bearer security definition
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         In = ParameterLocation.Header,
@@ -62,7 +61,7 @@ builder.Services.AddAuthentication(options =>
 .AddJwtBearer(options =>
 {
     // For Keycloak 19+, the realm path is "http://localhost:8080/realms/<realm>"
-    options.Authority = "http://localhost:8080/realms/pisval-pos-realm";
+    options.Authority = "http://localhost:8280/realms/pisval-pos-realm";
 
     // The default audience in many Keycloak realms is "account".
     // If your tokens show a different "aud", put that here instead.
@@ -74,11 +73,9 @@ builder.Services.AddAuthentication(options =>
     {
         // Example: enforce that the token's "iss" claim must match the below
         ValidateIssuer = true,
-        ValidIssuer = "http://localhost:8080/realms/pisval-pos-realm",
-
+        ValidIssuer = "http://localhost:8280/realms/pisval-pos-realm",
         ValidateAudience = true,
         ValidAudience = "account",
-
         ValidateLifetime = true
     };
 });

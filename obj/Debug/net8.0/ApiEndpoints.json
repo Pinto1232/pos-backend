@@ -1,12 +1,23 @@
 [
   {
     "ContainingType": "PosBackend.Controllers.PricingPackagesController",
-    "Method": "Get",
+    "Method": "GetAll",
     "RelativePath": "api/PricingPackages",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
-    "Parameters": [],
+    "Parameters": [
+      {
+        "Name": "pageNumber",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "pageSize",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
     "ReturnTypes": [
       {
         "Type": "System.Collections.Generic.IEnumerable\u00601[[PosBackend.Models.PricingPackage, PosBackend, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
@@ -20,22 +31,23 @@
     ]
   },
   {
-    "ContainingType": "Program\u002B\u003C\u003Ec__DisplayClass0_0",
-    "Method": "\u003C\u003CMain\u003E$\u003Eb__1",
-    "RelativePath": "weatherforecast",
+    "ContainingType": "PosBackend.Controllers.PricingPackagesController",
+    "Method": "PublicEndpoint",
+    "RelativePath": "api/PricingPackages/public",
     "HttpMethod": "GET",
-    "IsController": false,
+    "IsController": true,
     "Order": 0,
     "Parameters": [],
     "ReturnTypes": [
       {
-        "Type": "WeatherForecast[]",
+        "Type": "System.String",
         "MediaTypes": [
-          "application/json"
+          "text/plain",
+          "application/json",
+          "text/json"
         ],
         "StatusCode": 200
       }
-    ],
-    "EndpointName": "GetWeatherForecast"
+    ]
   }
 ]
