@@ -11,7 +11,7 @@ using PosBackend.Models;
 namespace PosBackend.Migrations
 {
     [DbContext(typeof(PosDbContext))]
-    [Migration("20250121055955_InitialCreate")]
+    [Migration("20250122214208_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -78,6 +78,36 @@ namespace PosBackend.Migrations
                             Price = 59.99m,
                             TestPeriodDays = 14,
                             Title = "Growth"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Description = "Tailor-made solutions for your unique business needs.;Perfect for businesses requiring customized POS features.",
+                            ExtraDescription = "Get a POS system that fits your specific requirements.",
+                            Icon = "custom-icon.png",
+                            Price = 99.99m,
+                            TestPeriodDays = 30,
+                            Title = "Custom"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Description = "Comprehensive POS solutions for large enterprises.;Includes all advanced features and premium support.",
+                            ExtraDescription = "Ideal for large businesses with extensive POS needs.",
+                            Icon = "enterprise-icon.png",
+                            Price = 199.99m,
+                            TestPeriodDays = 30,
+                            Title = "Enterprise"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Description = "All-inclusive POS package with premium features.;Best for businesses looking for top-tier POS solutions.",
+                            ExtraDescription = "Experience the best POS system with all features included.",
+                            Icon = "premium-icon.png",
+                            Price = 299.99m,
+                            TestPeriodDays = 30,
+                            Title = "Premium"
                         });
                 });
 #pragma warning restore 612, 618
