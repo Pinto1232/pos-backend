@@ -7,7 +7,7 @@ namespace PosBackend.Models
     {
         public PosDbContext(DbContextOptions<PosDbContext> options) : base(options) { }
 
-        public DbSet<PricingPackage>? PricingPackages { get; set; }
+        public DbSet<PricingPackage> PricingPackages { get; set; } 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

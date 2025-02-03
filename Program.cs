@@ -1,12 +1,13 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using PosBackend.Middlewares;
 using PosBackend.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1) CORS policy
+// 1️⃣ Configure CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("DevPolicy", policy =>
@@ -18,19 +19,19 @@ builder.Services.AddCors(options =>
     });
 });
 
-// 2) Swagger services
+// 2️⃣ Configure Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "POS API", Version = "v1" });
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        In = ParameterLocation.Header,
-        Description = "Enter 'Bearer' [space] and then your valid token.",
         Name = "Authorization",
         Type = SecuritySchemeType.Http,
+        Scheme = "Bearer",
         BearerFormat = "JWT",
-        Scheme = "Bearer"
+        In = ParameterLocation.Header,
+        Description = "Enter 'Bearer' [space] then your JWT token."
     });
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
@@ -43,78 +44,91 @@ builder.Services.AddSwaggerGen(c =>
                     Id = "Bearer"
                 }
             },
-            Array.Empty<string>()
+            new string[] {}
         }
     });
 });
 
-// 3) EF Core with PostgreSQL (adjust your connection string in appsettings.json)
+// 3️⃣ Configure Database
 builder.Services.AddDbContext<PosDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// 4) Configure Keycloak + JWT Bearer Authentication
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
-{
-    // For Keycloak 19+, the realm path is "http://localhost:8080/realms/<realm>"
-    options.Authority = "http://localhost:8280/realms/pisval-pos-realm";
-
-    // The default audience in many Keycloak realms is "account".
-    // If your tokens show a different "aud", put that here instead.
-    options.Audience = "account";
-    options.RequireHttpsMetadata = false;
-
-    // Additional token validation settings
-    options.TokenValidationParameters = new TokenValidationParameters
+// 4️⃣ Configure JWT Authentication with Improved Error Handling
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
     {
-        // Example: enforce that the token's "iss" claim must match the below
-        ValidateIssuer = true,
-        ValidIssuer = "http://localhost:8280/realms/pisval-pos-realm",
-        ValidateAudience = true,
-        ValidAudience = "account",
-        ValidateLifetime = true
-    };
-});
+        options.Authority = builder.Configuration["Keycloak:Authority"];
+        options.Audience = builder.Configuration["Keycloak:ClientId"];
+        options.RequireHttpsMetadata = !builder.Environment.IsDevelopment();
 
-// 5) Add Authorization
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = builder.Configuration["Keycloak:Authority"],
+            ValidateAudience = true,
+            ValidAudiences = new[] { builder.Configuration["Keycloak:ClientId"], "realm-management", "broker", "account" },
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.Zero
+        };
+
+        options.Events = new JwtBearerEvents
+        {
+            OnAuthenticationFailed = context =>
+            {
+                Console.WriteLine($"❌ Authentication failed: {context.Exception.Message}");
+                context.Response.StatusCode = 401;
+                context.Response.ContentType = "application/json";
+                return context.Response.WriteAsync($"{{\"error\": \"Authentication failed\", \"message\": \"{context.Exception.Message}\"}}");
+            },
+
+            OnForbidden = context =>
+            {
+                Console.WriteLine("⛔ Access forbidden.");
+                context.Response.StatusCode = 403;
+                context.Response.ContentType = "application/json";
+                return context.Response.WriteAsync("{\"error\": \"Forbidden\", \"message\": \"You do not have permission.\"}");
+            },
+
+            OnTokenValidated = context =>
+            {
+                Console.WriteLine("✅ Token validated successfully.");
+                return Task.CompletedTask;
+            }
+        };
+    });
+
+// 5️⃣ Enable Authorization
 builder.Services.AddAuthorization();
 
-// 5.5) IMPORTANT: Add Controllers!
+// 6️⃣ Enable Controllers
 builder.Services.AddControllers();
 
-// 6) Build the WebApplication
+// 7️⃣ Build Application
 var app = builder.Build();
 
-// 7) Swagger + environment check
+// 8️⃣ Global Error Handling Middleware
+app.UseMiddleware<ExceptionHandlingMiddleware>();
+
+// 9️⃣ Enable Swagger in Development
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    // Serve swagger at /swagger
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "POS API v1");
-        c.RoutePrefix = "swagger"; // So your UI is at http://localhost:5107/swagger/index.html
+        c.RoutePrefix = "swagger";
     });
 }
 
-// Optional: If you want pure HTTP on port 5107, comment out if it causes forced HTTPS
-// app.UseHttpsRedirection();
-
-app.UseRouting();
-
-// 8) Enable CORS before authentication/authorization
+// 🔟 Enable CORS before Authentication
 app.UseCors("DevPolicy");
 
-// 9) Set up the authentication + authorization middlewares
+// 1️⃣1️⃣ Enable Authentication & Authorization
 app.UseAuthentication();
 app.UseAuthorization();
 
-// 10) Map controllers
+// 1️⃣2️⃣ Map Controllers
 app.MapControllers();
 
-// 11) Run the app
+// 1️⃣3️⃣ Run Application
 app.Run();
