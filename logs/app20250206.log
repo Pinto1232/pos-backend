@@ -1,0 +1,20 @@
+2025-02-06 22:02:06.701 +02:00 [INF] 🚀 Starting POS API...
+2025-02-06 22:02:06.801 +02:00 [INF] User profile is available. Using 'C:\Users\pinto\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2025-02-06 22:02:07.007 +02:00 [INF] Now listening on: http://localhost:5107
+2025-02-06 22:02:07.010 +02:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-02-06 22:02:07.011 +02:00 [INF] Hosting environment: Development
+2025-02-06 22:02:07.011 +02:00 [INF] Content root path: C:\Users\pinto\Documents\Development\POS\pos-backend
+2025-02-06 22:02:28.443 +02:00 [INF] Application is shutting down...
+2025-02-06 22:03:16.205 +02:00 [INF] 🚀 Starting POS API...
+2025-02-06 22:03:16.329 +02:00 [INF] User profile is available. Using 'C:\Users\pinto\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2025-02-06 22:03:16.444 +02:00 [INF] Now listening on: http://localhost:5107
+2025-02-06 22:03:16.447 +02:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-02-06 22:03:16.448 +02:00 [INF] Hosting environment: Development
+2025-02-06 22:03:16.449 +02:00 [INF] Content root path: C:\Users\pinto\Documents\Development\POS\pos-backend
+2025-02-06 22:03:26.197 +02:00 [INF] Request starting HTTP/1.1 GET http://localhost:5107/ - null null
+2025-02-06 22:03:26.623 +02:00 [INF] Request finished HTTP/1.1 GET http://localhost:5107/ - 404 0 null 425.5993ms
+2025-02-06 22:03:27.739 +02:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET http://localhost:5107/, Response status code: 404
+2025-02-06 22:03:43.892 +02:00 [INF] Request starting HTTP/1.1 GET http://localhost:5107/ - null null
+2025-02-06 22:03:44.048 +02:00 [INF] Request finished HTTP/1.1 GET http://localhost:5107/ - 404 0 null 170.4304ms
+2025-02-06 22:03:44.060 +02:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET http://localhost:5107/, Response status code: 404
+2025-02-06 22:04:03.901 +02:00 [INF] Application is shutting down...

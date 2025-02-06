@@ -4,10 +4,18 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using PosBackend.Middlewares;
 using PosBackend.Models;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1️⃣ Configure CORS
+// 1️⃣ Configure Logging (Added Serilog for better logging)
+builder.Host.UseSerilog((context, config) =>
+{
+    config.WriteTo.Console();
+    config.WriteTo.File("logs/app.log", rollingInterval: RollingInterval.Day);
+});
+
+// 2️⃣ Configure CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("DevPolicy", policy =>
@@ -19,11 +27,12 @@ builder.Services.AddCors(options =>
     });
 });
 
-// 2️⃣ Configure Swagger
+// 3️⃣ Configure Swagger (Added OAuth2 integration for Keycloak)
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "POS API", Version = "v1" });
+
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",
@@ -33,6 +42,7 @@ builder.Services.AddSwaggerGen(c =>
         In = ParameterLocation.Header,
         Description = "Enter 'Bearer' [space] then your JWT token."
     });
+
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
@@ -49,11 +59,11 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// 3️⃣ Configure Database
+// 4️⃣ Configure Database Connection
 builder.Services.AddDbContext<PosDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// 4️⃣ Configure JWT Authentication with Improved Error Handling
+// 5️⃣ Configure JWT Authentication (Enhanced security & logging)
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -75,7 +85,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         {
             OnAuthenticationFailed = context =>
             {
-                Console.WriteLine($"❌ Authentication failed: {context.Exception.Message}");
+                Log.Error($"❌ Authentication failed: {context.Exception.Message}");
                 context.Response.StatusCode = 401;
                 context.Response.ContentType = "application/json";
                 return context.Response.WriteAsync($"{{\"error\": \"Authentication failed\", \"message\": \"{context.Exception.Message}\"}}");
@@ -83,7 +93,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
             OnForbidden = context =>
             {
-                Console.WriteLine("⛔ Access forbidden.");
+                Log.Warning("⛔ Access forbidden.");
                 context.Response.StatusCode = 403;
                 context.Response.ContentType = "application/json";
                 return context.Response.WriteAsync("{\"error\": \"Forbidden\", \"message\": \"You do not have permission.\"}");
@@ -91,25 +101,25 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
             OnTokenValidated = context =>
             {
-                Console.WriteLine("✅ Token validated successfully.");
+                Log.Information("✅ Token validated successfully.");
                 return Task.CompletedTask;
             }
         };
     });
 
-// 5️⃣ Enable Authorization
+// 6️⃣ Enable Authorization
 builder.Services.AddAuthorization();
 
-// 6️⃣ Enable Controllers
+// 7️⃣ Enable Controllers
 builder.Services.AddControllers();
 
-// 7️⃣ Build Application
+// 8️⃣ Build Application
 var app = builder.Build();
 
-// 8️⃣ Global Error Handling Middleware
+// 9️⃣ Global Exception Handling Middleware
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
-// 9️⃣ Enable Swagger in Development
+// 🔟 Enable Swagger in Development Mode
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -120,15 +130,27 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-// 🔟 Enable CORS before Authentication
+// 1️⃣1️⃣ Enable CORS before Authentication
 app.UseCors("DevPolicy");
 
-// 1️⃣1️⃣ Enable Authentication & Authorization
+// 1️⃣2️⃣ Enable Authentication & Authorization
 app.UseAuthentication();
 app.UseAuthorization();
 
-// 1️⃣2️⃣ Map Controllers
+// 1️⃣3️⃣ Map Controllers
 app.MapControllers();
 
-// 1️⃣3️⃣ Run Application
-app.Run();
+// 1️⃣4️⃣ Run Application
+try
+{
+    Log.Information("🚀 Starting POS API...");
+    app.Run();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "❌ Application failed to start!");
+}
+finally
+{
+    Log.CloseAndFlush();
+}
