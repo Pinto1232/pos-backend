@@ -30,7 +30,8 @@ public class AuthController : ControllerBase
 
             _logger.LogInformation("🔄 Refresh token request received.");
 
-            var request = new HttpRequestMessage(HttpMethod.Post, "http://localhost:8282/realms/pos-realm/protocol/openid-connect/token")
+            var request = new HttpRequestMessage(HttpMethod.Post, "http://keycloak:8282/realms/pisval-pos-realm/protocol/openid-connect/token")
+
             {
                 Content = new FormUrlEncodedContent(new[]
                 {
