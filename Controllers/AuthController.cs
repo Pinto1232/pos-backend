@@ -25,12 +25,13 @@ public class AuthController : ControllerBase
         try
         {
             var token = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+
             if (string.IsNullOrEmpty(token))
                 return BadRequest(new { error = "Invalid request", message = "Token is missing" });
 
             _logger.LogInformation("🔄 Refresh token request received.");
-
-            var request = new HttpRequestMessage(HttpMethod.Post, "http://keycloak:8282/realms/pisval-pos-realm/protocol/openid-connect/token")
+            /* This setting is production http://keycloak:8282/realms/pisval-pos-realm/protocol/openid-connect/token */
+            var request = new HttpRequestMessage(HttpMethod.Post, "http://localhost:8282/realms/pisval-pos-realm/protocol/openid-connect/token")
 
             {
                 Content = new FormUrlEncodedContent(new[]

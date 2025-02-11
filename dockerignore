@@ -1,0 +1,11 @@
+# Ignore build and dependency files
+bin/
+obj/
+node_modules/
+.vscode/
+.idea/
+logs/
+*.log
+*.mdf
+*.ldf
+*.db

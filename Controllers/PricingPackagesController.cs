@@ -2,9 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using PosBackend.Models; // Adjust to your namespace
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace PosBackend.Controllers
 {
