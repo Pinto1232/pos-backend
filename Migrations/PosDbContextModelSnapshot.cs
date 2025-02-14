@@ -16,7 +16,7 @@ namespace PosBackend.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.1")
+                .HasAnnotation("ProductVersion", "9.0.2")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -51,6 +51,10 @@ namespace PosBackend.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.HasKey("Id");
 
                     b.ToTable("PricingPackages");
@@ -64,7 +68,8 @@ namespace PosBackend.Migrations
                             Icon = "starter-icon.png",
                             Price = 29.99m,
                             TestPeriodDays = 14,
-                            Title = "Starter"
+                            Title = "Starter",
+                            Type = "starter"
                         },
                         new
                         {
@@ -74,7 +79,8 @@ namespace PosBackend.Migrations
                             Icon = "growth-icon.png",
                             Price = 59.99m,
                             TestPeriodDays = 14,
-                            Title = "Growth"
+                            Title = "Growth",
+                            Type = "growth"
                         },
                         new
                         {
@@ -84,7 +90,8 @@ namespace PosBackend.Migrations
                             Icon = "custom-icon.png",
                             Price = 99.99m,
                             TestPeriodDays = 30,
-                            Title = "Custom"
+                            Title = "Custom",
+                            Type = "custom"
                         },
                         new
                         {
@@ -94,7 +101,8 @@ namespace PosBackend.Migrations
                             Icon = "enterprise-icon.png",
                             Price = 199.99m,
                             TestPeriodDays = 30,
-                            Title = "Enterprise"
+                            Title = "Enterprise",
+                            Type = "enterprise"
                         },
                         new
                         {
@@ -104,7 +112,8 @@ namespace PosBackend.Migrations
                             Icon = "premium-icon.png",
                             Price = 299.99m,
                             TestPeriodDays = 30,
-                            Title = "Premium"
+                            Title = "Premium",
+                            Type = "premium"
                         });
                 });
 #pragma warning restore 612, 618

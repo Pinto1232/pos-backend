@@ -24,7 +24,8 @@ namespace PosBackend.Models
                     Icon = "starter-icon.png",
                     ExtraDescription = "This package is perfect for startups and small businesses.",
                     Price = 29.99m,
-                    TestPeriodDays = 14
+                    TestPeriodDays = 14,
+                    Type = "starter"
                 },
                 new PricingPackage
                 {
@@ -38,7 +39,8 @@ namespace PosBackend.Models
                     Icon = "growth-icon.png",
                     ExtraDescription = "Ideal for businesses looking to scale and grow.",
                     Price = 59.99m,
-                    TestPeriodDays = 14
+                    TestPeriodDays = 14,
+                    Type = "growth"
                 },
                 new PricingPackage
                 {
@@ -52,7 +54,8 @@ namespace PosBackend.Models
                     Icon = "custom-icon.png",
                     ExtraDescription = "Get a POS system that fits your specific requirements.",
                     Price = 99.99m,
-                    TestPeriodDays = 30
+                    TestPeriodDays = 30,
+                    Type = "custom"
                 },
                 new PricingPackage
                 {
@@ -66,7 +69,8 @@ namespace PosBackend.Models
                     Icon = "enterprise-icon.png",
                     ExtraDescription = "Ideal for large businesses with extensive POS needs.",
                     Price = 199.99m,
-                    TestPeriodDays = 30
+                    TestPeriodDays = 30,
+                    Type = "enterprise"
                 },
                 new PricingPackage
                 {
@@ -80,7 +84,8 @@ namespace PosBackend.Models
                     Icon = "premium-icon.png",
                     ExtraDescription = "Experience the best POS system with all features included.",
                     Price = 299.99m,
-                    TestPeriodDays = 30
+                    TestPeriodDays = 30,
+                    Type = "premium"
                 }
             );
         }

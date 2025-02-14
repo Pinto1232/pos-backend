@@ -14,6 +14,8 @@ namespace PosBackend.Models
         public string ExtraDescription { get; set; } = string.Empty;
         public decimal Price { get; set; }
         public int TestPeriodDays { get; set; }
+        public string Type { get; set; } = string.Empty;
+
 
         [NotMapped]
         public List<string> DescriptionList
