@@ -184,6 +184,7 @@ C:\Users\pinto\Documents\Development\POS\pos-backend\obj\Debug\net8.0\staticweba
 C:\Users\pinto\Documents\Development\POS\pos-backend\obj\Debug\net8.0\staticwebassets\msbuild.buildMultiTargeting.PosBackend.props
 C:\Users\pinto\Documents\Development\POS\pos-backend\obj\Debug\net8.0\staticwebassets\msbuild.buildTransitive.PosBackend.props
 C:\Users\pinto\Documents\Development\POS\pos-backend\obj\Debug\net8.0\staticwebassets.pack.json
+C:\Users\pinto\Documents\Development\POS\pos-backend\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
 C:\Users\pinto\Documents\Development\POS\pos-backend\obj\Debug\net8.0\PosBackend.csproj.Up2Date
 C:\Users\pinto\Documents\Development\POS\pos-backend\obj\Debug\net8.0\PosBackend.dll
 C:\Users\pinto\Documents\Development\POS\pos-backend\obj\Debug\net8.0\refint\PosBackend.dll
