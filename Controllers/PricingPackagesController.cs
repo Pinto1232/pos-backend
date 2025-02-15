@@ -62,10 +62,10 @@ namespace PosBackend.Controllers
                     new Feature { Id = 103, Name = "Multi-Location Support", Description = "Manage multiple store locations from one dashboard.", BasePrice = 12.00m, IsRequired = false }
                 };
 
-                package.AddOns = new List<AddOn>
+                package.AddOns = new List<PosBackend.Models.AddOn>
                 {
-                    new AddOn { Id = 201, Name = "Premium Support", Description = "24/7 priority support via chat and email.", Price = 5.00m },
-                    new AddOn { Id = 202, Name = "Custom Branding", Description = "Add your own logo and color scheme to the POS.", Price = 7.00m, Dependencies = new List<int> { 101 } }
+                    new PosBackend.Models.AddOn { Id = 201, Name = "Premium Support", Description = "24/7 priority support via chat and email.", Price = 5.00m },
+                    new PosBackend.Models.AddOn { Id = 202, Name = "Custom Branding", Description = "Add your own logo and color scheme to the POS.", Price = 7.00m}
                 };
 
                 package.UsageBasedPricingOptions = new List<UsageBasedPricing>
@@ -130,7 +130,7 @@ namespace PosBackend.Controllers
         private static readonly Dictionary<int, AddOn> CustomPackageAddOns = new()
         {
             { 201, new AddOn { Id = 201, Name = "Premium Support", Description = "24/7 priority support via chat and email.", Price = 5.00m } },
-            { 202, new AddOn { Id = 202, Name = "Custom Branding", Description = "Add your own logo and color scheme to the POS.", Price = 7.00m, Dependencies = new List<int> { 101 } } }
+            { 202, new AddOn { Id = 202, Name = "Custom Branding", Description = "Add your own logo and color scheme to the POS.", Price = 7.00m } }
         };
 
         private static readonly Dictionary<int, UsageBasedPricing> CustomPackageUsagePricing = new()
@@ -145,5 +145,13 @@ namespace PosBackend.Controllers
         public List<int> SelectedFeatures { get; set; } = new();
         public List<int> SelectedAddOns { get; set; } = new();
         public Dictionary<int, int> UsageLimits { get; set; } = new();
+    }
+    // Add the Dependencies property to the AddOn class
+    public class AddOn
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public decimal Price { get; set; }
     }
 }

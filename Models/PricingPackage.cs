@@ -49,9 +49,6 @@ namespace PosBackend.Models
         public string Name { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public decimal Price { get; set; }
-
-        [NotMapped]
-        public List<int> Dependencies { get; set; } = new();
     }
 
     public class UsageBasedPricing

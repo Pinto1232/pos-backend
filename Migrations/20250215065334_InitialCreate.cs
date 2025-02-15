@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
@@ -9,7 +8,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace PosBackend.Migrations
 {
     /// <inheritdoc />
-    public partial class AddCustomPackageFeaturesV2 : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -22,8 +21,7 @@ namespace PosBackend.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Name = table.Column<string>(type: "text", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: false),
-                    Price = table.Column<decimal>(type: "numeric", nullable: false),
-                    Dependencies = table.Column<List<int>>(type: "integer[]", nullable: false)
+                    Price = table.Column<decimal>(type: "numeric", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -47,6 +45,25 @@ namespace PosBackend.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "PricingPackages",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Title = table.Column<string>(type: "text", nullable: false),
+                    Description = table.Column<string>(type: "text", nullable: false),
+                    Icon = table.Column<string>(type: "text", nullable: false),
+                    ExtraDescription = table.Column<string>(type: "text", nullable: false),
+                    Price = table.Column<decimal>(type: "numeric", nullable: false),
+                    TestPeriodDays = table.Column<int>(type: "integer", nullable: false),
+                    Type = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PricingPackages", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "UsageBasedPricing",
                 columns: table => new
                 {
@@ -66,11 +83,11 @@ namespace PosBackend.Migrations
 
             migrationBuilder.InsertData(
                 table: "AddOns",
-                columns: new[] { "Id", "Dependencies", "Description", "Name", "Price" },
+                columns: new[] { "Id", "Description", "Name", "Price" },
                 values: new object[,]
                 {
-                    { 201, new List<int>(), "24/7 priority support via chat and email.", "Premium Support", 5.00m },
-                    { 202, new List<int> { 101 }, "Add your own logo and color scheme to the POS.", "Custom Branding", 7.00m }
+                    { 201, "24/7 priority support via chat and email.", "Premium Support", 5.00m },
+                    { 202, "Add your own logo and color scheme to the POS.", "Custom Branding", 7.00m }
                 });
 
             migrationBuilder.InsertData(
@@ -88,8 +105,11 @@ namespace PosBackend.Migrations
                 columns: new[] { "Id", "Description", "ExtraDescription", "Icon", "Price", "TestPeriodDays", "Title", "Type" },
                 values: new object[,]
                 {
-                    { 4, "Comprehensive POS solutions for large enterprises.;Includes all advanced features and premium support.", "Ideal for large businesses with extensive POS needs.", "enterprise-icon.png", 199.99m, 30, "Enterprise", "enterprise" },
-                    { 5, "All-inclusive POS package with premium features.;Best for businesses looking for top-tier POS solutions.", "Experience the best POS system with all features included.", "premium-icon.png", 299.99m, 30, "Premium", "premium" }
+                    { 1, "Select the essential modules and features for your business.;Ideal for small businesses or those new to POS systems.", "This package is perfect for startups and small businesses.", "MUI:StartIcon", 29.99m, 14, "Starter", "starter" },
+                    { 2, "Expand your business capabilities with advanced modules and features.;Designed for growing businesses looking to enhance their POS system.", "Ideal for businesses looking to scale and grow.", "MUI:TrendingUpIcon", 59.99m, 14, "Growth", "growth" },
+                    { 3, "Tailor-made solutions for your unique business needs.;Perfect for businesses requiring customized POS features.", "Get a POS system that fits your specific requirements.", "MUI:BuildIcon", 99.99m, 30, "Custom", "custom" },
+                    { 4, "Comprehensive POS solutions for large enterprises.;Includes all advanced features and premium support.", "Ideal for large businesses with extensive POS needs.", "MUI:BusinessIcon", 199.99m, 30, "Enterprise", "enterprise" },
+                    { 5, "All-inclusive POS package with premium features.;Best for businesses looking for top-tier POS solutions.", "Experience the best POS system with all features included.", "MUI:StarIcon", 299.99m, 30, "Premium", "premium" }
                 });
 
             migrationBuilder.InsertData(
@@ -112,17 +132,10 @@ namespace PosBackend.Migrations
                 name: "CoreFeatures");
 
             migrationBuilder.DropTable(
+                name: "PricingPackages");
+
+            migrationBuilder.DropTable(
                 name: "UsageBasedPricing");
-
-            migrationBuilder.DeleteData(
-                table: "PricingPackages",
-                keyColumn: "Id",
-                keyValue: 4);
-
-            migrationBuilder.DeleteData(
-                table: "PricingPackages",
-                keyColumn: "Id",
-                keyValue: 5);
         }
     }
 }
