@@ -31,7 +31,12 @@ namespace PosBackend.Middlewares
                 if (!context.Response.HasStarted)
                 {
                     context.Response.Clear();
-                    context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                    //context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                    if (!context.Response.HasStarted)
+                    {
+                        context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                    }
+
                     context.Response.ContentType = "application/json";
 
                     var errorResponse = new

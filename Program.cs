@@ -10,7 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 // 1️⃣ Configure CORS
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("DevPolicy", policy =>
+    options.AddPolicy("AllowAll", policy =>
     {
         policy.WithOrigins("http://localhost:3000")
               .AllowAnyHeader()
@@ -49,7 +49,7 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// 3️⃣ Configure Database
+// 3️⃣ Configure Databaseservices.AddCors
 builder.Services.AddDbContext<PosDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -140,7 +140,7 @@ app.UseSwaggerUI(c =>
 });
 
 // 1️⃣1️⃣ Enable CORS before Authentication
-app.UseCors("DevPolicy");
+app.UseCors("AllowAll");
 
 // 1️⃣2️⃣ Enable Authentication & Authorization
 app.UseAuthentication();
