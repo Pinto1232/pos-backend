@@ -11,8 +11,8 @@ using PosBackend.Models;
 namespace PosBackend.Migrations
 {
     [DbContext(typeof(PosDbContext))]
-    [Migration("20250215065334_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20250217131926_FixAddIconsAdded")]
+    partial class FixAddIconsAdded
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -161,7 +161,7 @@ namespace PosBackend.Migrations
                             Id = 1,
                             Description = "Select the essential modules and features for your business.;Ideal for small businesses or those new to POS systems.",
                             ExtraDescription = "This package is perfect for startups and small businesses.",
-                            Icon = "MUI:StartIcon",
+                            Icon = "StartIcon",
                             Price = 29.99m,
                             TestPeriodDays = 14,
                             Title = "Starter",
@@ -172,7 +172,7 @@ namespace PosBackend.Migrations
                             Id = 2,
                             Description = "Expand your business capabilities with advanced modules and features.;Designed for growing businesses looking to enhance their POS system.",
                             ExtraDescription = "Ideal for businesses looking to scale and grow.",
-                            Icon = "MUI:TrendingUpIcon",
+                            Icon = "TrendingUpIcon",
                             Price = 59.99m,
                             TestPeriodDays = 14,
                             Title = "Growth",
@@ -183,7 +183,7 @@ namespace PosBackend.Migrations
                             Id = 3,
                             Description = "Tailor-made solutions for your unique business needs.;Perfect for businesses requiring customized POS features.",
                             ExtraDescription = "Get a POS system that fits your specific requirements.",
-                            Icon = "MUI:BuildIcon",
+                            Icon = "BuildIcon",
                             Price = 99.99m,
                             TestPeriodDays = 30,
                             Title = "Custom",
@@ -194,7 +194,7 @@ namespace PosBackend.Migrations
                             Id = 4,
                             Description = "Comprehensive POS solutions for large enterprises.;Includes all advanced features and premium support.",
                             ExtraDescription = "Ideal for large businesses with extensive POS needs.",
-                            Icon = "MUI:BusinessIcon",
+                            Icon = "BusinessIcon",
                             Price = 199.99m,
                             TestPeriodDays = 30,
                             Title = "Enterprise",
@@ -205,7 +205,7 @@ namespace PosBackend.Migrations
                             Id = 5,
                             Description = "All-inclusive POS package with premium features.;Best for businesses looking for top-tier POS solutions.",
                             ExtraDescription = "Experience the best POS system with all features included.",
-                            Icon = "MUI:StarIcon",
+                            Icon = "StarIcon",
                             Price = 299.99m,
                             TestPeriodDays = 30,
                             Title = "Premium",
