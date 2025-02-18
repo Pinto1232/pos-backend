@@ -11,8 +11,8 @@ using PosBackend.Models;
 namespace PosBackend.Migrations
 {
     [DbContext(typeof(PosDbContext))]
-    [Migration("20250215065334_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20250218151514_RecreatePricingPackages")]
+    partial class RecreatePricingPackages
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
