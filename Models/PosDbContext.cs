@@ -12,9 +12,40 @@ namespace PosBackend.Models
         public DbSet<AddOn> AddOns { get; set; }
         public DbSet<UsageBasedPricing> UsageBasedPricing { get; set; }
 
+        // Junction Tables for Custom Package selections
+        public DbSet<CustomPackageSelectedFeature> CustomPackageSelectedFeatures { get; set; }
+        public DbSet<CustomPackageSelectedAddOn> CustomPackageSelectedAddOns { get; set; }
+        public DbSet<CustomPackageUsageBasedPricing> CustomPackageUsageBasedPricing { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Seeding Pricing Packages
+            // **📌 Define relationships for Custom Package**
+            modelBuilder.Entity<CustomPackageSelectedFeature>()
+                .HasKey(cf => new { cf.PricingPackageId, cf.FeatureId });
+
+            modelBuilder.Entity<CustomPackageSelectedFeature>()
+                .HasOne(cf => cf.Feature)
+                .WithMany()
+                .HasForeignKey(cf => cf.FeatureId);
+
+            modelBuilder.Entity<CustomPackageSelectedAddOn>()
+                .HasKey(ca => new { ca.PricingPackageId, ca.AddOnId });
+
+            modelBuilder.Entity<CustomPackageSelectedAddOn>()
+                .HasOne(ca => ca.AddOn)
+                .WithMany()
+                .HasForeignKey(ca => ca.AddOnId);
+
+            modelBuilder.Entity<CustomPackageUsageBasedPricing>()
+                .HasKey(cu => new { cu.PricingPackageId, cu.UsageBasedPricingId });
+
+            modelBuilder.Entity<CustomPackageUsageBasedPricing>()
+                .HasOne(cu => cu.UsageBasedPricing)
+                .WithMany()
+                .HasForeignKey(cu => cu.UsageBasedPricingId);
+
+            // **📌 Seeding Data (Other Packages remain unchanged)**
+
             modelBuilder.Entity<PricingPackage>().HasData(
                 new PricingPackage
                 {
@@ -73,7 +104,7 @@ namespace PosBackend.Models
                 }
             );
 
-            // Seeding Features for Custom Package
+            // **📌 Seeding Features for Custom Package**
             modelBuilder.Entity<Feature>().HasData(
                 new Feature
                 {
@@ -101,7 +132,7 @@ namespace PosBackend.Models
                 }
             );
 
-            // Seeding AddOns for Custom Package
+            // **📌 Seeding AddOns for Custom Package**
             modelBuilder.Entity<AddOn>().HasData(
                 new AddOn
                 {
@@ -109,7 +140,6 @@ namespace PosBackend.Models
                     Name = "Premium Support",
                     Description = "24/7 priority support via chat and email.",
                     Price = 5.00m,
-
                 },
                 new AddOn
                 {
@@ -120,7 +150,7 @@ namespace PosBackend.Models
                 }
             );
 
-            // Seeding Usage-Based Pricing
+            // **📌 Seeding Usage-Based Pricing**
             modelBuilder.Entity<UsageBasedPricing>().HasData(
                 new UsageBasedPricing
                 {
