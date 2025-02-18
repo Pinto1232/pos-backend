@@ -61,6 +61,63 @@ namespace PosBackend.Migrations
                         });
                 });
 
+            modelBuilder.Entity("PosBackend.Models.CustomPackageSelectedAddOn", b =>
+                {
+                    b.Property<int>("PricingPackageId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("AddOnId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Id")
+                        .HasColumnType("integer");
+
+                    b.HasKey("PricingPackageId", "AddOnId");
+
+                    b.HasIndex("AddOnId");
+
+                    b.ToTable("CustomPackageSelectedAddOns");
+                });
+
+            modelBuilder.Entity("PosBackend.Models.CustomPackageSelectedFeature", b =>
+                {
+                    b.Property<int>("PricingPackageId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("FeatureId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Id")
+                        .HasColumnType("integer");
+
+                    b.HasKey("PricingPackageId", "FeatureId");
+
+                    b.HasIndex("FeatureId");
+
+                    b.ToTable("CustomPackageSelectedFeatures");
+                });
+
+            modelBuilder.Entity("PosBackend.Models.CustomPackageUsageBasedPricing", b =>
+                {
+                    b.Property<int>("PricingPackageId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("UsageBasedPricingId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Id")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer");
+
+                    b.HasKey("PricingPackageId", "UsageBasedPricingId");
+
+                    b.HasIndex("UsageBasedPricingId");
+
+                    b.ToTable("CustomPackageUsageBasedPricing");
+                });
+
             modelBuilder.Entity("PosBackend.Models.Feature", b =>
                 {
                     b.Property<int>("Id")
@@ -263,6 +320,66 @@ namespace PosBackend.Migrations
                             PricePerUnit = 5.00m,
                             Unit = "users"
                         });
+                });
+
+            modelBuilder.Entity("PosBackend.Models.CustomPackageSelectedAddOn", b =>
+                {
+                    b.HasOne("PosBackend.Models.AddOn", "AddOn")
+                        .WithMany()
+                        .HasForeignKey("AddOnId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PosBackend.Models.PricingPackage", null)
+                        .WithMany("SelectedAddOns")
+                        .HasForeignKey("PricingPackageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AddOn");
+                });
+
+            modelBuilder.Entity("PosBackend.Models.CustomPackageSelectedFeature", b =>
+                {
+                    b.HasOne("PosBackend.Models.Feature", "Feature")
+                        .WithMany()
+                        .HasForeignKey("FeatureId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PosBackend.Models.PricingPackage", null)
+                        .WithMany("SelectedFeatures")
+                        .HasForeignKey("PricingPackageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Feature");
+                });
+
+            modelBuilder.Entity("PosBackend.Models.CustomPackageUsageBasedPricing", b =>
+                {
+                    b.HasOne("PosBackend.Models.PricingPackage", null)
+                        .WithMany("SelectedUsageBasedPricing")
+                        .HasForeignKey("PricingPackageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PosBackend.Models.UsageBasedPricing", "UsageBasedPricing")
+                        .WithMany()
+                        .HasForeignKey("UsageBasedPricingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("UsageBasedPricing");
+                });
+
+            modelBuilder.Entity("PosBackend.Models.PricingPackage", b =>
+                {
+                    b.Navigation("SelectedAddOns");
+
+                    b.Navigation("SelectedFeatures");
+
+                    b.Navigation("SelectedUsageBasedPricing");
                 });
 #pragma warning restore 612, 618
         }

@@ -8,7 +8,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace PosBackend.Migrations
 {
     /// <inheritdoc />
-    public partial class RecreatePricingPackages : Migration
+    public partial class ImprovedLogicPricingPackages : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -81,6 +81,82 @@ namespace PosBackend.Migrations
                     table.PrimaryKey("PK_UsageBasedPricing", x => x.Id);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "CustomPackageSelectedAddOns",
+                columns: table => new
+                {
+                    PricingPackageId = table.Column<int>(type: "integer", nullable: false),
+                    AddOnId = table.Column<int>(type: "integer", nullable: false),
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CustomPackageSelectedAddOns", x => new { x.PricingPackageId, x.AddOnId });
+                    table.ForeignKey(
+                        name: "FK_CustomPackageSelectedAddOns_AddOns_AddOnId",
+                        column: x => x.AddOnId,
+                        principalTable: "AddOns",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_CustomPackageSelectedAddOns_PricingPackages_PricingPackageId",
+                        column: x => x.PricingPackageId,
+                        principalTable: "PricingPackages",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CustomPackageSelectedFeatures",
+                columns: table => new
+                {
+                    PricingPackageId = table.Column<int>(type: "integer", nullable: false),
+                    FeatureId = table.Column<int>(type: "integer", nullable: false),
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CustomPackageSelectedFeatures", x => new { x.PricingPackageId, x.FeatureId });
+                    table.ForeignKey(
+                        name: "FK_CustomPackageSelectedFeatures_CoreFeatures_FeatureId",
+                        column: x => x.FeatureId,
+                        principalTable: "CoreFeatures",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_CustomPackageSelectedFeatures_PricingPackages_PricingPackag~",
+                        column: x => x.PricingPackageId,
+                        principalTable: "PricingPackages",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CustomPackageUsageBasedPricing",
+                columns: table => new
+                {
+                    PricingPackageId = table.Column<int>(type: "integer", nullable: false),
+                    UsageBasedPricingId = table.Column<int>(type: "integer", nullable: false),
+                    Id = table.Column<int>(type: "integer", nullable: false),
+                    Quantity = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CustomPackageUsageBasedPricing", x => new { x.PricingPackageId, x.UsageBasedPricingId });
+                    table.ForeignKey(
+                        name: "FK_CustomPackageUsageBasedPricing_PricingPackages_PricingPacka~",
+                        column: x => x.PricingPackageId,
+                        principalTable: "PricingPackages",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_CustomPackageUsageBasedPricing_UsageBasedPricing_UsageBased~",
+                        column: x => x.UsageBasedPricingId,
+                        principalTable: "UsageBasedPricing",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.InsertData(
                 table: "AddOns",
                 columns: new[] { "Id", "Description", "Name", "Price" },
@@ -120,11 +196,35 @@ namespace PosBackend.Migrations
                     { 1, 101, 100000, 1000, "API Calls", 0.01m, "requests" },
                     { 2, 102, 50, 1, "User Licenses", 5.00m, "users" }
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CustomPackageSelectedAddOns_AddOnId",
+                table: "CustomPackageSelectedAddOns",
+                column: "AddOnId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CustomPackageSelectedFeatures_FeatureId",
+                table: "CustomPackageSelectedFeatures",
+                column: "FeatureId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CustomPackageUsageBasedPricing_UsageBasedPricingId",
+                table: "CustomPackageUsageBasedPricing",
+                column: "UsageBasedPricingId");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "CustomPackageSelectedAddOns");
+
+            migrationBuilder.DropTable(
+                name: "CustomPackageSelectedFeatures");
+
+            migrationBuilder.DropTable(
+                name: "CustomPackageUsageBasedPricing");
+
             migrationBuilder.DropTable(
                 name: "AddOns");
 
