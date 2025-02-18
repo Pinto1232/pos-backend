@@ -8,7 +8,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace PosBackend.Migrations
 {
     /// <inheritdoc />
-    public partial class ImprovedLogicPricingPackages : Migration
+    public partial class AddedLogicPricingPackages : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

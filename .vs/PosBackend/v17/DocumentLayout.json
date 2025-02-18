@@ -3,6 +3,10 @@
   "WorkspaceRootPath": "C:\\Users\\pinto\\Documents\\Development\\POS\\pos-backend\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{CEE0D204-4F2E-4CD8-AC96-C28513CDB1B8}|PosBackend.csproj|c:\\users\\pinto\\documents\\development\\pos\\pos-backend\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CEE0D204-4F2E-4CD8-AC96-C28513CDB1B8}|PosBackend.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{CEE0D204-4F2E-4CD8-AC96-C28513CDB1B8}|PosBackend.csproj|c:\\users\\pinto\\documents\\development\\pos\\pos-backend\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
       "RelativeMoniker": "D:0:0:{CEE0D204-4F2E-4CD8-AC96-C28513CDB1B8}|PosBackend.csproj|solutionrelative:appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
     },
@@ -17,10 +21,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{CEE0D204-4F2E-4CD8-AC96-C28513CDB1B8}|PosBackend.csproj|c:\\users\\pinto\\documents\\development\\pos\\pos-backend\\models\\posdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{CEE0D204-4F2E-4CD8-AC96-C28513CDB1B8}|PosBackend.csproj|solutionrelative:models\\posdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{CEE0D204-4F2E-4CD8-AC96-C28513CDB1B8}|PosBackend.csproj|c:\\users\\pinto\\documents\\development\\pos\\pos-backend\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{CEE0D204-4F2E-4CD8-AC96-C28513CDB1B8}|PosBackend.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -30,7 +30,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 4,
+          "SelectedChildIndex": 8,
           "Children": [
             {
               "$type": "Bookmark",
@@ -50,7 +50,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "appsettings.json",
               "DocumentMoniker": "C:\\Users\\pinto\\Documents\\Development\\POS\\pos-backend\\appsettings.json",
               "RelativeDocumentMoniker": "appsettings.json",
@@ -63,7 +63,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "PricingPackage.cs",
               "DocumentMoniker": "C:\\Users\\pinto\\Documents\\Development\\POS\\pos-backend\\Models\\PricingPackage.cs",
               "RelativeDocumentMoniker": "Models\\PricingPackage.cs",
@@ -75,7 +75,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 4,
               "Title": "PosDbContext.cs",
               "DocumentMoniker": "C:\\Users\\pinto\\Documents\\Development\\POS\\pos-backend\\Models\\PosDbContext.cs",
               "RelativeDocumentMoniker": "Models\\PosDbContext.cs",
@@ -87,7 +87,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 3,
               "Title": "PricingPackagesController.cs",
               "DocumentMoniker": "C:\\Users\\pinto\\Documents\\Development\\POS\\pos-backend\\Controllers\\PricingPackagesController.cs",
               "RelativeDocumentMoniker": "Controllers\\PricingPackagesController.cs",
@@ -99,15 +99,16 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 0,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\Users\\pinto\\Documents\\Development\\POS\\pos-backend\\Program.cs",
               "RelativeDocumentMoniker": "Program.cs",
               "ToolTip": "C:\\Users\\pinto\\Documents\\Development\\POS\\pos-backend\\Program.cs",
               "RelativeToolTip": "Program.cs",
-              "ViewState": "AgIAAAYAAAAAAAAAAAAAAB0AAAAnAAAAAAAAAA==",
+              "ViewState": "AgIAAHAAAAAAAAAAAAAcwH4AAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-02-08T09:42:42.309Z"
+              "WhenOpened": "2025-02-08T09:42:42.309Z",
+              "EditorCaption": ""
             }
           ]
         }

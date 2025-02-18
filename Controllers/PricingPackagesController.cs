@@ -20,6 +20,31 @@ namespace PosBackend.Controllers
             _context = context;
         }
 
+        // GET: api/PricingPackages - Returns paginated pricing packages
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<PricingPackage>>> GetAll(
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            if (_context.PricingPackages == null)
+            {
+                return NotFound("No PricingPackages table found.");
+            }
+
+            var totalItems = await _context.PricingPackages.CountAsync();
+            var packages = await _context.PricingPackages
+                .OrderBy(p => p.Id)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return Ok(new
+            {
+                TotalItems = totalItems,
+                Data = packages
+            });
+        }
+
         // GET: api/PricingPackages/custom/features
         [HttpGet("custom/features")]
         public async Task<ActionResult<object>> GetCustomFeatures()

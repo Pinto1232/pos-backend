@@ -49,14 +49,14 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// 3️⃣ Configure Databaseservices.AddCors
+// 3️⃣ Configure Database
 builder.Services.AddDbContext<PosDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // 4️⃣ Configure HttpClientFactory
-builder.Services.AddHttpClient(); // ✅ Ensures IHttpClientFactory is available
+builder.Services.AddHttpClient();
 
-// 5️⃣ Configure JWT Authentication (Fixed Keycloak Authority Issue)
+// 5️⃣ Configure JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -65,17 +65,18 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
         if (string.IsNullOrEmpty(keycloakAuthority) || string.IsNullOrEmpty(keycloakClientId))
         {
-            throw new Exception("⚠️ Keycloak settings are missing in appsettings.json!");
+            Console.WriteLine("⚠️ Keycloak settings are missing in appsettings.json! Exiting...");
+            return;
         }
 
         options.Authority = keycloakAuthority;
         options.Audience = keycloakClientId;
-        options.RequireHttpsMetadata = false; // ⚠️ Important for local development
+        options.RequireHttpsMetadata = false;
 
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
-            ValidIssuer = keycloakAuthority, // ✅ Match Keycloak URL
+            ValidIssuer = keycloakAuthority,
             ValidateAudience = true,
             ValidAudiences = new[] { keycloakClientId, "realm-management", "broker", "account" },
             ValidateLifetime = true,
@@ -84,20 +85,26 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
         options.Events = new JwtBearerEvents
         {
-            OnAuthenticationFailed = context =>
+            OnAuthenticationFailed = async context =>
             {
-                Console.WriteLine($"❌ Authentication failed: {context.Exception.Message}");
-                context.Response.StatusCode = 401;
-                context.Response.ContentType = "application/json";
-                return context.Response.WriteAsync($"{{\"error\": \"Authentication failed\", \"message\": \"{context.Exception.Message}\"}}");
+                if (!context.Response.HasStarted)
+                {
+                    Console.WriteLine($"❌ Authentication failed: {context.Exception.Message}");
+                    context.Response.StatusCode = 401;
+                    context.Response.ContentType = "application/json";
+                    await context.Response.WriteAsync("{\"error\": \"Authentication failed\", \"message\": \"Invalid token\"}");
+                }
             },
 
-            OnForbidden = context =>
+            OnForbidden = async context =>
             {
-                Console.WriteLine("⛔ Access forbidden.");
-                context.Response.StatusCode = 403;
-                context.Response.ContentType = "application/json";
-                return context.Response.WriteAsync("{\"error\": \"Forbidden\", \"message\": \"You do not have permission.\"}");
+                if (!context.Response.HasStarted)
+                {
+                    Console.WriteLine("⛔ Access forbidden.");
+                    context.Response.StatusCode = 403;
+                    context.Response.ContentType = "application/json";
+                    await context.Response.WriteAsync("{\"error\": \"Forbidden\", \"message\": \"You do not have permission.\"}");
+                }
             },
 
             OnTokenValidated = context =>
@@ -115,23 +122,16 @@ builder.Services.AddControllers();
 // 7️⃣ Build Application
 var app = builder.Build();
 
-// 8️⃣ Global Error Handling Middleware
-//app.UseMiddleware<ExceptionHandlingMiddleware>();
-
-// 9️⃣ Enable Swagger in Development
-if (app.Environment.IsDevelopment())
-{
-    app.UseDeveloperExceptionPage();
-}
-else
-{
-    app.UseExceptionHandler("/error");
-}
-
-// 🟢 Add your custom middleware AFTER framework handlers
+// 8️⃣ Global Error Handling Middleware (Move to the top)
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
-// 1️⃣0️⃣ Enable Swagger
+// 9️⃣ Enable HTTPS Redirection
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
+
+// 🔟 Enable Swagger
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {

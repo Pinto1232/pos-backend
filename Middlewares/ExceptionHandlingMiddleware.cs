@@ -26,30 +26,33 @@ namespace PosBackend.Middlewares
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"❌ Unhandled Exception: {ex.Message}");
+                _logger.LogError(ex, "❌ Unhandled Exception occurred");
 
+                // Ensure we can modify the response
                 if (!context.Response.HasStarted)
                 {
                     context.Response.Clear();
-                    //context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-                    if (!context.Response.HasStarted)
-                    {
-                        context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-                    }
-
+                    context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
                     context.Response.ContentType = "application/json";
 
                     var errorResponse = new
                     {
                         error = "Internal Server Error",
-                        message = ex.Message
+                        message = ex.Message,
+                        stackTrace = ex.StackTrace // Include only in development mode
                     };
 
-                    await context.Response.WriteAsync(JsonSerializer.Serialize(errorResponse));
+                    var jsonResponse = JsonSerializer.Serialize(errorResponse, new JsonSerializerOptions
+                    {
+                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                        WriteIndented = true
+                    });
+
+                    await context.Response.WriteAsync(jsonResponse);
                 }
                 else
                 {
-                    _logger.LogWarning("⚠️ Response has already started. Exception cannot be handled gracefully.");
+                    _logger.LogWarning("⚠️ Response has already started. Unable to handle exception gracefully.");
                 }
             }
         }
