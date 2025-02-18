@@ -77,43 +77,45 @@
         }
       }
     },
-    "/api/PricingPackages/{id}": {
+    "/api/PricingPackages/custom/features": {
       "get": {
         "tags": [
           "PricingPackages"
         ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "style": "simple",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
         "responses": {
           "200": {
-            "description": "Success",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/PricingPackage"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PricingPackage"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PricingPackage"
-                }
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/PricingPackages/custom/select": {
+      "post": {
+        "tags": [
+          "PricingPackages"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomSelectionRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomSelectionRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomSelectionRequest"
               }
             }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
           }
         }
       }
@@ -148,35 +150,6 @@
           }
         }
       }
-    },
-    "/api/PricingPackages/public": {
-      "get": {
-        "tags": [
-          "PricingPackages"
-        ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "string"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "string"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        }
-      }
     }
   },
   "components": {
@@ -203,9 +176,114 @@
         },
         "additionalProperties": false
       },
+      "CustomPackageSelectedAddOn": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pricingPackageId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "addOnId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "addOn": {
+            "$ref": "#/components/schemas/AddOn"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CustomPackageSelectedFeature": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pricingPackageId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "featureId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "feature": {
+            "$ref": "#/components/schemas/Feature"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CustomPackageUsageBasedPricing": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pricingPackageId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "usageBasedPricingId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "quantity": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "usageBasedPricing": {
+            "$ref": "#/components/schemas/UsageBasedPricing"
+          }
+        },
+        "additionalProperties": false
+      },
       "CustomPricingRequest": {
         "type": "object",
         "properties": {
+          "packageId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "selectedFeatures": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
+          },
+          "selectedAddOns": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
+          },
+          "usageLimits": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CustomSelectionRequest": {
+        "type": "object",
+        "properties": {
+          "packageId": {
+            "type": "integer",
+            "format": "int32"
+          },
           "selectedFeatures": {
             "type": "array",
             "items": {
@@ -304,24 +382,24 @@
             "type": "boolean",
             "readOnly": true
           },
-          "coreFeatures": {
+          "selectedFeatures": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/Feature"
+              "$ref": "#/components/schemas/CustomPackageSelectedFeature"
             },
             "nullable": true
           },
-          "addOns": {
+          "selectedAddOns": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/AddOn"
+              "$ref": "#/components/schemas/CustomPackageSelectedAddOn"
             },
             "nullable": true
           },
-          "usageBasedPricingOptions": {
+          "selectedUsageBasedPricing": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/UsageBasedPricing"
+              "$ref": "#/components/schemas/CustomPackageUsageBasedPricing"
             },
             "nullable": true
           }
@@ -358,6 +436,11 @@
           "pricePerUnit": {
             "type": "number",
             "format": "double"
+          },
+          "defaultValue": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
           }
         },
         "additionalProperties": false

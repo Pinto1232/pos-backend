@@ -42,32 +42,6 @@
   },
   {
     "ContainingType": "PosBackend.Controllers.PricingPackagesController",
-    "Method": "GetById",
-    "RelativePath": "api/PricingPackages/{id}",
-    "HttpMethod": "GET",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "id",
-        "Type": "System.Int32",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": [
-      {
-        "Type": "PosBackend.Models.PricingPackage",
-        "MediaTypes": [
-          "text/plain",
-          "application/json",
-          "text/json"
-        ],
-        "StatusCode": 200
-      }
-    ]
-  },
-  {
-    "ContainingType": "PosBackend.Controllers.PricingPackagesController",
     "Method": "CalculateCustomPrice",
     "RelativePath": "api/PricingPackages/custom/calculate-price",
     "HttpMethod": "POST",
@@ -76,7 +50,7 @@
     "Parameters": [
       {
         "Name": "request",
-        "Type": "PosBackend.Controllers.CustomPricingRequest",
+        "Type": "PosBackend.Controllers.PricingPackagesController\u002BCustomPricingRequest",
         "IsRequired": true
       }
     ],
@@ -84,22 +58,28 @@
   },
   {
     "ContainingType": "PosBackend.Controllers.PricingPackagesController",
-    "Method": "PublicEndpoint",
-    "RelativePath": "api/PricingPackages/public",
+    "Method": "GetCustomFeatures",
+    "RelativePath": "api/PricingPackages/custom/features",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
     "Parameters": [],
-    "ReturnTypes": [
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PosBackend.Controllers.PricingPackagesController",
+    "Method": "SelectCustomPackage",
+    "RelativePath": "api/PricingPackages/custom/select",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
       {
-        "Type": "System.String",
-        "MediaTypes": [
-          "text/plain",
-          "application/json",
-          "text/json"
-        ],
-        "StatusCode": 200
+        "Name": "request",
+        "Type": "PosBackend.Controllers.PricingPackagesController\u002BCustomSelectionRequest",
+        "IsRequired": true
       }
-    ]
+    ],
+    "ReturnTypes": []
   }
 ]

@@ -11,7 +11,7 @@ using PosBackend.Models;
 namespace PosBackend.Migrations
 {
     [DbContext(typeof(PosDbContext))]
-    [Migration("20250218163426_AddedLogicPricingPackages")]
+    [Migration("20250218222813_AddedLogicPricingPackages")]
     partial class AddedLogicPricingPackages
     {
         /// <inheritdoc />

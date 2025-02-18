@@ -1,3 +1,4 @@
+//PosDbContext.cs
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 

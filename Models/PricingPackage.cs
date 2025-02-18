@@ -24,7 +24,7 @@ namespace PosBackend.Models
 
         public bool IsCustomizable => Type.ToLower() == "custom";
 
-        // Only applies to the "Custom" package
+        // Navigation properties
         public ICollection<CustomPackageSelectedFeature>? SelectedFeatures { get; set; }
         public ICollection<CustomPackageSelectedAddOn>? SelectedAddOns { get; set; }
         public ICollection<CustomPackageUsageBasedPricing>? SelectedUsageBasedPricing { get; set; }
@@ -56,8 +56,12 @@ namespace PosBackend.Models
         public int MinValue { get; set; }
         public int MaxValue { get; set; }
         public decimal PricePerUnit { get; set; }
+        
+        [NotMapped]
+        public int DefaultValue => MinValue;
     }
 
+    // Junction tables
     public class CustomPackageSelectedFeature
     {
         public int Id { get; set; }
