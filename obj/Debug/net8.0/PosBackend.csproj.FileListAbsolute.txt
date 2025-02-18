@@ -190,4 +190,3 @@ C:\Users\pinto\Documents\Development\POS\pos-backend\obj\Debug\net8.0\refint\Pos
 C:\Users\pinto\Documents\Development\POS\pos-backend\obj\Debug\net8.0\PosBackend.pdb
 C:\Users\pinto\Documents\Development\POS\pos-backend\obj\Debug\net8.0\PosBackend.genruntimeconfig.cache
 C:\Users\pinto\Documents\Development\POS\pos-backend\obj\Debug\net8.0\ref\PosBackend.dll
-C:\Users\pinto\Documents\Development\POS\pos-backend\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
