@@ -11,8 +11,8 @@ using PosBackend.Models;
 namespace PosBackend.Migrations
 {
     [DbContext(typeof(PosDbContext))]
-    [Migration("20250218154525_ImprovedLogicPricingPackages")]
-    partial class ImprovedLogicPricingPackages
+    [Migration("20250218151514_RecreatePricingPackages")]
+    partial class RecreatePricingPackages
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -62,78 +62,6 @@ namespace PosBackend.Migrations
                             Name = "Custom Branding",
                             Price = 7.00m
                         });
-                });
-
-            modelBuilder.Entity("PosBackend.Models.CustomPackageSelectedAddOn", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("AddOnId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("PricingPackageId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AddOnId");
-
-                    b.HasIndex("PricingPackageId");
-
-                    b.ToTable("CustomPackageSelectedAddOn");
-                });
-
-            modelBuilder.Entity("PosBackend.Models.CustomPackageSelectedFeature", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("FeatureId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("PricingPackageId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("FeatureId");
-
-                    b.HasIndex("PricingPackageId");
-
-                    b.ToTable("CustomPackageSelectedFeature");
-                });
-
-            modelBuilder.Entity("PosBackend.Models.CustomPackageUsageBasedPricing", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("PricingPackageId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("UsageBasedPricingId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PricingPackageId");
-
-                    b.HasIndex("UsageBasedPricingId");
-
-                    b.ToTable("CustomPackageUsageBasedPricing");
                 });
 
             modelBuilder.Entity("PosBackend.Models.Feature", b =>
@@ -338,66 +266,6 @@ namespace PosBackend.Migrations
                             PricePerUnit = 5.00m,
                             Unit = "users"
                         });
-                });
-
-            modelBuilder.Entity("PosBackend.Models.CustomPackageSelectedAddOn", b =>
-                {
-                    b.HasOne("PosBackend.Models.AddOn", "AddOn")
-                        .WithMany()
-                        .HasForeignKey("AddOnId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("PosBackend.Models.PricingPackage", null)
-                        .WithMany("SelectedAddOns")
-                        .HasForeignKey("PricingPackageId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("AddOn");
-                });
-
-            modelBuilder.Entity("PosBackend.Models.CustomPackageSelectedFeature", b =>
-                {
-                    b.HasOne("PosBackend.Models.Feature", "Feature")
-                        .WithMany()
-                        .HasForeignKey("FeatureId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("PosBackend.Models.PricingPackage", null)
-                        .WithMany("SelectedFeatures")
-                        .HasForeignKey("PricingPackageId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Feature");
-                });
-
-            modelBuilder.Entity("PosBackend.Models.CustomPackageUsageBasedPricing", b =>
-                {
-                    b.HasOne("PosBackend.Models.PricingPackage", null)
-                        .WithMany("SelectedUsageBasedPricing")
-                        .HasForeignKey("PricingPackageId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("PosBackend.Models.UsageBasedPricing", "UsageBasedPricing")
-                        .WithMany()
-                        .HasForeignKey("UsageBasedPricingId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("UsageBasedPricing");
-                });
-
-            modelBuilder.Entity("PosBackend.Models.PricingPackage", b =>
-                {
-                    b.Navigation("SelectedAddOns");
-
-                    b.Navigation("SelectedFeatures");
-
-                    b.Navigation("SelectedUsageBasedPricing");
                 });
 #pragma warning restore 612, 618
         }

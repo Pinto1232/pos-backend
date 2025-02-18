@@ -24,10 +24,14 @@ namespace PosBackend.Models
 
         public bool IsCustomizable => Type.ToLower() == "custom";
 
-        // Relations for dynamically linking core features, add-ons, and usage-based pricing
-        public ICollection<CustomPackageSelectedFeature> SelectedFeatures { get; set; } = new List<CustomPackageSelectedFeature>();
-        public ICollection<CustomPackageSelectedAddOn> SelectedAddOns { get; set; } = new List<CustomPackageSelectedAddOn>();
-        public ICollection<CustomPackageUsageBasedPricing> SelectedUsageBasedPricing { get; set; } = new List<CustomPackageUsageBasedPricing>();
+        [NotMapped]
+        public List<Feature> CoreFeatures { get; set; } = new();
+
+        [NotMapped]
+        public List<AddOn> AddOns { get; set; } = new();
+
+        [NotMapped]
+        public List<UsageBasedPricing> UsageBasedPricingOptions { get; set; } = new();
     }
 
     public class Feature
@@ -49,7 +53,7 @@ namespace PosBackend.Models
 
     public class UsageBasedPricing
     {
-        public int Id { get; set; }
+        public int Id { get; set; } 
         public int FeatureId { get; set; }
         public string Name { get; set; } = string.Empty;
         public string Unit { get; set; } = string.Empty;
@@ -58,28 +62,4 @@ namespace PosBackend.Models
         public decimal PricePerUnit { get; set; }
     }
 
-    public class CustomPackageSelectedFeature
-    {
-        public int Id { get; set; }
-        public int PricingPackageId { get; set; }
-        public int FeatureId { get; set; }
-        public Feature Feature { get; set; }
-    }
-
-    public class CustomPackageSelectedAddOn
-    {
-        public int Id { get; set; }
-        public int PricingPackageId { get; set; }
-        public int AddOnId { get; set; }
-        public AddOn AddOn { get; set; }
-    }
-
-    public class CustomPackageUsageBasedPricing
-    {
-        public int Id { get; set; }
-        public int PricingPackageId { get; set; }
-        public int UsageBasedPricingId { get; set; }
-        public int Quantity { get; set; } // Number of units used
-        public UsageBasedPricing UsageBasedPricing { get; set; }
-    }
 }
