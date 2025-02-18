@@ -20,89 +20,83 @@ namespace PosBackend.Controllers
             _context = context;
         }
 
-        // GET: api/PricingPackages - Returns paginated pricing packages
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<PricingPackage>>> GetAll(
-            [FromQuery] int pageNumber = 1,
-            [FromQuery] int pageSize = 10)
+        // GET: api/PricingPackages/custom/features
+        [HttpGet("custom/features")]
+        public async Task<ActionResult<object>> GetCustomFeatures()
         {
-            if (_context.PricingPackages == null)
-            {
-                return NotFound("No PricingPackages table found.");
-            }
-
-            var totalItems = await _context.PricingPackages.CountAsync();
-            var packages = await _context.PricingPackages
-                .OrderBy(p => p.Id)
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
+            var features = await _context.CoreFeatures.ToListAsync();
+            var addOns = await _context.AddOns.ToListAsync();
+            var usageBasedPricing = await _context.UsageBasedPricing.ToListAsync();
 
             return Ok(new
             {
-                TotalItems = totalItems,
-                Data = packages
+                CoreFeatures = features,
+                AddOns = addOns,
+                UsageBasedPricing = usageBasedPricing
             });
         }
 
-        // GET: api/PricingPackages/{id} - Returns a single package, with customization fields if applicable
-        [HttpGet("{id}")]
-        public async Task<ActionResult<PricingPackage>> GetById(int id)
+        // POST: api/PricingPackages/custom/select - Updates selected features and add-ons
+        [HttpPost("custom/select")]
+        public async Task<IActionResult> SelectCustomPackage([FromBody] CustomSelectionRequest request)
         {
-            var package = await _context.PricingPackages.FindAsync(id);
+            var package = await _context.PricingPackages
+                .Include(p => p.SelectedFeatures)
+                .Include(p => p.SelectedAddOns)
+                .Include(p => p.SelectedUsageBasedPricing)
+                .FirstOrDefaultAsync(p => p.Id == request.PricingPackageId && p.Type.ToLower() == "custom");
+
             if (package == null)
-                return NotFound("Package not found");
+                return NotFound("Custom package not found.");
 
-            if (package.Type.ToLower() == "custom")
-            {
-                package.CoreFeatures = new List<Feature>
-                {
-                    new Feature { Id = 101, Name = "Inventory Management", Description = "Track and manage your inventory in real-time.", BasePrice = 10.00m, IsRequired = true },
-                    new Feature { Id = 102, Name = "Sales Reporting", Description = "Generate detailed reports on sales and revenue.", BasePrice = 8.00m, IsRequired = false },
-                    new Feature { Id = 103, Name = "Multi-Location Support", Description = "Manage multiple store locations from one dashboard.", BasePrice = 12.00m, IsRequired = false }
-                };
+            // Clear previous selections
+            package.SelectedFeatures?.Clear();
+            package.SelectedAddOns?.Clear();
+            package.SelectedUsageBasedPricing?.Clear();
 
-                package.AddOns = new List<PosBackend.Models.AddOn>
-                {
-                    new PosBackend.Models.AddOn { Id = 201, Name = "Premium Support", Description = "24/7 priority support via chat and email.", Price = 5.00m },
-                    new PosBackend.Models.AddOn { Id = 202, Name = "Custom Branding", Description = "Add your own logo and color scheme to the POS.", Price = 7.00m}
-                };
+            // Add new selections
+            package.SelectedFeatures = request.SelectedFeatures
+                .Select(f => new CustomPackageSelectedFeature { PricingPackageId = package.Id, FeatureId = f })
+                .ToList();
 
-                package.UsageBasedPricingOptions = new List<UsageBasedPricing>
-                {
-                    new UsageBasedPricing { FeatureId = 101, Name = "API Calls", Unit = "requests", MinValue = 1000, MaxValue = 100000, PricePerUnit = 0.01m },
-                    new UsageBasedPricing { FeatureId = 102, Name = "User Licenses", Unit = "users", MinValue = 1, MaxValue = 50, PricePerUnit = 5.00m }
-                };
-            }
+            package.SelectedAddOns = request.SelectedAddOns
+                .Select(a => new CustomPackageSelectedAddOn { PricingPackageId = package.Id, AddOnId = a })
+                .ToList();
 
-            return Ok(package);
+            package.SelectedUsageBasedPricing = request.UsageLimits
+                .Select(u => new CustomPackageUsageBasedPricing { PricingPackageId = package.Id, UsageBasedPricingId = u.Key, Quantity = u.Value })
+                .ToList();
+
+            await _context.SaveChangesAsync();
+            return Ok("Custom package updated successfully.");
         }
 
-        // POST: api/PricingPackages/custom/calculate-price - Dynamically calculates custom package pricing
+        // POST: api/PricingPackages/custom/calculate-price
         [HttpPost("custom/calculate-price")]
-        public ActionResult<object> CalculateCustomPrice([FromBody] CustomPricingRequest request)
+        public async Task<ActionResult<object>> CalculateCustomPrice([FromBody] CustomPricingRequest request)
         {
-            if (request == null)
-                return BadRequest("Invalid request data.");
-
             decimal basePrice = 99.99m;
             decimal totalPrice = basePrice;
 
-            totalPrice += request.SelectedFeatures
-                .Where(f => CustomPackageFeatures.ContainsKey(f))
-                .Sum(f => CustomPackageFeatures[f].BasePrice);
+            var selectedFeatures = await _context.CoreFeatures
+                .Where(f => request.SelectedFeatures.Contains(f.Id))
+                .ToListAsync();
 
-            totalPrice += request.SelectedAddOns
-                .Where(a => CustomPackageAddOns.ContainsKey(a))
-                .Sum(a => CustomPackageAddOns[a].Price);
+            var selectedAddOns = await _context.AddOns
+                .Where(a => request.SelectedAddOns.Contains(a.Id))
+                .ToListAsync();
 
-            foreach (var usage in request.UsageLimits)
+            var selectedUsage = await _context.UsageBasedPricing
+                .Where(u => request.UsageLimits.Keys.Contains(u.Id))
+                .ToListAsync();
+
+            totalPrice += selectedFeatures.Sum(f => f.BasePrice);
+            totalPrice += selectedAddOns.Sum(a => a.Price);
+
+            foreach (var usage in selectedUsage)
             {
-                if (CustomPackageUsagePricing.ContainsKey(usage.Key))
-                {
-                    var pricing = CustomPackageUsagePricing[usage.Key];
-                    totalPrice += usage.Value * pricing.PricePerUnit;
-                }
+                int quantity = request.UsageLimits[usage.Id];
+                totalPrice += quantity * usage.PricePerUnit;
             }
 
             return Ok(new
@@ -111,33 +105,14 @@ namespace PosBackend.Controllers
                 TotalPrice = totalPrice
             });
         }
+    }
 
-        // GET: api/PricingPackages/public - Open endpoint for testing
-        [HttpGet("public")]
-        [AllowAnonymous]
-        public ActionResult<string> PublicEndpoint()
-        {
-            return "This endpoint does not require a token!";
-        }
-
-        private static readonly Dictionary<int, Feature> CustomPackageFeatures = new()
-        {
-            { 101, new Feature { Id = 101, Name = "Inventory Management", Description = "Track and manage your inventory in real-time.", BasePrice = 10.00m, IsRequired = true } },
-            { 102, new Feature { Id = 102, Name = "Sales Reporting", Description = "Generate detailed reports on sales and revenue.", BasePrice = 8.00m, IsRequired = false } },
-            { 103, new Feature { Id = 103, Name = "Multi-Location Support", Description = "Manage multiple store locations from one dashboard.", BasePrice = 12.00m, IsRequired = false } }
-        };
-
-        private static readonly Dictionary<int, AddOn> CustomPackageAddOns = new()
-        {
-            { 201, new AddOn { Id = 201, Name = "Premium Support", Description = "24/7 priority support via chat and email.", Price = 5.00m } },
-            { 202, new AddOn { Id = 202, Name = "Custom Branding", Description = "Add your own logo and color scheme to the POS.", Price = 7.00m } }
-        };
-
-        private static readonly Dictionary<int, UsageBasedPricing> CustomPackageUsagePricing = new()
-        {
-            { 101, new UsageBasedPricing { FeatureId = 101, Name = "API Calls", Unit = "requests", MinValue = 1000, MaxValue = 100000, PricePerUnit = 0.01m } },
-            { 102, new UsageBasedPricing { FeatureId = 102, Name = "User Licenses", Unit = "users", MinValue = 1, MaxValue = 50, PricePerUnit = 5.00m } }
-        };
+    public class CustomSelectionRequest
+    {
+        public int PricingPackageId { get; set; }
+        public List<int> SelectedFeatures { get; set; } = new();
+        public List<int> SelectedAddOns { get; set; } = new();
+        public Dictionary<int, int> UsageLimits { get; set; } = new();
     }
 
     public class CustomPricingRequest
@@ -145,13 +120,5 @@ namespace PosBackend.Controllers
         public List<int> SelectedFeatures { get; set; } = new();
         public List<int> SelectedAddOns { get; set; } = new();
         public Dictionary<int, int> UsageLimits { get; set; } = new();
-    }
-    // Add the Dependencies property to the AddOn class
-    public class AddOn
-    {
-        public int Id { get; set; }
-        public string? Name { get; set; }
-        public string? Description { get; set; }
-        public decimal Price { get; set; }
     }
 }
