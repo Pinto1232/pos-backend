@@ -1,4 +1,3 @@
-//PosDbContext.cs
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 
@@ -18,9 +17,24 @@ namespace PosBackend.Models
         public DbSet<CustomPackageSelectedAddOn> CustomPackageSelectedAddOns { get; set; }
         public DbSet<CustomPackageUsageBasedPricing> CustomPackageUsageBasedPricing { get; set; }
 
+        // New DbSet for currencies
+        public DbSet<Currency> Currencies { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // **📌 Define relationships for Custom Package**
+            // Add shadow property for default currency (e.g., "USD", "EUR", etc.)
+            modelBuilder.Entity<PricingPackage>()
+                .Property<string>("Currency")
+                .HasMaxLength(3)
+                .HasDefaultValue("USD");
+
+            // Update: Use PostgreSQL type "text" instead of "nvarchar(max)"
+            modelBuilder.Entity<PricingPackage>()
+                .Property<string>("MultiCurrencyPrices")
+                .HasColumnType("text")
+                .HasDefaultValue("{}");
+
+            // **Define relationships for Custom Package**
             modelBuilder.Entity<CustomPackageSelectedFeature>()
                 .HasKey(cf => new { cf.PricingPackageId, cf.FeatureId });
 
@@ -45,8 +59,13 @@ namespace PosBackend.Models
                 .WithMany()
                 .HasForeignKey(cu => cu.UsageBasedPricingId);
 
-            // **📌 Seeding Data (Other Packages remain unchanged)**
+            // Configure the new Currencies table
+            modelBuilder.Entity<Currency>().HasKey(c => c.Code);
+            modelBuilder.Entity<Currency>()
+                .Property(c => c.ExchangeRate)
+                .HasColumnType("decimal(18,4)");
 
+            // **Seeding Data for PricingPackages**
             modelBuilder.Entity<PricingPackage>().HasData(
                 new PricingPackage
                 {
@@ -105,7 +124,7 @@ namespace PosBackend.Models
                 }
             );
 
-            // **📌 Seeding Features for Custom Package**
+            // **Seeding Features for Custom Package**
             modelBuilder.Entity<Feature>().HasData(
                 new Feature
                 {
@@ -133,7 +152,7 @@ namespace PosBackend.Models
                 }
             );
 
-            // **📌 Seeding AddOns for Custom Package**
+            // **Seeding AddOns for Custom Package**
             modelBuilder.Entity<AddOn>().HasData(
                 new AddOn
                 {
@@ -151,7 +170,7 @@ namespace PosBackend.Models
                 }
             );
 
-            // **📌 Seeding Usage-Based Pricing**
+            // **Seeding Usage-Based Pricing**
             modelBuilder.Entity<UsageBasedPricing>().HasData(
                 new UsageBasedPricing
                 {
@@ -174,6 +193,15 @@ namespace PosBackend.Models
                     PricePerUnit = 5.00m
                 }
             );
+
+            // **Seeding Currencies**
+            modelBuilder.Entity<Currency>().HasData(
+                new Currency { Code = "USD", ExchangeRate = 1.0m },
+                new Currency { Code = "EUR", ExchangeRate = 0.9m },
+                new Currency { Code = "GBP", ExchangeRate = 0.8m }
+            );
+
+            base.OnModelCreating(modelBuilder);
         }
     }
 }

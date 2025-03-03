@@ -22,7 +22,7 @@ namespace PosBackend.Controllers
 
         // GET: api/PricingPackages (Paginated)
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<PricingPackage>>> GetAll(
+        public async Task<ActionResult<object>> GetAll(
             [FromQuery] int pageNumber = 1,
             [FromQuery] int pageSize = 10)
         {
@@ -32,11 +32,31 @@ namespace PosBackend.Controllers
             }
 
             var totalItems = await _context.PricingPackages.CountAsync();
-            var packages = await _context.PricingPackages
+
+            // Materialize the data into memory first
+            var packagesData = await _context.PricingPackages
                 .OrderBy(p => p.Id)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
+
+            // Then project into the DTO, retrieving shadow properties via the Entry API.
+            var packages = packagesData.Select(p => new PricingPackageDto
+            {
+                Id = p.Id,
+                Title = p.Title,
+                Description = p.Description,
+                Icon = p.Icon,
+                ExtraDescription = p.ExtraDescription,
+                Price = p.Price,
+                TestPeriodDays = p.TestPeriodDays,
+                Type = p.Type,
+                DescriptionList = p.Description.Split(';').ToList(),
+                IsCustomizable = p.Type.ToLower() == "custom",
+                // Retrieve the shadow properties from the DbContext's entry for p.
+                Currency = _context.Entry(p).Property("Currency").CurrentValue as string ?? "",
+                MultiCurrencyPrices = _context.Entry(p).Property("MultiCurrencyPrices").CurrentValue as string ?? ""
+            }).ToList();
 
             return Ok(new
             {
@@ -128,7 +148,8 @@ namespace PosBackend.Controllers
             var package = await _context.PricingPackages
                 .FirstOrDefaultAsync(p => p.Id == request.PackageId);
             
-            if (package == null) return BadRequest("Invalid package");
+            if (package == null) 
+                return BadRequest("Invalid package");
 
             decimal basePrice = package.Price;
             decimal totalPrice = basePrice;
@@ -164,6 +185,23 @@ namespace PosBackend.Controllers
         }
 
         // DTO Classes
+
+        public class PricingPackageDto
+        {
+            public int Id { get; set; }
+            public string Title { get; set; } = string.Empty;
+            public string Description { get; set; } = string.Empty;
+            public string Icon { get; set; } = string.Empty;
+            public string ExtraDescription { get; set; } = string.Empty;
+            public decimal Price { get; set; }
+            public int TestPeriodDays { get; set; }
+            public string Type { get; set; } = string.Empty;
+            public List<string> DescriptionList { get; set; } = new List<string>();
+            public bool IsCustomizable { get; set; }
+            public string Currency { get; set; } = string.Empty;
+            public string MultiCurrencyPrices { get; set; } = string.Empty;
+        }
+
         public class CustomSelectionRequest
         {
             public int PackageId { get; set; }
