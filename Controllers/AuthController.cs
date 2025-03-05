@@ -24,6 +24,8 @@ public class AuthController : ControllerBase
     {
         try
         {
+            _logger.LogInformation($"🔐 Attempting login for user: {request.Email}");
+
             var loginRequest = new HttpRequestMessage(HttpMethod.Post, "http://localhost:8282/realms/pisval-pos-realm/protocol/openid-connect/token")
             {
                 Content = new FormUrlEncodedContent(new[]
@@ -43,7 +45,7 @@ public class AuthController : ControllerBase
 
             if (!response.IsSuccessStatusCode)
             {
-                _logger.LogWarning($"⚠️ Login failed: {response.StatusCode}");
+                _logger.LogWarning($"⚠️ Login failed: {response.StatusCode}, Response: {content}");
                 return StatusCode((int)response.StatusCode, new { error = "Login failed", message = content });
             }
 
