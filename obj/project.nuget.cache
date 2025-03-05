@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "mwH4uqLm4mU=",
+  "dgSpecHash": "HgGj6yxzKaE=",
   "success": true,
-  "projectFilePath": "C:\\Users\\pinto\\Documents\\Development\\POS\\pos-backend\\PosBackend.csproj",
+  "projectFilePath": "C:\\Users\\pinto\\Documents\\Development\\POS\\backend\\PosBackend.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\pinto\\.nuget\\packages\\azure.core\\1.38.0\\azure.core.1.38.0.nupkg.sha512",
     "C:\\Users\\pinto\\.nuget\\packages\\azure.identity\\1.11.4\\azure.identity.1.11.4.nupkg.sha512",

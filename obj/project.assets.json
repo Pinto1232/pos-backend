@@ -5641,11 +5641,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\pinto\\Documents\\Development\\POS\\pos-backend\\PosBackend.csproj",
+      "projectUniqueName": "C:\\Users\\pinto\\Documents\\Development\\POS\\backend\\PosBackend.csproj",
       "projectName": "PosBackend",
-      "projectPath": "C:\\Users\\pinto\\Documents\\Development\\POS\\pos-backend\\PosBackend.csproj",
+      "projectPath": "C:\\Users\\pinto\\Documents\\Development\\POS\\backend\\PosBackend.csproj",
       "packagesPath": "C:\\Users\\pinto\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\pinto\\Documents\\Development\\POS\\pos-backend\\obj\\",
+      "outputPath": "C:\\Users\\pinto\\Documents\\Development\\POS\\backend\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

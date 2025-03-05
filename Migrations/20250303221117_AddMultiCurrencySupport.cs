@@ -49,7 +49,40 @@ namespace PosBackend.Migrations
                     { "USD", 1.0m }
                 });
 
-            // Removed the empty UpdateData calls that were generating invalid SQL.
+            migrationBuilder.UpdateData(
+                table: "PricingPackages",
+                keyColumn: "Id",
+                keyValue: 1,
+                columns: new string[0],
+                values: new object[0]);
+
+            migrationBuilder.UpdateData(
+                table: "PricingPackages",
+                keyColumn: "Id",
+                keyValue: 2,
+                columns: new string[0],
+                values: new object[0]);
+
+            migrationBuilder.UpdateData(
+                table: "PricingPackages",
+                keyColumn: "Id",
+                keyValue: 3,
+                columns: new string[0],
+                values: new object[0]);
+
+            migrationBuilder.UpdateData(
+                table: "PricingPackages",
+                keyColumn: "Id",
+                keyValue: 4,
+                columns: new string[0],
+                values: new object[0]);
+
+            migrationBuilder.UpdateData(
+                table: "PricingPackages",
+                keyColumn: "Id",
+                keyValue: 5,
+                columns: new string[0],
+                values: new object[0]);
         }
 
         /// <inheritdoc />

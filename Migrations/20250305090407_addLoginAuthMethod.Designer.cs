@@ -11,8 +11,8 @@ using PosBackend.Models;
 namespace PosBackend.Migrations
 {
     [DbContext(typeof(PosDbContext))]
-    [Migration("20250303221117_AddMultiCurrencySupport")]
-    partial class AddMultiCurrencySupport
+    [Migration("20250305090407_addLoginAuthMethod")]
+    partial class addLoginAuthMethod
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -92,7 +92,6 @@ namespace PosBackend.Migrations
                             Code = "GBP",
                             ExchangeRate = 0.8m
                         });
-                        
                 });
 
             modelBuilder.Entity("PosBackend.Models.CustomPackageSelectedAddOn", b =>
