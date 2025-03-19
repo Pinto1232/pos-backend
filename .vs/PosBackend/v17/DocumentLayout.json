@@ -1,26 +1,26 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\pinto\\Documents\\Development\\POS\\pos-backend\\",
+  "WorkspaceRootPath": "C:\\Users\\pinto\\Documents\\Development\\POS\\backend\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{CEE0D204-4F2E-4CD8-AC96-C28513CDB1B8}|PosBackend.csproj|c:\\users\\pinto\\documents\\development\\pos\\pos-backend\\models\\pricingpackage.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{CEE0D204-4F2E-4CD8-AC96-C28513CDB1B8}|PosBackend.csproj|solutionrelative:models\\pricingpackage.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{CEE0D204-4F2E-4CD8-AC96-C28513CDB1B8}|PosBackend.csproj|c:\\users\\pinto\\documents\\development\\pos\\backend\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CEE0D204-4F2E-4CD8-AC96-C28513CDB1B8}|PosBackend.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{CEE0D204-4F2E-4CD8-AC96-C28513CDB1B8}|PosBackend.csproj|c:\\users\\pinto\\documents\\development\\pos\\pos-backend\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
-      "RelativeMoniker": "D:0:0:{CEE0D204-4F2E-4CD8-AC96-C28513CDB1B8}|PosBackend.csproj|solutionrelative:appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{CEE0D204-4F2E-4CD8-AC96-C28513CDB1B8}|PosBackend.csproj|c:\\users\\pinto\\documents\\development\\pos\\pos-backend\\models\\posdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{CEE0D204-4F2E-4CD8-AC96-C28513CDB1B8}|PosBackend.csproj|solutionrelative:models\\posdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{CEE0D204-4F2E-4CD8-AC96-C28513CDB1B8}|PosBackend.csproj|c:\\users\\pinto\\documents\\development\\pos\\pos-backend\\controllers\\pricingpackagescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{CEE0D204-4F2E-4CD8-AC96-C28513CDB1B8}|PosBackend.csproj|c:\\users\\pinto\\documents\\development\\pos\\backend\\controllers\\pricingpackagescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{CEE0D204-4F2E-4CD8-AC96-C28513CDB1B8}|PosBackend.csproj|solutionrelative:controllers\\pricingpackagescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{CEE0D204-4F2E-4CD8-AC96-C28513CDB1B8}|PosBackend.csproj|c:\\users\\pinto\\documents\\development\\pos\\pos-backend\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{CEE0D204-4F2E-4CD8-AC96-C28513CDB1B8}|PosBackend.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{CEE0D204-4F2E-4CD8-AC96-C28513CDB1B8}|PosBackend.csproj|c:\\users\\pinto\\documents\\development\\pos\\backend\\models\\posdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CEE0D204-4F2E-4CD8-AC96-C28513CDB1B8}|PosBackend.csproj|solutionrelative:models\\posdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CEE0D204-4F2E-4CD8-AC96-C28513CDB1B8}|PosBackend.csproj|c:\\users\\pinto\\documents\\development\\pos\\backend\\models\\pricingpackage.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CEE0D204-4F2E-4CD8-AC96-C28513CDB1B8}|PosBackend.csproj|solutionrelative:models\\pricingpackage.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CEE0D204-4F2E-4CD8-AC96-C28513CDB1B8}|PosBackend.csproj|c:\\users\\pinto\\documents\\development\\pos\\backend\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{CEE0D204-4F2E-4CD8-AC96-C28513CDB1B8}|PosBackend.csproj|solutionrelative:appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
     }
   ],
   "DocumentGroupContainers": [
@@ -30,7 +30,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 5,
+          "SelectedChildIndex": 8,
           "Children": [
             {
               "$type": "Bookmark",
@@ -50,11 +50,11 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 4,
               "Title": "appsettings.json",
-              "DocumentMoniker": "C:\\Users\\pinto\\Documents\\Development\\POS\\pos-backend\\appsettings.json",
+              "DocumentMoniker": "C:\\Users\\pinto\\Documents\\Development\\POS\\backend\\appsettings.json",
               "RelativeDocumentMoniker": "appsettings.json",
-              "ToolTip": "C:\\Users\\pinto\\Documents\\Development\\POS\\pos-backend\\appsettings.json",
+              "ToolTip": "C:\\Users\\pinto\\Documents\\Development\\POS\\backend\\appsettings.json",
               "RelativeToolTip": "appsettings.json",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAAWAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
@@ -62,13 +62,13 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 3,
               "Title": "PricingPackage.cs",
-              "DocumentMoniker": "C:\\Users\\pinto\\Documents\\Development\\POS\\pos-backend\\Models\\PricingPackage.cs",
+              "DocumentMoniker": "C:\\Users\\pinto\\Documents\\Development\\POS\\backend\\Models\\PricingPackage.cs",
               "RelativeDocumentMoniker": "Models\\PricingPackage.cs",
-              "ToolTip": "C:\\Users\\pinto\\Documents\\Development\\POS\\pos-backend\\Models\\PricingPackage.cs",
+              "ToolTip": "C:\\Users\\pinto\\Documents\\Development\\POS\\backend\\Models\\PricingPackage.cs",
               "RelativeToolTip": "Models\\PricingPackage.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABwAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAABUAAAAAAAAAAAAAAA4AAAAuAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-02-07T19:12:14.473Z",
               "EditorCaption": ""
@@ -77,37 +77,40 @@
               "$type": "Document",
               "DocumentIndex": 2,
               "Title": "PosDbContext.cs",
-              "DocumentMoniker": "C:\\Users\\pinto\\Documents\\Development\\POS\\pos-backend\\Models\\PosDbContext.cs",
+              "DocumentMoniker": "C:\\Users\\pinto\\Documents\\Development\\POS\\backend\\Models\\PosDbContext.cs",
               "RelativeDocumentMoniker": "Models\\PosDbContext.cs",
-              "ToolTip": "C:\\Users\\pinto\\Documents\\Development\\POS\\pos-backend\\Models\\PosDbContext.cs",
+              "ToolTip": "C:\\Users\\pinto\\Documents\\Development\\POS\\backend\\Models\\PosDbContext.cs",
               "RelativeToolTip": "Models\\PosDbContext.cs",
-              "ViewState": "AgIAADoAAAAAAAAAAAAAwE8AAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAACgAAAAAAAAAAAAAwCkAAAApAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-02-07T19:12:11.427Z"
+              "WhenOpened": "2025-02-07T19:12:11.427Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 1,
               "Title": "PricingPackagesController.cs",
-              "DocumentMoniker": "C:\\Users\\pinto\\Documents\\Development\\POS\\pos-backend\\Controllers\\PricingPackagesController.cs",
+              "DocumentMoniker": "C:\\Users\\pinto\\Documents\\Development\\POS\\backend\\Controllers\\PricingPackagesController.cs",
               "RelativeDocumentMoniker": "Controllers\\PricingPackagesController.cs",
-              "ToolTip": "C:\\Users\\pinto\\Documents\\Development\\POS\\pos-backend\\Controllers\\PricingPackagesController.cs",
+              "ToolTip": "C:\\Users\\pinto\\Documents\\Development\\POS\\backend\\Controllers\\PricingPackagesController.cs",
               "RelativeToolTip": "Controllers\\PricingPackagesController.cs",
-              "ViewState": "AgIAADsAAAAAAAAAAAAswEwAAAAgAAAAAAAAAA==",
+              "ViewState": "AgIAADIAAAAAAAAAAAAswD4AAAAbAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-02-07T19:11:46.939Z"
+              "WhenOpened": "2025-02-07T19:11:46.939Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 0,
               "Title": "Program.cs",
-              "DocumentMoniker": "C:\\Users\\pinto\\Documents\\Development\\POS\\pos-backend\\Program.cs",
+              "DocumentMoniker": "C:\\Users\\pinto\\Documents\\Development\\POS\\backend\\Program.cs",
               "RelativeDocumentMoniker": "Program.cs",
-              "ToolTip": "C:\\Users\\pinto\\Documents\\Development\\POS\\pos-backend\\Program.cs",
+              "ToolTip": "C:\\Users\\pinto\\Documents\\Development\\POS\\backend\\Program.cs",
               "RelativeToolTip": "Program.cs",
-              "ViewState": "AgIAAEMAAAAAAAAAAAAcwFoAAAARAAAAAAAAAA==",
+              "ViewState": "AgIAAEYAAAAAAAAAAAAcwFoAAAARAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-02-08T09:42:42.309Z"
+              "WhenOpened": "2025-02-08T09:42:42.309Z",
+              "EditorCaption": ""
             }
           ]
         }
