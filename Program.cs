@@ -53,6 +53,10 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddDbContext<PosDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// Register SignalR
+builder.Services.AddSignalR();
+
+
 // 4️⃣ Configure HttpClientFactory
 builder.Services.AddHttpClient();
 

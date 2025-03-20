@@ -17,6 +17,9 @@ namespace PosBackend.Models
         public DbSet<CustomPackageSelectedAddOn> CustomPackageSelectedAddOns { get; set; }
         public DbSet<CustomPackageUsageBasedPricing> CustomPackageUsageBasedPricing { get; set; }
 
+        // Db set of dashboard customization
+        public DbSet<UserCustomization> UserCustomizations { get; set; }
+
         // New DbSet for currencies
         public DbSet<Currency> Currencies { get; set; }
 

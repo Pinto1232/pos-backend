@@ -2,3 +2,4 @@
 # Ignorar pastas de build
 bin/
 obj/
+Keycloack/data/h2/keycloakdb.mv.db
