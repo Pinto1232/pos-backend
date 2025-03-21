@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "HgGj6yxzKaE=",
+  "dgSpecHash": "wpoTPsnORoM=",
   "success": true,
   "projectFilePath": "C:\\Users\\pinto\\Documents\\Development\\POS\\backend\\PosBackend.csproj",
   "expectedPackageFiles": [
@@ -8,6 +8,8 @@
     "C:\\Users\\pinto\\.nuget\\packages\\azure.identity\\1.11.4\\azure.identity.1.11.4.nupkg.sha512",
     "C:\\Users\\pinto\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
     "C:\\Users\\pinto\\.nuget\\packages\\identitymodel\\7.0.0\\identitymodel.7.0.0.nupkg.sha512",
+    "C:\\Users\\pinto\\.nuget\\packages\\maxmind.db\\4.1.0\\maxmind.db.4.1.0.nupkg.sha512",
+    "C:\\Users\\pinto\\.nuget\\packages\\maxmind.geoip2\\5.2.0\\maxmind.geoip2.5.2.0.nupkg.sha512",
     "C:\\Users\\pinto\\.nuget\\packages\\microsoft.aspnetcore.authentication.jwtbearer\\8.0.10\\microsoft.aspnetcore.authentication.jwtbearer.8.0.10.nupkg.sha512",
     "C:\\Users\\pinto\\.nuget\\packages\\microsoft.aspnetcore.openapi\\8.0.6\\microsoft.aspnetcore.openapi.8.0.6.nupkg.sha512",
     "C:\\Users\\pinto\\.nuget\\packages\\microsoft.bcl.asyncinterfaces\\7.0.0\\microsoft.bcl.asyncinterfaces.7.0.0.nupkg.sha512",

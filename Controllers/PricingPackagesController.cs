@@ -2,9 +2,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using PosBackend.Models;
+using PosBackend.Services;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace PosBackend.Controllers
 {
@@ -14,55 +16,113 @@ namespace PosBackend.Controllers
     public class PricingPackagesController : ControllerBase
     {
         private readonly PosDbContext _context;
+        private readonly GeoLocationService _geoService;
+        private readonly ILogger<PricingPackagesController> _logger;
 
-        public PricingPackagesController(PosDbContext context)
+        // A mapping from country code to currency code.
+        private readonly Dictionary<string, string> _countryToCurrency = new Dictionary<string, string>
+        {
+            { "US", "USD" },
+            { "ZA", "ZAR" },
+            { "GB", "GBP" },
+            { "FR", "EUR" },
+            // Add additional mappings as needed.
+        };
+
+        public PricingPackagesController(PosDbContext context, ILogger<PricingPackagesController> logger)
         {
             _context = context;
+            _logger = logger;
+
+            // Ensure the dbPath is correct. This should point to the location of your GeoLite2-Country.mmdb file.
+            string dbPath = "PathToGeoLite2-Country.mmdb"; // Update this path accordingly.
+            try
+            {
+                _geoService = new GeoLocationService(dbPath);
+            }
+            catch (System.Exception ex)
+            {
+                _logger.LogError(ex, "Failed to initialize GeoLocationService with dbPath: {dbPath}", dbPath);
+                // If the GeoLocationService fails, we use a fallback that always returns "US".
+                _geoService = new GeoLocationServiceFallback();
+            }
         }
 
         // GET: api/PricingPackages (Paginated)
         [HttpGet]
-        public async Task<ActionResult<object>> GetAll(
-            [FromQuery] int pageNumber = 1,
-            [FromQuery] int pageSize = 10)
+        public async Task<ActionResult<object>> GetAll([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            if (_context.PricingPackages == null)
+            try
             {
-                return NotFound("Pricing packages not found");
+                if (_context.PricingPackages == null)
+                {
+                    return NotFound("Pricing packages not found");
+                }
+
+                // Determine the user's IP address.
+                string ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "127.0.0.1";
+                string countryCode = _geoService.GetCountryCode(ipAddress);
+
+                // Map the country code to a currency. Default to "USD" if not mapped.
+                string userCurrency = _countryToCurrency.ContainsKey(countryCode)
+                    ? _countryToCurrency[countryCode]
+                    : "USD";
+
+                var totalItems = await _context.PricingPackages.CountAsync();
+
+                var packagesData = await _context.PricingPackages
+                    .OrderBy(p => p.Id)
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
+
+                var packages = packagesData.Select(p =>
+                {
+                    var multiPrices = new Dictionary<string, decimal>();
+                    try
+                    {
+                        multiPrices = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, decimal>>(p.MultiCurrencyPrices)
+                            ?? new Dictionary<string, decimal>();
+                    }
+                    catch (System.Exception ex)
+                    {
+                        _logger.LogError(ex, "Failed to parse MultiCurrencyPrices for package id {PackageId}", p.Id);
+                    }
+
+                    var finalPrice = p.Price;
+                    if (multiPrices.TryGetValue(userCurrency, out decimal currencyPrice))
+                    {
+                        finalPrice = currencyPrice;
+                    }
+
+                    return new PricingPackageDto
+                    {
+                        Id = p.Id,
+                        Title = p.Title,
+                        Description = p.Description,
+                        Icon = p.Icon,
+                        ExtraDescription = p.ExtraDescription,
+                        Price = finalPrice,
+                        TestPeriodDays = p.TestPeriodDays,
+                        Type = p.Type,
+                        DescriptionList = p.Description.Split(';').ToList(),
+                        IsCustomizable = p.Type.ToLower() == "custom",
+                        Currency = userCurrency,
+                        MultiCurrencyPrices = p.MultiCurrencyPrices
+                    };
+                }).ToList();
+
+                return Ok(new
+                {
+                    totalItems,
+                    data = packages
+                });
             }
-
-            var totalItems = await _context.PricingPackages.CountAsync();
-
-            // Materialize the data into memory first
-            var packagesData = await _context.PricingPackages
-                .OrderBy(p => p.Id)
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
-
-            // Then project into the DTO, retrieving shadow properties via the Entry API.
-            var packages = packagesData.Select(p => new PricingPackageDto
+            catch (System.Exception ex)
             {
-                Id = p.Id,
-                Title = p.Title,
-                Description = p.Description,
-                Icon = p.Icon,
-                ExtraDescription = p.ExtraDescription,
-                Price = p.Price,
-                TestPeriodDays = p.TestPeriodDays,
-                Type = p.Type,
-                DescriptionList = p.Description.Split(';').ToList(),
-                IsCustomizable = p.Type.ToLower() == "custom",
-                // Retrieve the shadow properties from the DbContext's entry for p.
-                Currency = _context.Entry(p).Property("Currency").CurrentValue as string ?? "",
-                MultiCurrencyPrices = _context.Entry(p).Property("MultiCurrencyPrices").CurrentValue as string ?? ""
-            }).ToList();
-
-            return Ok(new
-            {
-                totalItems,
-                data = packages
-            });
+                _logger.LogError(ex, "Error in GetAll pricing packages");
+                return StatusCode(500, new { message = "Internal server error", error = ex.Message });
+            }
         }
 
         // GET: api/PricingPackages/custom/features
@@ -85,7 +145,7 @@ namespace PosBackend.Controllers
                 defaultValue = u.MinValue
             }).ToList();
 
-            return Ok(new 
+            return Ok(new
             {
                 coreFeatures = features,
                 addOns = addOns,
@@ -106,36 +166,31 @@ namespace PosBackend.Controllers
             if (package == null)
                 return NotFound("Custom package not found");
 
-            // Clear previous selections
             package.SelectedFeatures?.Clear();
             package.SelectedAddOns?.Clear();
             package.SelectedUsageBasedPricing?.Clear();
 
-            // Add new selections
             package.SelectedFeatures = request.SelectedFeatures
-                .Select(f => new CustomPackageSelectedFeature 
-                { 
-                    PricingPackageId = package.Id, 
-                    FeatureId = f 
-                })
-                .ToList();
+                .Select(f => new CustomPackageSelectedFeature
+                {
+                    PricingPackageId = package.Id,
+                    FeatureId = f
+                }).ToList();
 
             package.SelectedAddOns = request.SelectedAddOns
-                .Select(a => new CustomPackageSelectedAddOn 
-                { 
-                    PricingPackageId = package.Id, 
-                    AddOnId = a 
-                })
-                .ToList();
+                .Select(a => new CustomPackageSelectedAddOn
+                {
+                    PricingPackageId = package.Id,
+                    AddOnId = a
+                }).ToList();
 
             package.SelectedUsageBasedPricing = request.UsageLimits
-                .Select(u => new CustomPackageUsageBasedPricing 
-                { 
-                    PricingPackageId = package.Id, 
-                    UsageBasedPricingId = u.Key, 
-                    Quantity = u.Value 
-                })
-                .ToList();
+                .Select(u => new CustomPackageUsageBasedPricing
+                {
+                    PricingPackageId = package.Id,
+                    UsageBasedPricingId = u.Key,
+                    Quantity = u.Value
+                }).ToList();
 
             await _context.SaveChangesAsync();
             return Ok(new { message = "Custom package updated successfully" });
@@ -145,10 +200,8 @@ namespace PosBackend.Controllers
         [HttpPost("custom/calculate-price")]
         public async Task<ActionResult<object>> CalculateCustomPrice([FromBody] CustomPricingRequest request)
         {
-            var package = await _context.PricingPackages
-                .FirstOrDefaultAsync(p => p.Id == request.PackageId);
-            
-            if (package == null) 
+            var package = await _context.PricingPackages.FirstOrDefaultAsync(p => p.Id == request.PackageId);
+            if (package == null)
                 return BadRequest("Invalid package");
 
             decimal basePrice = package.Price;
@@ -177,11 +230,7 @@ namespace PosBackend.Controllers
                 }
             }
 
-            return Ok(new
-            {
-                basePrice,
-                totalPrice
-            });
+            return Ok(new { basePrice, totalPrice });
         }
 
         // DTO Classes
@@ -216,6 +265,17 @@ namespace PosBackend.Controllers
             public List<int> SelectedFeatures { get; set; } = new List<int>();
             public List<int> SelectedAddOns { get; set; } = new List<int>();
             public Dictionary<int, int> UsageLimits { get; set; } = new Dictionary<int, int>();
+        }
+    }
+
+    // Fallback geo service that always returns "US"
+    public class GeoLocationServiceFallback : GeoLocationService
+    {
+        public GeoLocationServiceFallback() : base("fallback") { }
+
+        public override string GetCountryCode(string ipAddress)
+        {
+            return "US";
         }
     }
 }
