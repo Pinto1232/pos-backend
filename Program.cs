@@ -123,6 +123,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization();
 builder.Services.AddControllers();
 
+// Add logging
+builder.Logging.AddConsole();
+builder.Logging.AddDebug();
+
 // 7️⃣ Build Application
 var app = builder.Build();
 
