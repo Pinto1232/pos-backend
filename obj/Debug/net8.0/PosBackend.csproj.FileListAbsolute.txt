@@ -203,6 +203,8 @@ C:\Users\pinto\Documents\Development\POS\backend\bin\Debug\net8.0\Azure.Core.dll
 C:\Users\pinto\Documents\Development\POS\backend\bin\Debug\net8.0\Azure.Identity.dll
 C:\Users\pinto\Documents\Development\POS\backend\bin\Debug\net8.0\Humanizer.dll
 C:\Users\pinto\Documents\Development\POS\backend\bin\Debug\net8.0\IdentityModel.dll
+C:\Users\pinto\Documents\Development\POS\backend\bin\Debug\net8.0\MaxMind.Db.dll
+C:\Users\pinto\Documents\Development\POS\backend\bin\Debug\net8.0\MaxMind.GeoIP2.dll
 C:\Users\pinto\Documents\Development\POS\backend\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
 C:\Users\pinto\Documents\Development\POS\backend\bin\Debug\net8.0\Microsoft.AspNetCore.OpenApi.dll
 C:\Users\pinto\Documents\Development\POS\backend\bin\Debug\net8.0\Microsoft.Bcl.AsyncInterfaces.dll
@@ -382,5 +384,3 @@ C:\Users\pinto\Documents\Development\POS\backend\obj\Debug\net8.0\refint\PosBack
 C:\Users\pinto\Documents\Development\POS\backend\obj\Debug\net8.0\PosBackend.pdb
 C:\Users\pinto\Documents\Development\POS\backend\obj\Debug\net8.0\PosBackend.genruntimeconfig.cache
 C:\Users\pinto\Documents\Development\POS\backend\obj\Debug\net8.0\ref\PosBackend.dll
-C:\Users\pinto\Documents\Development\POS\backend\bin\Debug\net8.0\MaxMind.Db.dll
-C:\Users\pinto\Documents\Development\POS\backend\bin\Debug\net8.0\MaxMind.GeoIP2.dll
