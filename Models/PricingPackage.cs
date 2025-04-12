@@ -15,7 +15,7 @@ namespace PosBackend.Models
         public int TestPeriodDays { get; set; }
         public string Type { get; set; } = string.Empty;
 
-        // NEW PROPERTY: Stores the default/base currency (e.g., "USD").
+        // default/base currency (e.g., "USD").
         public string Currency { get; set; } = "";
 
         // JSON string to store prices for multiple currencies.
@@ -62,7 +62,7 @@ namespace PosBackend.Models
         public int MinValue { get; set; }
         public int MaxValue { get; set; }
         public decimal PricePerUnit { get; set; }
-        
+
         [NotMapped]
         public int DefaultValue => MinValue;
     }

@@ -7,6 +7,5 @@ namespace PosBackend.Models
         public required string SidebarColor { get; set; }
         public required string LogoUrl { get; set; }
         public required string NavbarColor { get; set; }
-        // Add additional properties as needed
     }
 }

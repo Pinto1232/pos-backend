@@ -1,7 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using PosBackend.Application.Interfaces;
+using PosBackend.Application.Services;
 using PosBackend.Middlewares;
 using PosBackend.Models;
 
@@ -53,15 +56,26 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddDbContext<PosDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Register SignalR
+// 4️⃣ Configure Identity with Entity Framework
+builder.Services.AddIdentity<User, UserRole>()
+    .AddEntityFrameworkStores<PosDbContext>()
+    .AddDefaultTokenProviders();
+
+// 5️⃣ Repository Registrations
+builder.Services.AddScoped<IUserRepository, UserService>();
+
+// 6️⃣ Register SignalR
 builder.Services.AddSignalR();
 
-
-// 4️⃣ Configure HttpClientFactory
+// 7️⃣ Configure HttpClientFactory
 builder.Services.AddHttpClient();
 
-// 5️⃣ Configure JWT Authentication
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+// 8️⃣ Configure JWT Authentication
+builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
     .AddJwtBearer(options =>
     {
         string? keycloakAuthority = builder.Configuration["Keycloak:Authority"];
@@ -119,27 +133,27 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-// 6️⃣ Enable Authorization & Controllers
+// 9️⃣ Enable Authorization & Controllers
 builder.Services.AddAuthorization();
 builder.Services.AddControllers();
 
-// Add logging
+// 🔟 Add logging
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
 
-// 7️⃣ Build Application
+// 1️⃣1️⃣ Build Application
 var app = builder.Build();
 
-// 8️⃣ Global Error Handling Middleware (Move to the top)
+// 1️⃣2️⃣ Global Error Handling Middleware (Move to the top)
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
-// 9️⃣ Enable HTTPS Redirection
+// 1️⃣3️⃣ Enable HTTPS Redirection
 if (!app.Environment.IsDevelopment())
 {
     app.UseHttpsRedirection();
 }
 
-// 🔟 Enable Swagger
+// 1️⃣4️⃣ Enable Swagger
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
@@ -147,15 +161,15 @@ app.UseSwaggerUI(c =>
     c.RoutePrefix = "swagger";
 });
 
-// 1️⃣1️⃣ Enable CORS before Authentication
+// 1️⃣5️⃣ Enable CORS before Authentication
 app.UseCors("AllowAll");
 
-// 1️⃣2️⃣ Enable Authentication & Authorization
+// 1️⃣6️⃣ Enable Authentication & Authorization
 app.UseAuthentication();
 app.UseAuthorization();
 
-// 1️⃣3️⃣ Map Controllers
+// 1️⃣7️⃣ Map Controllers
 app.MapControllers();
 
-// 1️⃣4️⃣ Run Application
+// 1️⃣8️⃣ Run Application
 app.Run();
