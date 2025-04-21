@@ -9,11 +9,11 @@ using PosBackend.Models;
 
 #nullable disable
 
-namespace PosBackend.Migrations
+namespace PosBackend.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(PosDbContext))]
-    [Migration("20250412015640_addMigrationComponentModels")]
-    partial class addMigrationComponentModels
+    [Migration("20250421201340_AddedScopeEntity")]
+    partial class AddedScopeEntity
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -414,15 +414,6 @@ namespace PosBackend.Migrations
 
                     b.Property<int>("GroupId")
                         .HasColumnType("integer");
-
-                    b.Property<DateTime?>("InactivatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
-
-                    b.Property<DateTime>("JoinedAt")
-                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("MembershipId");
 
@@ -1115,6 +1106,31 @@ namespace PosBackend.Migrations
                     b.ToTable("SaleItems");
                 });
 
+            modelBuilder.Entity("PosBackend.Models.Scope", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Scopes");
+                });
+
             modelBuilder.Entity("PosBackend.Models.StockAlert", b =>
                 {
                     b.Property<int>("AlertId")
@@ -1654,7 +1670,7 @@ namespace PosBackend.Migrations
 
             modelBuilder.Entity("PosBackend.Models.Inventory", b =>
                 {
-                    b.HasOne("PosBackend.Models.Store", "Store")
+                    b.HasOne("PosBackend.Models.Scope", "Store")
                         .WithMany()
                         .HasForeignKey("StoreId")
                         .OnDelete(DeleteBehavior.Cascade)
