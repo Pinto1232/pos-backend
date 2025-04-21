@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.OpenApi.Writers;
 
 namespace PosBackend.Models
 {
@@ -11,7 +12,7 @@ namespace PosBackend.Models
 
         [ForeignKey("Store")]
         public int StoreId { get; set; }
-        public Store? Store { get; set; }
+        public Scope? Store { get; set; }
 
         [ForeignKey("ProductVariant")]
         public int VariantId { get; set; }

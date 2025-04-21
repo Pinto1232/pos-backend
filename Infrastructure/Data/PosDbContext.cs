@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
 
 
 namespace PosBackend.Models
@@ -13,7 +12,7 @@ namespace PosBackend.Models
         public DbSet<Feature> CoreFeatures { get; set; }
         public DbSet<AddOn> AddOns { get; set; }
         public DbSet<UsageBasedPricing> UsageBasedPricing { get; set; }
-
+        public DbSet<Scope> Scopes { get; set; }
 
         public DbSet<CustomPackageSelectedFeature> CustomPackageSelectedFeatures { get; set; }
         public DbSet<CustomPackageSelectedAddOn> CustomPackageSelectedAddOns { get; set; }
@@ -28,7 +27,6 @@ namespace PosBackend.Models
         // User Management 
         public DbSet<UserLoginHistory> UserLoginHistories { get; set; }
 
-    
         public DbSet<Order> Orders { get; set; }
         public DbSet<Store> Stores { get; set; }
         public DbSet<Terminal> Terminals { get; set; }
@@ -53,10 +51,13 @@ namespace PosBackend.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            
             base.OnModelCreating(modelBuilder);
 
-    
+            // Configure the Scope entity
+            modelBuilder.Entity<Scope>()
+                .Property(s => s.Type)
+                .HasConversion<string>();
+
             modelBuilder.Entity<User>()
                 .HasMany(u => u.UserRoles)
                 .WithOne(ur => ur.User)
@@ -65,13 +66,12 @@ namespace PosBackend.Models
 
             // Configure Role-UserRole relationship
             modelBuilder.Entity<User>()
-             .HasMany(u => u.UserRoles)
-             .WithOne(ur => ur.User)
-             .HasForeignKey(ur => ur.UserId)
-             .IsRequired();
+                .HasMany(u => u.UserRoles)
+                .WithOne(ur => ur.User)
+                .HasForeignKey(ur => ur.UserId)
+                .IsRequired();
 
-
-            // Pricing Package Configuraion
+            // Pricing Package Configuration
             modelBuilder.Entity<PricingPackage>()
                 .Property<string>("Currency")
                 .HasMaxLength(3)
@@ -91,7 +91,6 @@ namespace PosBackend.Models
                 .WithMany()
                 .HasForeignKey(cf => cf.FeatureId);
 
-
             modelBuilder.Entity<CustomPackageSelectedAddOn>()
                 .HasKey(ca => new { ca.PricingPackageId, ca.AddOnId });
 
@@ -108,19 +107,18 @@ namespace PosBackend.Models
                 .WithMany()
                 .HasForeignKey(cu => cu.UsageBasedPricingId);
 
-
             // Currency Configuration
             modelBuilder.Entity<Currency>().HasKey(c => c.Code);
             modelBuilder.Entity<Currency>()
                 .Property(c => c.ExchangeRate)
-                .HasColumnType("decimal(18,4)"); 
+                .HasColumnType("decimal(18,4)");
 
             modelBuilder.Entity<PricingPackage>().HasData(
-                 new PricingPackage { Id = 1, Title = "Starter", Description = "Select the essential modules and features for your business.;Ideal for small businesses or those new to POS systems.", Icon = "MUI:StartIcon", ExtraDescription = "This package is perfect for startups and small businesses.", Price = 29.99m, TestPeriodDays = 14, Type = "starter" },
-                 new PricingPackage { Id = 2, Title = "Growth", Description = "Expand your business capabilities with advanced modules and features.;Designed for growing businesses looking to enhance their POS system.", Icon = "MUI:TrendingUpIcon", ExtraDescription = "Ideal for businesses looking to scale and grow.", Price = 59.99m, TestPeriodDays = 14, Type = "growth" },
-                 new PricingPackage { Id = 3, Title = "Custom", Description = "Tailor-made solutions for your unique business needs.;Perfect for businesses requiring customized POS features.", Icon = "MUI:BuildIcon", ExtraDescription = "Get a POS system that fits your specific requirements.", Price = 99.99m, TestPeriodDays = 30, Type = "custom" },
-                 new PricingPackage { Id = 4, Title = "Enterprise", Description = "Comprehensive POS solutions for large enterprises.;Includes all advanced features and premium support.", Icon = "MUI:BusinessIcon", ExtraDescription = "Ideal for large businesses with extensive POS needs.", Price = 199.99m, TestPeriodDays = 30, Type = "enterprise" },
-                 new PricingPackage { Id = 5, Title = "Premium", Description = "All-inclusive POS package with premium features.;Best for businesses looking for top-tier POS solutions.", Icon = "MUI:StarIcon", ExtraDescription = "Experience the best POS system with all features included.", Price = 299.99m, TestPeriodDays = 30, Type = "premium" }
+                new PricingPackage { Id = 1, Title = "Starter", Description = "Select the essential modules and features for your business.;Ideal for small businesses or those new to POS systems.", Icon = "MUI:StartIcon", ExtraDescription = "This package is perfect for startups and small businesses.", Price = 29.99m, TestPeriodDays = 14, Type = "starter" },
+                new PricingPackage { Id = 2, Title = "Growth", Description = "Expand your business capabilities with advanced modules and features.;Designed for growing businesses looking to enhance their POS system.", Icon = "MUI:TrendingUpIcon", ExtraDescription = "Ideal for businesses looking to scale and grow.", Price = 59.99m, TestPeriodDays = 14, Type = "growth" },
+                new PricingPackage { Id = 3, Title = "Custom", Description = "Tailor-made solutions for your unique business needs.;Perfect for businesses requiring customized POS features.", Icon = "MUI:BuildIcon", ExtraDescription = "Get a POS system that fits your specific requirements.", Price = 99.99m, TestPeriodDays = 30, Type = "custom" },
+                new PricingPackage { Id = 4, Title = "Enterprise", Description = "Comprehensive POS solutions for large enterprises.;Includes all advanced features and premium support.", Icon = "MUI:BusinessIcon", ExtraDescription = "Ideal for large businesses with extensive POS needs.", Price = 199.99m, TestPeriodDays = 30, Type = "enterprise" },
+                new PricingPackage { Id = 5, Title = "Premium", Description = "All-inclusive POS package with premium features.;Best for businesses looking for top-tier POS solutions.", Icon = "MUI:StarIcon", ExtraDescription = "Experience the best POS system with all features included.", Price = 299.99m, TestPeriodDays = 30, Type = "premium" }
             );
 
             modelBuilder.Entity<Feature>().HasData(

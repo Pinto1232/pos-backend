@@ -2,6 +2,7 @@ using MaxMind.GeoIP2;
 using MaxMind.GeoIP2.Responses;
 using System;
 using System.Net;
+using System.IO;
 
 namespace PosBackend.Services
 {
@@ -13,27 +14,29 @@ namespace PosBackend.Services
         {
             if (dbPath == "fallback")
             {
-                // In fallback scenario, do not initialize the DatabaseReader.
                 return;
             }
-
-            _reader = new DatabaseReader(dbPath);
+            if (File.Exists(dbPath))
+            {
+                _reader = new DatabaseReader(dbPath);
+            }
+            else
+            {
+                Console.WriteLine($"GeoLite2 database file not found at: {dbPath}");
+                _reader = null;
+            }
         }
-
-        // Marked virtual so it can be overridden.
         public virtual string GetCountryCode(string ipAddress)
         {
             try
             {
                 if (!IPAddress.TryParse(ipAddress, out IPAddress? ip))
                 {
-                    // If parsing fails, default to "US"
                     return "US";
                 }
 
                 if (_reader == null)
                 {
-                    // If the reader is not initialized, default to "US"
                     return "US";
                 }
 
@@ -42,8 +45,6 @@ namespace PosBackend.Services
             }
             catch (Exception)
             {
-                // Log error as needed and return a default value.
-                // For example: _logger.LogError("Geo lookup failed for IP {ipAddress}");
                 return "US";
             }
         }

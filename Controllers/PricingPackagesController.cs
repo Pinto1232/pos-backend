@@ -3,10 +3,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using PosBackend.Models;
 using PosBackend.Services;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 
 namespace PosBackend.Controllers
 {
@@ -19,23 +15,21 @@ namespace PosBackend.Controllers
         private readonly GeoLocationService _geoService;
         private readonly ILogger<PricingPackagesController> _logger;
 
-        // A mapping from country code to currency code.
+
         private readonly Dictionary<string, string> _countryToCurrency = new Dictionary<string, string>
         {
             { "US", "USD" },
             { "ZA", "ZAR" },
             { "GB", "GBP" },
             { "FR", "EUR" },
-            // Add additional mappings as needed.
+
         };
 
         public PricingPackagesController(PosDbContext context, ILogger<PricingPackagesController> logger)
         {
             _context = context;
             _logger = logger;
-
-            // Ensure the dbPath is correct. This should point to the location of your GeoLite2-Country.mmdb file.
-            string dbPath = "PathToGeoLite2-Country.mmdb"; // Update this path accordingly.
+            string dbPath = Path.Combine(Directory.GetCurrentDirectory(), "GeoLite2-Country.mmdb");
             try
             {
                 _geoService = new GeoLocationService(dbPath);
@@ -43,12 +37,10 @@ namespace PosBackend.Controllers
             catch (System.Exception ex)
             {
                 _logger.LogError(ex, "Failed to initialize GeoLocationService with dbPath: {dbPath}", dbPath);
-                // If the GeoLocationService fails, we use a fallback that always returns "US".
                 _geoService = new GeoLocationServiceFallback();
             }
         }
 
-        // GET: api/PricingPackages (Paginated)
         [HttpGet]
         public async Task<ActionResult<object>> GetAll([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
@@ -59,11 +51,9 @@ namespace PosBackend.Controllers
                     return NotFound("Pricing packages not found");
                 }
 
-                // Determine the user's IP address.
                 string ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "127.0.0.1";
                 string countryCode = _geoService.GetCountryCode(ipAddress);
 
-                // Map the country code to a currency. Default to "USD" if not mapped.
                 string userCurrency = _countryToCurrency.ContainsKey(countryCode)
                     ? _countryToCurrency[countryCode]
                     : "USD";
@@ -125,7 +115,6 @@ namespace PosBackend.Controllers
             }
         }
 
-        // GET: api/PricingPackages/custom/features
         [HttpGet("custom/features")]
         public async Task<ActionResult<object>> GetCustomFeatures()
         {
@@ -153,7 +142,6 @@ namespace PosBackend.Controllers
             });
         }
 
-        // POST: api/PricingPackages/custom/select
         [HttpPost("custom/select")]
         public async Task<IActionResult> SelectCustomPackage([FromBody] CustomSelectionRequest request)
         {
@@ -196,7 +184,6 @@ namespace PosBackend.Controllers
             return Ok(new { message = "Custom package updated successfully" });
         }
 
-        // POST: api/PricingPackages/custom/calculate-price
         [HttpPost("custom/calculate-price")]
         public async Task<ActionResult<object>> CalculateCustomPrice([FromBody] CustomPricingRequest request)
         {
@@ -233,8 +220,6 @@ namespace PosBackend.Controllers
             return Ok(new { basePrice, totalPrice });
         }
 
-        // DTO Classes
-
         public class PricingPackageDto
         {
             public int Id { get; set; }
@@ -265,17 +250,6 @@ namespace PosBackend.Controllers
             public List<int> SelectedFeatures { get; set; } = new List<int>();
             public List<int> SelectedAddOns { get; set; } = new List<int>();
             public Dictionary<int, int> UsageLimits { get; set; } = new Dictionary<int, int>();
-        }
-    }
-
-    // Fallback geo service that always returns "US"
-    public class GeoLocationServiceFallback : GeoLocationService
-    {
-        public GeoLocationServiceFallback() : base("fallback") { }
-
-        public override string GetCountryCode(string ipAddress)
-        {
-            return "US";
         }
     }
 }
