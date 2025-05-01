@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace PosBackend.Models
 {
@@ -15,10 +16,15 @@ namespace PosBackend.Models
 
         [ForeignKey("ParentCategory")]
         public int? ParentCategoryId { get; set; }
-        public required Category ParentCategory { get; set; }
+
+        [JsonIgnore]
+        public Category? ParentCategory { get; set; }
 
         // Navigation properties
+        [JsonIgnore]
         public ICollection<Category> ChildCategories { get; set; } = new List<Category>();
+
+        [JsonIgnore]
         public ICollection<Product> Products { get; set; } = new List<Product>();
     }
 }

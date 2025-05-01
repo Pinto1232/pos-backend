@@ -1,6 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PosBackend.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace PosBackend.Controllers
@@ -16,7 +19,6 @@ namespace PosBackend.Controllers
             _context = context;
         }
 
-        // GET: api/Orders
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Order>>> GetOrders()
         {
@@ -27,7 +29,6 @@ namespace PosBackend.Controllers
                 .ToListAsync();
         }
 
-        // GET: api/Orders/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Order>> GetOrder(int id)
         {
@@ -46,27 +47,66 @@ namespace PosBackend.Controllers
             return order;
         }
 
-        // POST: api/Orders
         [HttpPost]
-        public async Task<ActionResult<Order>> CreateOrder(Order order)
+        public async Task<ActionResult<Order>> CreateOrder([FromBody] OrderCreateRequest request)
         {
-            // Set timestamps
-            order.CreatedAt = DateTime.UtcNow;
-            order.UpdatedAt = DateTime.UtcNow;
-
-            // Set default status if not provided
-            if (string.IsNullOrEmpty(order.Status))
+            var customer = await _context.Customers.FindAsync(request.CustomerId);
+            if (customer == null)
             {
-                order.Status = "Pending";
+                return BadRequest($"Customer with ID {request.CustomerId} not found");
             }
+
+            var store = await _context.Stores.FindAsync(request.StoreId);
+            if (store == null)
+            {
+                return BadRequest($"Store with ID {request.StoreId} not found");
+            }
+
+            var order = new Order
+            {
+                CustomerId = request.CustomerId,
+                StoreId = request.StoreId,
+                OrderDate = request.OrderDate.ToUniversalTime(),
+                Status = string.IsNullOrEmpty(request.Status) ? "Pending" : request.Status,
+                TotalAmount = request.TotalAmount,
+                ShippingAddress = request.ShippingAddress,
+                Notes = request.Notes,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
 
             _context.Orders.Add(order);
             await _context.SaveChangesAsync();
 
+            if (request.OrderItems != null && request.OrderItems.Any())
+            {
+                foreach (var item in request.OrderItems)
+                {
+                    var productVariant = await _context.ProductVariants.FindAsync(item.ProductVariantId);
+                    if (productVariant == null)
+                    {
+                        return BadRequest($"ProductVariant with ID {item.ProductVariantId} not found");
+                    }
+
+                    var orderItem = new OrderItem
+                    {
+                        OrderId = order.OrderId,
+                        Order = order,
+                        VariantId = item.ProductVariantId,
+                        ProductVariant = productVariant,
+                        Quantity = item.Quantity,
+                        Price = item.UnitPrice
+                    };
+
+                    order.OrderItems.Add(orderItem);
+                }
+
+                await _context.SaveChangesAsync();
+            }
+
             return CreatedAtAction(nameof(GetOrder), new { id = order.OrderId }, order);
         }
 
-        // PUT: api/Orders/5/status
         [HttpPut("{id}/status")]
         public async Task<IActionResult> UpdateOrderStatus(int id, [FromBody] string newStatus)
         {
@@ -85,7 +125,6 @@ namespace PosBackend.Controllers
             return NoContent();
         }
 
-        // GET: api/Orders/status-summary
         [HttpGet("status-summary")]
         public async Task<ActionResult<object>> GetOrderStatusSummary()
         {
@@ -101,5 +140,24 @@ namespace PosBackend.Controllers
 
             return Ok(statusSummary);
         }
+    }
+
+    public class OrderCreateRequest
+    {
+        public int CustomerId { get; set; }
+        public int StoreId { get; set; }
+        public DateTime OrderDate { get; set; } = DateTime.UtcNow;
+        public string? Status { get; set; }
+        public decimal TotalAmount { get; set; }
+        public string? ShippingAddress { get; set; }
+        public string? Notes { get; set; }
+        public List<OrderItemCreateRequest>? OrderItems { get; set; }
+    }
+
+    public class OrderItemCreateRequest
+    {
+        public int ProductVariantId { get; set; }
+        public int Quantity { get; set; }
+        public decimal UnitPrice { get; set; }
     }
 }

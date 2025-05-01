@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace PosBackend.Models
 {
@@ -13,13 +14,18 @@ namespace PosBackend.Models
 
         [ForeignKey("Customer")]
         public int CustomerId { get; set; }
-        public Customer Customer { get; set; } = null!;
-        public DateTime CreatedAt { get; set; }
 
+        [JsonIgnore] // Add this to prevent circular references
+        public Customer? Customer { get; set; } // Make nullable
+
+        public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
+
         [ForeignKey("Store")]
         public int StoreId { get; set; }
-        public Store Store { get; set; } = null!;
+
+        [JsonIgnore] // Add this to prevent circular references
+        public Store? Store { get; set; } // Make nullable
 
         public DateTime OrderDate { get; set; }
 

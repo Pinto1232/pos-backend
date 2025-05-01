@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PosBackend.Models;
@@ -11,9 +12,11 @@ using PosBackend.Models;
 namespace PosBackend.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(PosDbContext))]
-    partial class PosDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250501093934_AddStoresAndProductVariants")]
+    partial class AddStoresAndProductVariants
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1002,19 +1005,28 @@ namespace PosBackend.Infrastructure.Data.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("VariantId"));
 
+                    b.Property<string>("Attributes")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Barcode")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
                     b.Property<decimal>("Price")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("PriceAdjustment")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("ProductId")
                         .HasColumnType("integer");
 
-                    b.Property<string>("SKU")
+                    b.Property<string>("Sku")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
-
-                    b.Property<int>("StockQuantity")
-                        .HasColumnType("integer");
 
                     b.HasKey("VariantId");
 
@@ -1657,7 +1669,7 @@ namespace PosBackend.Infrastructure.Data.Migrations
                         .IsRequired();
 
                     b.HasOne("PosBackend.Models.ProductVariant", "ProductVariant")
-                        .WithMany()
+                        .WithMany("Inventories")
                         .HasForeignKey("VariantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1686,7 +1698,7 @@ namespace PosBackend.Infrastructure.Data.Migrations
                         .HasForeignKey("UserId");
 
                     b.HasOne("PosBackend.Models.ProductVariant", "ProductVariant")
-                        .WithMany()
+                        .WithMany("InventoryMovements")
                         .HasForeignKey("VariantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1799,7 +1811,7 @@ namespace PosBackend.Infrastructure.Data.Migrations
                         .IsRequired();
 
                     b.HasOne("PosBackend.Models.ProductVariant", "ProductVariant")
-                        .WithMany()
+                        .WithMany("ProductExpiries")
                         .HasForeignKey("VariantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1862,7 +1874,7 @@ namespace PosBackend.Infrastructure.Data.Migrations
                         .IsRequired();
 
                     b.HasOne("PosBackend.Models.ProductVariant", "ProductVariant")
-                        .WithMany()
+                        .WithMany("SaleItems")
                         .HasForeignKey("VariantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1977,7 +1989,15 @@ namespace PosBackend.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("PosBackend.Models.ProductVariant", b =>
                 {
+                    b.Navigation("Inventories");
+
+                    b.Navigation("InventoryMovements");
+
                     b.Navigation("OrderItems");
+
+                    b.Navigation("ProductExpiries");
+
+                    b.Navigation("SaleItems");
                 });
 
             modelBuilder.Entity("PosBackend.Models.Sale", b =>
