@@ -10,7 +10,6 @@ using PosBackend.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1️⃣ Configure CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
@@ -22,7 +21,6 @@ builder.Services.AddCors(options =>
     });
 });
 
-// 2️⃣ Configure Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -52,25 +50,19 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// 3️⃣ Configure Database
 builder.Services.AddDbContext<PosDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// 4️⃣ Configure Identity with Entity Framework
 builder.Services.AddIdentity<User, UserRole>()
     .AddEntityFrameworkStores<PosDbContext>()
     .AddDefaultTokenProviders();
 
-// 5️⃣ Repository Registrations
 builder.Services.AddScoped<IUserRepository, UserService>();
 
-// 6️⃣ Register SignalR
 builder.Services.AddSignalR();
 
-// 7️⃣ Configure HttpClientFactory
 builder.Services.AddHttpClient();
 
-// 8️⃣ Configure JWT Authentication
 builder.Services.AddAuthentication(options =>
     {
         options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -133,27 +125,26 @@ builder.Services.AddAuthentication(options =>
         };
     });
 
-// 9️⃣ Enable Authorization & Controllers
-builder.Services.AddAuthorization();
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.PropertyNameCaseInsensitive = false;
+        options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
+        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+    });
 
-// 🔟 Add logging
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
 
-// 1️⃣1️⃣ Build Application
 var app = builder.Build();
 
-// 1️⃣2️⃣ Global Error Handling Middleware (Move to the top)
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
-// 1️⃣3️⃣ Enable HTTPS Redirection
 if (!app.Environment.IsDevelopment())
 {
     app.UseHttpsRedirection();
 }
 
-// 1️⃣4️⃣ Enable Swagger
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
@@ -161,15 +152,11 @@ app.UseSwaggerUI(c =>
     c.RoutePrefix = "swagger";
 });
 
-// 1️⃣5️⃣ Enable CORS before Authentication
 app.UseCors("AllowAll");
 
-// 1️⃣6️⃣ Enable Authentication & Authorization
 app.UseAuthentication();
 app.UseAuthorization();
 
-// 1️⃣7️⃣ Map Controllers
 app.MapControllers();
 
-// 1️⃣8️⃣ Run Application
 app.Run();
