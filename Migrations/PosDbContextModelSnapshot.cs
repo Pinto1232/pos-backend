@@ -2,21 +2,18 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PosBackend.Models;
 
 #nullable disable
 
-namespace PosBackend.Infrastructure.Data.Migrations
+namespace PosBackend.Migrations
 {
     [DbContext(typeof(PosDbContext))]
-    [Migration("20250501094240_AddProductVariants")]
-    partial class AddProductVariants
+    partial class PosDbContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

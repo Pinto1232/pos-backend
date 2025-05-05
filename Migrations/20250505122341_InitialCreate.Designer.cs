@@ -9,11 +9,11 @@ using PosBackend.Models;
 
 #nullable disable
 
-namespace PosBackend.Infrastructure.Data.Migrations
+namespace PosBackend.Migrations
 {
     [DbContext(typeof(PosDbContext))]
-    [Migration("20250501100804_FixDateTimeUtcIssue")]
-    partial class FixDateTimeUtcIssue
+    [Migration("20250505122341_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

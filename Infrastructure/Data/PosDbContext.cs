@@ -24,7 +24,7 @@ namespace PosBackend.Models
         // Currencies
         public DbSet<Currency> Currencies { get; set; }
 
-        // User Management 
+        // User Management
         public DbSet<UserLoginHistory> UserLoginHistories { get; set; }
 
         public DbSet<Order> Orders { get; set; }
