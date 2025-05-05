@@ -10,6 +10,25 @@ using PosBackend.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Add memory cache for response caching
+builder.Services.AddMemoryCache();
+
+// Add response compression for better performance
+builder.Services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+    options.MimeTypes = new[] {
+        "text/plain",
+        "text/css",
+        "application/javascript",
+        "text/html",
+        "application/xml",
+        "text/xml",
+        "application/json",
+        "text/json",
+    };
+});
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
@@ -17,7 +36,8 @@ builder.Services.AddCors(options =>
         policy.WithOrigins("http://localhost:3000")
               .AllowAnyHeader()
               .AllowAnyMethod()
-              .AllowCredentials();
+              .AllowCredentials()
+              .SetIsOriginAllowed(_ => true); // This is more permissive for development
     });
 });
 
@@ -50,8 +70,32 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+// Configure DbContext with performance optimizations
 builder.Services.AddDbContext<PosDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+{
+    options.UseNpgsql(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        npgsqlOptions =>
+        {
+            // Enable connection resiliency
+            npgsqlOptions.EnableRetryOnFailure(
+                maxRetryCount: 5,
+                maxRetryDelay: TimeSpan.FromSeconds(30),
+                errorCodesToAdd: null);
+
+            // Set command timeout
+            npgsqlOptions.CommandTimeout(30);
+        });
+
+    // Enable sensitive data logging only in development
+    if (builder.Environment.IsDevelopment())
+    {
+        options.EnableSensitiveDataLogging();
+    }
+
+    // Disable change tracking for read-only operations
+    options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+});
 
 builder.Services.AddIdentity<User, UserRole>()
     .AddEntityFrameworkStores<PosDbContext>()
@@ -138,12 +182,39 @@ builder.Logging.AddDebug();
 
 var app = builder.Build();
 
+// Use CORS early in the pipeline
+app.UseCors("AllowAll");
+
+// Use exception handling middleware
 app.UseMiddleware<ExceptionHandlingMiddleware>();
+
+// Enable response compression
+app.UseResponseCompression();
 
 if (!app.Environment.IsDevelopment())
 {
     app.UseHttpsRedirection();
 }
+
+// Use built-in response caching middleware
+app.UseResponseCaching();
+
+// Use our custom response caching middleware
+app.UseCustomResponseCaching();
+
+// Add cache control headers middleware
+app.Use(async (context, next) =>
+{
+    // Add cache control headers for static files
+    if (context.Request.Path.StartsWithSegments("/static") ||
+        context.Request.Path.Value?.EndsWith(".js") == true ||
+        context.Request.Path.Value?.EndsWith(".css") == true)
+    {
+        context.Response.Headers.Append("Cache-Control", "public,max-age=31536000");
+    }
+
+    await next();
+});
 
 app.UseSwagger();
 app.UseSwaggerUI(c =>
@@ -151,8 +222,6 @@ app.UseSwaggerUI(c =>
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "POS API v1");
     c.RoutePrefix = "swagger";
 });
-
-app.UseCors("AllowAll");
 
 app.UseAuthentication();
 app.UseAuthorization();
