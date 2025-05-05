@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PosBackend.Models;
@@ -11,9 +12,11 @@ using PosBackend.Models;
 namespace PosBackend.Migrations
 {
     [DbContext(typeof(PosDbContext))]
-    partial class PosDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250505230750_AddOwnedEntitiesConfiguration")]
+    partial class AddOwnedEntitiesConfiguration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1391,15 +1394,9 @@ namespace PosBackend.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("RegionalSettingsJson")
-                        .HasColumnType("jsonb");
-
                     b.Property<string>("SidebarColor")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<string>("TaxSettingsJson")
-                        .HasColumnType("jsonb");
 
                     b.Property<string>("UserId")
                         .IsRequired()
@@ -1898,6 +1895,111 @@ namespace PosBackend.Migrations
                         .IsRequired();
 
                     b.Navigation("Store");
+                });
+
+            modelBuilder.Entity("PosBackend.Models.UserCustomization", b =>
+                {
+                    b.OwnsOne("PosBackend.Models.RegionalSettings", "RegionalSettings", b1 =>
+                        {
+                            b1.Property<int>("UserCustomizationId")
+                                .HasColumnType("integer");
+
+                            b1.Property<bool>("AutoDetectLocation")
+                                .HasColumnType("boolean");
+
+                            b1.Property<string>("DateFormat")
+                                .IsRequired()
+                                .HasColumnType("text");
+
+                            b1.Property<string>("DefaultCurrency")
+                                .IsRequired()
+                                .HasColumnType("text");
+
+                            b1.Property<bool>("EnableMultiCurrency")
+                                .HasColumnType("boolean");
+
+                            b1.Property<string>("Language")
+                                .IsRequired()
+                                .HasColumnType("text");
+
+                            b1.Property<string>("NumberFormat")
+                                .IsRequired()
+                                .HasColumnType("text");
+
+                            b1.Property<string>("SupportedCurrenciesJson")
+                                .IsRequired()
+                                .HasColumnType("text");
+
+                            b1.Property<string>("TimeFormat")
+                                .IsRequired()
+                                .HasColumnType("text");
+
+                            b1.Property<string>("Timezone")
+                                .IsRequired()
+                                .HasColumnType("text");
+
+                            b1.HasKey("UserCustomizationId");
+
+                            b1.ToTable("UserCustomizations");
+
+                            b1.ToJson("RegionalSettings");
+
+                            b1.WithOwner()
+                                .HasForeignKey("UserCustomizationId");
+                        });
+
+                    b.OwnsOne("PosBackend.Models.TaxSettings", "TaxSettings", b1 =>
+                        {
+                            b1.Property<int>("UserCustomizationId")
+                                .HasColumnType("integer");
+
+                            b1.Property<decimal>("DefaultTaxRate")
+                                .HasColumnType("numeric");
+
+                            b1.Property<bool>("DisplayTaxOnReceipts")
+                                .HasColumnType("boolean");
+
+                            b1.Property<bool>("EnableMultipleTaxRates")
+                                .HasColumnType("boolean");
+
+                            b1.Property<bool>("EnableTaxCalculation")
+                                .HasColumnType("boolean");
+
+                            b1.Property<bool>("EnableTaxExemptions")
+                                .HasColumnType("boolean");
+
+                            b1.Property<string>("TaxCalculationMethod")
+                                .IsRequired()
+                                .HasColumnType("text");
+
+                            b1.Property<string>("TaxCategoriesJson")
+                                .IsRequired()
+                                .HasColumnType("text");
+
+                            b1.Property<string>("TaxReportingPeriod")
+                                .IsRequired()
+                                .HasColumnType("text");
+
+                            b1.Property<string>("VatNumber")
+                                .IsRequired()
+                                .HasColumnType("text");
+
+                            b1.Property<bool>("VatRegistered")
+                                .HasColumnType("boolean");
+
+                            b1.HasKey("UserCustomizationId");
+
+                            b1.ToTable("UserCustomizations");
+
+                            b1.ToJson("TaxSettings");
+
+                            b1.WithOwner()
+                                .HasForeignKey("UserCustomizationId");
+                        });
+
+                    b.Navigation("RegionalSettings");
+
+                    b.Navigation("TaxSettings");
                 });
 
             modelBuilder.Entity("PosBackend.Models.UserLoginHistory", b =>

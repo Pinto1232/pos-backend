@@ -63,10 +63,38 @@ namespace PosBackend.Controllers
 
         private string DetectCountryFromIP(IPAddress ipAddress)
         {
-            // In a real-world scenario, you would use a more sophisticated 
+            // In a real-world scenario, you would use a more sophisticated
             // method to detect the country from the IP address
             // This is a simplified placeholder
             return "ZA"; // Default to South Africa for this example
+        }
+
+        [HttpGet("available")]
+        public IActionResult GetAvailableCurrencies()
+        {
+            try
+            {
+                var currencies = new List<object>
+                {
+                    new { code = "ZAR", name = "South African Rand", symbol = "R" },
+                    new { code = "USD", name = "US Dollar", symbol = "$" },
+                    new { code = "EUR", name = "Euro", symbol = "€" },
+                    new { code = "GBP", name = "British Pound", symbol = "£" },
+                    new { code = "JPY", name = "Japanese Yen", symbol = "¥" },
+                    new { code = "CNY", name = "Chinese Yuan", symbol = "¥" },
+                    new { code = "INR", name = "Indian Rupee", symbol = "₹" },
+                    new { code = "AUD", name = "Australian Dollar", symbol = "A$" },
+                    new { code = "CAD", name = "Canadian Dollar", symbol = "C$" },
+                    new { code = "BRL", name = "Brazilian Real", symbol = "R$" }
+                };
+
+                return Ok(currencies);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error in GetAvailableCurrencies: {ex.Message}");
+                return StatusCode(500, $"Error retrieving available currencies: {ex.Message}");
+            }
         }
 
         private List<CountryCurrencyMapping> LoadCountryCurrencyMappings()

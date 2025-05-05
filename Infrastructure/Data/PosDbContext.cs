@@ -113,6 +113,15 @@ namespace PosBackend.Models
                 .Property(c => c.ExchangeRate)
                 .HasColumnType("decimal(18,4)");
 
+            // Configure UserCustomization JSON columns
+            modelBuilder.Entity<UserCustomization>()
+                .Property(uc => uc.TaxSettingsJson)
+                .HasColumnType("jsonb");
+
+            modelBuilder.Entity<UserCustomization>()
+                .Property(uc => uc.RegionalSettingsJson)
+                .HasColumnType("jsonb");
+
             modelBuilder.Entity<PricingPackage>().HasData(
                 new PricingPackage { Id = 1, Title = "Starter", Description = "Select the essential modules and features for your business.;Ideal for small businesses or those new to POS systems.", Icon = "MUI:StartIcon", ExtraDescription = "This package is perfect for startups and small businesses.", Price = 29.99m, TestPeriodDays = 14, Type = "starter" },
                 new PricingPackage { Id = 2, Title = "Growth", Description = "Expand your business capabilities with advanced modules and features.;Designed for growing businesses looking to enhance their POS system.", Icon = "MUI:TrendingUpIcon", ExtraDescription = "Ideal for businesses looking to scale and grow.", Price = 59.99m, TestPeriodDays = 14, Type = "growth" },

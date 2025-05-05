@@ -46,7 +46,18 @@ namespace PosBackend.Controllers
                 existing.SidebarColor = customization.SidebarColor;
                 existing.LogoUrl = customization.LogoUrl;
                 existing.NavbarColor = customization.NavbarColor;
-                // Update any additional properties as needed
+
+                // Update tax settings if provided
+                if (customization.TaxSettings != null)
+                {
+                    existing.TaxSettings = customization.TaxSettings;
+                }
+
+                // Update regional settings if provided
+                if (customization.RegionalSettings != null)
+                {
+                    existing.RegionalSettings = customization.RegionalSettings;
+                }
             }
             await _context.SaveChangesAsync();
 
