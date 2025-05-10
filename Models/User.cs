@@ -22,11 +22,7 @@ namespace PosBackend.Models
         public override string? PasswordHash { get; set; } = string.Empty;
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
-        [Column("LastLogin")]
-        [DataType(DataType.DateTime)]
         public DateTime? LastLogin { get; set; }
-
         public bool IsActive { get; set; } = true;
 
         public virtual ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
