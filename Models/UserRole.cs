@@ -12,9 +12,8 @@ namespace PosBackend.Models
         public string Permissions { get; set; } = "[]";
 
         // Navigation properties
-        public required virtual User User { get; set; }
-        public virtual Rule Role { get; set; }
-        public int UserId { get; set; }
+        public virtual ICollection<UserRoleMapping> UserRoles { get; set; } = new List<UserRoleMapping>();
+        public virtual ICollection<RolePermission> RolePermissions { get; set; } = new List<RolePermission>();
 
         [NotMapped]
         public List<string> PermissionList

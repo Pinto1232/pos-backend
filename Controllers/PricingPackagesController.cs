@@ -66,6 +66,9 @@ namespace PosBackend.Controllers
                     .Take(pageSize)
                     .ToListAsync();
 
+                // Track if we need to save changes to the database
+                bool needToSaveChanges = false;
+
                 var packages = packagesData.Select(p =>
                 {
                     var multiPrices = new Dictionary<string, decimal>();
@@ -77,6 +80,34 @@ namespace PosBackend.Controllers
                     catch (System.Exception ex)
                     {
                         _logger.LogError(ex, "Failed to parse MultiCurrencyPrices for package id {PackageId}", p.Id);
+                    }
+
+                    // If we don't have a price for the user's currency, we need to add one
+                    if (!multiPrices.ContainsKey(userCurrency) && userCurrency != "USD")
+                    {
+                        // Get exchange rate from a service or use a default conversion
+                        // For now, we'll use some hardcoded rates for demonstration
+                        var exchangeRates = new Dictionary<string, decimal>
+                        {
+                            { "USD", 1.0m },
+                            { "ZAR", 18.5m },
+                            { "GBP", 0.78m },
+                            { "EUR", 0.92m },
+                            { "JPY", 150.0m },
+                            { "CNY", 7.2m },
+                            { "INR", 83.0m }
+                        };
+
+                        if (exchangeRates.TryGetValue(userCurrency, out decimal rate))
+                        {
+                            // Convert from USD to the target currency
+                            multiPrices[userCurrency] = Math.Round(p.Price * rate, 2);
+
+                            // Update the package's MultiCurrencyPrices for future use
+                            p.MultiCurrencyPrices = System.Text.Json.JsonSerializer.Serialize(multiPrices);
+                            _context.PricingPackages.Update(p);
+                            needToSaveChanges = true;
+                        }
                     }
 
                     var finalPrice = p.Price;
@@ -102,10 +133,17 @@ namespace PosBackend.Controllers
                     };
                 }).ToList();
 
+                // Save changes to the database if needed
+                if (needToSaveChanges)
+                {
+                    await _context.SaveChangesAsync();
+                }
+
                 return Ok(new
                 {
                     totalItems,
-                    data = packages
+                    data = packages,
+                    currency = userCurrency
                 });
             }
             catch (System.Exception ex)
@@ -191,7 +229,53 @@ namespace PosBackend.Controllers
             if (package == null)
                 return BadRequest("Invalid package");
 
+            // Get user's currency from IP
+            string ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "127.0.0.1";
+            string countryCode = _geoService.GetCountryCode(ipAddress);
+
+            string userCurrency = _countryToCurrency.ContainsKey(countryCode)
+                ? _countryToCurrency[countryCode]
+                : "USD";
+
+            // Get the base price in the user's currency
             decimal basePrice = package.Price;
+            var multiPrices = new Dictionary<string, decimal>();
+            try
+            {
+                multiPrices = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, decimal>>(package.MultiCurrencyPrices)
+                    ?? new Dictionary<string, decimal>();
+            }
+            catch (System.Exception ex)
+            {
+                _logger.LogError(ex, "Failed to parse MultiCurrencyPrices for package id {PackageId}", package.Id);
+            }
+
+            // If we have a price in the user's currency, use it
+            if (multiPrices.TryGetValue(userCurrency, out decimal currencyPrice))
+            {
+                basePrice = currencyPrice;
+            }
+            // Otherwise, convert the price
+            else if (userCurrency != "USD")
+            {
+                // Get exchange rate from a service or use a default conversion
+                var exchangeRates = new Dictionary<string, decimal>
+                {
+                    { "USD", 1.0m },
+                    { "ZAR", 18.5m },
+                    { "GBP", 0.78m },
+                    { "EUR", 0.92m },
+                    { "JPY", 150.0m },
+                    { "CNY", 7.2m },
+                    { "INR", 83.0m }
+                };
+
+                if (exchangeRates.TryGetValue(userCurrency, out decimal rate))
+                {
+                    basePrice = Math.Round(package.Price * rate, 2);
+                }
+            }
+
             decimal totalPrice = basePrice;
 
             var selectedFeatures = await _context.CoreFeatures
@@ -217,7 +301,7 @@ namespace PosBackend.Controllers
                 }
             }
 
-            return Ok(new { basePrice, totalPrice });
+            return Ok(new { basePrice, totalPrice, currency = userCurrency });
         }
 
         public class PricingPackageDto

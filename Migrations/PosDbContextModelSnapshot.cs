@@ -188,6 +188,59 @@ namespace PosBackend.Migrations
                     b.ToTable("Categories");
                 });
 
+            modelBuilder.Entity("PosBackend.Models.CoreFeature", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("BasePrice")
+                        .HasColumnType("numeric");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsRequired")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("CoreFeatures");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 101,
+                            BasePrice = 10.00m,
+                            Description = "Track and manage your inventory in real-time.",
+                            IsRequired = true,
+                            Name = "Inventory Management"
+                        },
+                        new
+                        {
+                            Id = 102,
+                            BasePrice = 8.00m,
+                            Description = "Generate detailed reports on sales and revenue.",
+                            IsRequired = false,
+                            Name = "Sales Reporting"
+                        },
+                        new
+                        {
+                            Id = 103,
+                            BasePrice = 12.00m,
+                            Description = "Manage multiple store locations from one dashboard.",
+                            IsRequired = false,
+                            Name = "Multi-Location Support"
+                        });
+                });
+
             modelBuilder.Entity("PosBackend.Models.Coupon", b =>
                 {
                     b.Property<int>("CouponId")
@@ -223,7 +276,7 @@ namespace PosBackend.Migrations
                         .HasColumnType("text");
 
                     b.Property<decimal>("ExchangeRate")
-                        .HasColumnType("decimal(18,4)");
+                        .HasColumnType("numeric");
 
                     b.HasKey("Code");
 
@@ -285,23 +338,28 @@ namespace PosBackend.Migrations
 
             modelBuilder.Entity("PosBackend.Models.CustomPackageUsageBasedPricing", b =>
                 {
-                    b.Property<int>("PricingPackageId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("UsageBasedPricingId")
-                        .HasColumnType("integer");
-
                     b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("PricingPackageId")
                         .HasColumnType("integer");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("integer");
 
-                    b.HasKey("PricingPackageId", "UsageBasedPricingId");
+                    b.Property<int>("UsageBasedPricingId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PricingPackageId");
 
                     b.HasIndex("UsageBasedPricingId");
 
-                    b.ToTable("CustomPackageUsageBasedPricing");
+                    b.ToTable("CustomPackageUsageBasedPricings");
                 });
 
             modelBuilder.Entity("PosBackend.Models.Customer", b =>
@@ -400,23 +458,21 @@ namespace PosBackend.Migrations
 
             modelBuilder.Entity("PosBackend.Models.CustomerGroupMember", b =>
                 {
+                    b.Property<int>("GroupId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("CustomerId")
+                        .HasColumnType("integer");
+
                     b.Property<int>("MembershipId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("MembershipId"));
 
-                    b.Property<int>("CustomerId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("GroupId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("MembershipId");
+                    b.HasKey("GroupId", "CustomerId");
 
                     b.HasIndex("CustomerId");
-
-                    b.HasIndex("GroupId");
 
                     b.ToTable("CustomerGroupMembers");
                 });
@@ -486,33 +542,7 @@ namespace PosBackend.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("CoreFeatures");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 101,
-                            BasePrice = 10.00m,
-                            Description = "Track and manage your inventory in real-time.",
-                            IsRequired = true,
-                            Name = "Inventory Management"
-                        },
-                        new
-                        {
-                            Id = 102,
-                            BasePrice = 8.00m,
-                            Description = "Generate detailed reports on sales and revenue.",
-                            IsRequired = false,
-                            Name = "Sales Reporting"
-                        },
-                        new
-                        {
-                            Id = 103,
-                            BasePrice = 12.00m,
-                            Description = "Manage multiple store locations from one dashboard.",
-                            IsRequired = false,
-                            Name = "Multi-Location Support"
-                        });
+                    b.ToTable("Features");
                 });
 
             modelBuilder.Entity("PosBackend.Models.Inventory", b =>
@@ -644,7 +674,7 @@ namespace PosBackend.Migrations
                     b.HasIndex("SaleId")
                         .IsUnique();
 
-                    b.ToTable("Invoices");
+                    b.ToTable("Invoice");
                 });
 
             modelBuilder.Entity("PosBackend.Models.LoyaltyPoint", b =>
@@ -746,6 +776,9 @@ namespace PosBackend.Migrations
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<int?>("ProductVariantVariantId")
+                        .HasColumnType("integer");
+
                     b.Property<int>("Quantity")
                         .HasColumnType("integer");
 
@@ -756,9 +789,11 @@ namespace PosBackend.Migrations
 
                     b.HasIndex("OrderId");
 
+                    b.HasIndex("ProductVariantVariantId");
+
                     b.HasIndex("VariantId");
 
-                    b.ToTable("OrderItem");
+                    b.ToTable("OrderItems");
                 });
 
             modelBuilder.Entity("PosBackend.Models.Payment", b =>
@@ -790,6 +825,41 @@ namespace PosBackend.Migrations
                     b.ToTable("Payments");
                 });
 
+            modelBuilder.Entity("PosBackend.Models.Permission", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Module")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Permissions");
+                });
+
             modelBuilder.Entity("PosBackend.Models.PricingPackage", b =>
                 {
                     b.Property<int>("Id")
@@ -800,10 +870,7 @@ namespace PosBackend.Migrations
 
                     b.Property<string>("Currency")
                         .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(3)
-                        .HasColumnType("character varying(3)")
-                        .HasDefaultValue("USD");
+                        .HasColumnType("text");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -819,9 +886,7 @@ namespace PosBackend.Migrations
 
                     b.Property<string>("MultiCurrencyPrices")
                         .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("text")
-                        .HasDefaultValue("{}");
+                        .HasColumnType("text");
 
                     b.Property<decimal>("Price")
                         .HasColumnType("numeric");
@@ -859,8 +924,8 @@ namespace PosBackend.Migrations
                         {
                             Id = 2,
                             Currency = "",
-                            Description = "Expand your business capabilities with advanced modules and features.;Designed for growing businesses looking to enhance their POS system.",
-                            ExtraDescription = "Ideal for businesses looking to scale and grow.",
+                            Description = "Expand your business with advanced features.;Perfect for growing businesses with multiple products.",
+                            ExtraDescription = "Scale your business with our growth package.",
                             Icon = "MUI:TrendingUpIcon",
                             MultiCurrencyPrices = "{}",
                             Price = 59.99m,
@@ -872,12 +937,12 @@ namespace PosBackend.Migrations
                         {
                             Id = 3,
                             Currency = "",
-                            Description = "Tailor-made solutions for your unique business needs.;Perfect for businesses requiring customized POS features.",
-                            ExtraDescription = "Get a POS system that fits your specific requirements.",
+                            Description = "Build your own package with the features you need.;Pay only for what your business requires.",
+                            ExtraDescription = "Customize your POS experience.",
                             Icon = "MUI:BuildIcon",
                             MultiCurrencyPrices = "{}",
-                            Price = 99.99m,
-                            TestPeriodDays = 30,
+                            Price = 39.99m,
+                            TestPeriodDays = 14,
                             Title = "Custom",
                             Type = "custom"
                         },
@@ -991,7 +1056,7 @@ namespace PosBackend.Migrations
 
                     b.HasIndex("VariantId");
 
-                    b.ToTable("ProductExpiries");
+                    b.ToTable("ProductExpiry");
                 });
 
             modelBuilder.Entity("PosBackend.Models.ProductVariant", b =>
@@ -1021,6 +1086,29 @@ namespace PosBackend.Migrations
                     b.HasIndex("ProductId");
 
                     b.ToTable("ProductVariants");
+                });
+
+            modelBuilder.Entity("PosBackend.Models.RolePermission", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("PermissionId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("RoleId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PermissionId");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("RolePermissions");
                 });
 
             modelBuilder.Entity("PosBackend.Models.Sale", b =>
@@ -1116,7 +1204,7 @@ namespace PosBackend.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Scopes");
+                    b.ToTable("Scope");
                 });
 
             modelBuilder.Entity("PosBackend.Models.StockAlert", b =>
@@ -1270,21 +1358,21 @@ namespace PosBackend.Migrations
                         {
                             Id = 1,
                             FeatureId = 101,
-                            MaxValue = 100000,
-                            MinValue = 1000,
-                            Name = "API Calls",
-                            PricePerUnit = 0.01m,
-                            Unit = "requests"
+                            MaxValue = 10000,
+                            MinValue = 100,
+                            Name = "Number of Products",
+                            PricePerUnit = 0.05m,
+                            Unit = "products"
                         },
                         new
                         {
                             Id = 2,
-                            FeatureId = 102,
+                            FeatureId = 103,
                             MaxValue = 50,
                             MinValue = 1,
-                            Name = "User Licenses",
+                            Name = "Number of Locations",
                             PricePerUnit = 5.00m,
-                            Unit = "users"
+                            Unit = "locations"
                         });
                 });
 
@@ -1318,7 +1406,8 @@ namespace PosBackend.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<DateTime?>("LastLogin")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("LastLogin");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("boolean");
@@ -1392,14 +1481,14 @@ namespace PosBackend.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("RegionalSettingsJson")
-                        .HasColumnType("jsonb");
+                        .HasColumnType("text");
 
                     b.Property<string>("SidebarColor")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("TaxSettingsJson")
-                        .HasColumnType("jsonb");
+                        .HasColumnType("text");
 
                     b.Property<string>("UserId")
                         .IsRequired()
@@ -1453,6 +1542,32 @@ namespace PosBackend.Migrations
                     b.ToTable("UserLoginHistories");
                 });
 
+            modelBuilder.Entity("PosBackend.Models.UserPermission", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("IsGranted")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("PermissionId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PermissionId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserPermissions");
+                });
+
             modelBuilder.Entity("PosBackend.Models.UserRole", b =>
                 {
                     b.Property<int>("Id")
@@ -1477,10 +1592,7 @@ namespace PosBackend.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("Role")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("UserId")
+                    b.Property<int?>("UserId")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
@@ -1492,6 +1604,29 @@ namespace PosBackend.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("AspNetRoles", (string)null);
+                });
+
+            modelBuilder.Entity("PosBackend.Models.UserRoleMapping", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("RoleId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoleId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserRoles");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
@@ -1549,7 +1684,8 @@ namespace PosBackend.Migrations
                 {
                     b.HasOne("PosBackend.Models.Category", "ParentCategory")
                         .WithMany("ChildCategories")
-                        .HasForeignKey("ParentCategoryId");
+                        .HasForeignKey("ParentCategoryId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("ParentCategory");
                 });
@@ -1733,7 +1869,7 @@ namespace PosBackend.Migrations
                     b.HasOne("PosBackend.Models.Customer", "Customer")
                         .WithMany("Orders")
                         .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("PosBackend.Models.Store", "Store")
@@ -1755,10 +1891,14 @@ namespace PosBackend.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PosBackend.Models.ProductVariant", "ProductVariant")
+                    b.HasOne("PosBackend.Models.ProductVariant", null)
                         .WithMany("OrderItems")
+                        .HasForeignKey("ProductVariantVariantId");
+
+                    b.HasOne("PosBackend.Models.ProductVariant", "ProductVariant")
+                        .WithMany()
                         .HasForeignKey("VariantId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Order");
@@ -1782,13 +1922,13 @@ namespace PosBackend.Migrations
                     b.HasOne("PosBackend.Models.Category", "Category")
                         .WithMany("Products")
                         .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("PosBackend.Models.Supplier", "Supplier")
                         .WithMany("Products")
                         .HasForeignKey("SupplierId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.SetNull)
                         .IsRequired();
 
                     b.Navigation("Category");
@@ -1826,11 +1966,31 @@ namespace PosBackend.Migrations
                     b.Navigation("Product");
                 });
 
+            modelBuilder.Entity("PosBackend.Models.RolePermission", b =>
+                {
+                    b.HasOne("PosBackend.Models.Permission", "Permission")
+                        .WithMany("RolePermissions")
+                        .HasForeignKey("PermissionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PosBackend.Models.UserRole", "Role")
+                        .WithMany("RolePermissions")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Permission");
+
+                    b.Navigation("Role");
+                });
+
             modelBuilder.Entity("PosBackend.Models.Sale", b =>
                 {
                     b.HasOne("PosBackend.Models.Customer", "Customer")
                         .WithMany("Sales")
-                        .HasForeignKey("CustomerId");
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("PosBackend.Models.Store", "Store")
                         .WithMany()
@@ -1841,7 +2001,7 @@ namespace PosBackend.Migrations
                     b.HasOne("PosBackend.Models.Terminal", "Terminal")
                         .WithMany("Sales")
                         .HasForeignKey("TerminalId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("PosBackend.Models.User", "User")
@@ -1870,7 +2030,7 @@ namespace PosBackend.Migrations
                     b.HasOne("PosBackend.Models.ProductVariant", "ProductVariant")
                         .WithMany()
                         .HasForeignKey("VariantId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("ProductVariant");
@@ -1911,13 +2071,47 @@ namespace PosBackend.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("PosBackend.Models.UserRole", b =>
+            modelBuilder.Entity("PosBackend.Models.UserPermission", b =>
                 {
+                    b.HasOne("PosBackend.Models.Permission", "Permission")
+                        .WithMany("UserPermissions")
+                        .HasForeignKey("PermissionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("PosBackend.Models.User", "User")
-                        .WithMany("UserRoles")
+                        .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Permission");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("PosBackend.Models.UserRole", b =>
+                {
+                    b.HasOne("PosBackend.Models.User", null)
+                        .WithMany("UserRoles")
+                        .HasForeignKey("UserId");
+                });
+
+            modelBuilder.Entity("PosBackend.Models.UserRoleMapping", b =>
+                {
+                    b.HasOne("PosBackend.Models.UserRole", "Role")
+                        .WithMany("UserRoles")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PosBackend.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Role");
 
                     b.Navigation("User");
                 });
@@ -1961,6 +2155,13 @@ namespace PosBackend.Migrations
             modelBuilder.Entity("PosBackend.Models.Order", b =>
                 {
                     b.Navigation("OrderItems");
+                });
+
+            modelBuilder.Entity("PosBackend.Models.Permission", b =>
+                {
+                    b.Navigation("RolePermissions");
+
+                    b.Navigation("UserPermissions");
                 });
 
             modelBuilder.Entity("PosBackend.Models.PricingPackage", b =>
@@ -2016,6 +2217,13 @@ namespace PosBackend.Migrations
                     b.Navigation("LoginHistories");
 
                     b.Navigation("Sales");
+
+                    b.Navigation("UserRoles");
+                });
+
+            modelBuilder.Entity("PosBackend.Models.UserRole", b =>
+                {
+                    b.Navigation("RolePermissions");
 
                     b.Navigation("UserRoles");
                 });
