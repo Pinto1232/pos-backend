@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using System.Net;
 using System.Collections.Generic;
 using System.Linq;
+using PosBackend.Services;
 
 namespace PosBackend.Controllers
 {
@@ -17,10 +18,12 @@ namespace PosBackend.Controllers
     public class CurrencyController : ControllerBase
     {
         private readonly ILogger<CurrencyController> _logger;
+        private readonly GeoLocationService _geoLocationService;
 
-        public CurrencyController(ILogger<CurrencyController> logger)
+        public CurrencyController(ILogger<CurrencyController> logger, GeoLocationService geoLocationService)
         {
             _logger = logger;
+            _geoLocationService = geoLocationService;
         }
 
         [HttpGet("location")]
@@ -63,10 +66,18 @@ namespace PosBackend.Controllers
 
         private string DetectCountryFromIP(IPAddress ipAddress)
         {
-            // In a real-world scenario, you would use a more sophisticated
-            // method to detect the country from the IP address
-            // This is a simplified placeholder
-            return "ZA"; // Default to South Africa for this example
+            try
+            {
+                string ip = ipAddress.ToString();
+                string countryCode = _geoLocationService.GetCountryCode(ip);
+                _logger.LogInformation($"Detected country code from IP {ip}: {countryCode}");
+                return countryCode;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error detecting country from IP");
+                return "US"; // Default to US if detection fails
+            }
         }
 
         [HttpGet("available")]

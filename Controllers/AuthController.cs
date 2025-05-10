@@ -3,8 +3,13 @@ using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using PosBackend.Application.Interfaces;
+using PosBackend.Utilities;
+using System.IdentityModel.Tokens.Jwt;
+using PosBackend.Models;
 
 [Route("api/auth")]
 [ApiController]
@@ -12,11 +17,16 @@ public class AuthController : ControllerBase
 {
     private readonly HttpClient _httpClient;
     private readonly ILogger<AuthController> _logger;
+    private readonly IUserRepository _userRepository;
 
-    public AuthController(IHttpClientFactory httpClientFactory, ILogger<AuthController> logger)
+    public AuthController(
+        IHttpClientFactory httpClientFactory,
+        ILogger<AuthController> logger,
+        IUserRepository userRepository)
     {
         _httpClient = httpClientFactory.CreateClient();
         _logger = logger;
+        _userRepository = userRepository;
     }
 
     [HttpPost("login")]
@@ -49,8 +59,69 @@ public class AuthController : ControllerBase
                 return StatusCode((int)response.StatusCode, new { error = "Login failed", message = content });
             }
 
-            var jsonResponse = JsonSerializer.Deserialize<object>(content);
+            var jsonResponse = JsonSerializer.Deserialize<KeycloakTokenResponse>(content);
             _logger.LogInformation("✅ Login successful.");
+
+            // Extract user information from the token
+            if (jsonResponse?.AccessToken != null)
+            {
+                try
+                {
+                    // Get the user ID from the token
+                    var handler = new JwtSecurityTokenHandler();
+                    var jsonToken = handler.ReadToken(jsonResponse.AccessToken) as JwtSecurityToken;
+
+                    if (jsonToken != null)
+                    {
+                        // Extract email from token
+                        var emailClaim = jsonToken.Claims.FirstOrDefault(c => c.Type == "email");
+                        var email = emailClaim?.Value ?? request.Email;
+
+                        // Extract Keycloak user ID from token
+                        var subClaim = jsonToken.Claims.FirstOrDefault(c => c.Type == "sub");
+                        var keycloakUserId = subClaim?.Value;
+
+                        // Log the login attempt and update LastLogin
+                        if (!string.IsNullOrEmpty(email))
+                        {
+                            var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
+                            await _userRepository.LogUserLoginAttemptAsync(email, true, ipAddress);
+
+                            // Update the LastLogin field for the user
+                            var user = await _userRepository.GetByEmailAsync(email);
+                            if (user != null)
+                            {
+                                user.LastLogin = DateTime.UtcNow;
+                                await _userRepository.UpdateUserAsync(user);
+                                _logger.LogInformation($"Updated LastLogin for user: {email}");
+                            }
+                            else if (!string.IsNullOrEmpty(keycloakUserId))
+                            {
+                                // User exists in Keycloak but not in our database - create a placeholder
+                                _logger.LogInformation($"User {email} exists in Keycloak but not in local database. Creating placeholder.");
+
+                                var newUser = new User
+                                {
+                                    UserName = email,
+                                    Email = email,
+                                    IsActive = true,
+                                    CreatedAt = DateTime.UtcNow,
+                                    LastLogin = DateTime.UtcNow,
+                                    SecurityStamp = keycloakUserId // Store Keycloak ID in SecurityStamp
+                                };
+
+                                await _userRepository.CreateUserAsync(newUser);
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error updating login history");
+                    // Don't fail the login if this fails
+                }
+            }
+
             return Ok(jsonResponse);
         }
         catch (Exception ex)
@@ -109,4 +180,31 @@ public class LoginRequest
 {
     public string Email { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;
+}
+
+public class KeycloakTokenResponse
+{
+    [JsonPropertyName("access_token")]
+    public string? AccessToken { get; set; }
+
+    [JsonPropertyName("expires_in")]
+    public int ExpiresIn { get; set; }
+
+    [JsonPropertyName("refresh_expires_in")]
+    public int RefreshExpiresIn { get; set; }
+
+    [JsonPropertyName("refresh_token")]
+    public string? RefreshToken { get; set; }
+
+    [JsonPropertyName("token_type")]
+    public string? TokenType { get; set; }
+
+    [JsonPropertyName("id_token")]
+    public string? IdToken { get; set; }
+
+    [JsonPropertyName("session_state")]
+    public string? SessionState { get; set; }
+
+    [JsonPropertyName("scope")]
+    public string? Scope { get; set; }
 }

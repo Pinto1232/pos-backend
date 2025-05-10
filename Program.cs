@@ -5,8 +5,10 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using PosBackend.Application.Interfaces;
 using PosBackend.Application.Services;
+using PosBackend.Data;
 using PosBackend.Middlewares;
 using PosBackend.Models;
+using PosBackend.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -102,6 +104,21 @@ builder.Services.AddIdentity<User, UserRole>()
     .AddDefaultTokenProviders();
 
 builder.Services.AddScoped<IUserRepository, UserService>();
+builder.Services.AddScoped<IRoleRepository, RoleService>();
+builder.Services.AddScoped<IPermissionRepository, PermissionService>();
+builder.Services.AddScoped<IKeycloakService, KeycloakService>();
+builder.Services.AddScoped<IRoleMappingService, RoleMappingService>();
+
+// Register GeoLocation service
+string geoLiteDbPath = Path.Combine(AppContext.BaseDirectory, "GeoLite2-Country.mmdb");
+if (File.Exists(geoLiteDbPath))
+{
+    builder.Services.AddSingleton<GeoLocationService>(new GeoLocationService(geoLiteDbPath));
+}
+else
+{
+    builder.Services.AddSingleton<GeoLocationService, GeoLocationServiceFallback>();
+}
 
 builder.Services.AddSignalR();
 
@@ -175,6 +192,8 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.PropertyNameCaseInsensitive = false;
         options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
         options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+        options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+        options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
     });
 
 builder.Logging.AddConsole();
@@ -224,8 +243,13 @@ app.UseSwaggerUI(c =>
 });
 
 app.UseAuthentication();
+app.UseDevelopmentAuth(); // Add development auth middleware
 app.UseAuthorization();
+app.UsePermissionAuthorization();
 
 app.MapControllers();
+
+// Seed the database
+await SeedData.Initialize(app.Services);
 
 app.Run();
