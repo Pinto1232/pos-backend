@@ -5,6 +5,7 @@ using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using System.Threading;
 
 [Route("api/auth")]
 [ApiController]
@@ -16,6 +17,7 @@ public class AuthController : ControllerBase
     public AuthController(IHttpClientFactory httpClientFactory, ILogger<AuthController> logger)
     {
         _httpClient = httpClientFactory.CreateClient();
+        _httpClient.Timeout = TimeSpan.FromSeconds(15); // Increase timeout to 15 seconds
         _logger = logger;
     }
 
@@ -40,13 +42,33 @@ public class AuthController : ControllerBase
 
             loginRequest.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-            var response = await _httpClient.SendAsync(loginRequest);
-            var content = await response.Content.ReadAsStringAsync();
+            var cts = new CancellationTokenSource();
+            cts.CancelAfter(TimeSpan.FromSeconds(10));
 
-            if (!response.IsSuccessStatusCode)
+            HttpResponseMessage response;
+            string content;
+
+            try
             {
-                _logger.LogWarning($"⚠️ Login failed: {response.StatusCode}, Response: {content}");
-                return StatusCode((int)response.StatusCode, new { error = "Login failed", message = content });
+                _logger.LogInformation("Sending request to Keycloak...");
+                response = await _httpClient.SendAsync(loginRequest, cts.Token);
+                content = await response.Content.ReadAsStringAsync();
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogWarning($"⚠️ Login failed: {response.StatusCode}, Response: {content}");
+                    return StatusCode((int)response.StatusCode, new { error = "Login failed", message = "Authentication failed. Please check your credentials." });
+                }
+            }
+            catch (TaskCanceledException ex) when (cts.IsCancellationRequested)
+            {
+                _logger.LogError($"⏱️ Keycloak request timed out: {ex.Message}");
+                return StatusCode(504, new { error = "Gateway Timeout", message = "Authentication server is not responding. Please try again later." });
+            }
+            catch (HttpRequestException ex)
+            {
+                _logger.LogError($"🌐 Network error connecting to Keycloak: {ex.Message}");
+                return StatusCode(502, new { error = "Bad Gateway", message = "Unable to connect to authentication server. Please try again later." });
             }
 
             var jsonResponse = JsonSerializer.Deserialize<object>(content);

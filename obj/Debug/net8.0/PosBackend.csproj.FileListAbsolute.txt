@@ -192,13 +192,19 @@ C:\Users\pinto\Documents\Development\POS\pos-backend\obj\Debug\net8.0\PosBackend
 C:\Users\pinto\Documents\Development\POS\pos-backend\obj\Debug\net8.0\ref\PosBackend.dll
 C:\Users\pinto\Documents\Development\POS\backend\bin\Debug\net8.0\appsettings.Development.json
 C:\Users\pinto\Documents\Development\POS\backend\bin\Debug\net8.0\appsettings.json
+C:\Users\pinto\Documents\Development\POS\backend\bin\Debug\net8.0\global.json
 C:\Users\pinto\Documents\Development\POS\backend\bin\Debug\net8.0\package-lock.json
+C:\Users\pinto\Documents\Development\POS\backend\bin\Debug\net8.0\UpdatePriceConsole\appsettings.json
+C:\Users\pinto\Documents\Development\POS\backend\bin\Debug\net8.0\UpdatePriceConsole\obj\project.assets.json
+C:\Users\pinto\Documents\Development\POS\backend\bin\Debug\net8.0\UpdatePriceConsole\obj\UpdatePriceConsole.csproj.nuget.dgspec.json
+C:\Users\pinto\Documents\Development\POS\backend\bin\Debug\net8.0\PosBackend.staticwebassets.runtime.json
 C:\Users\pinto\Documents\Development\POS\backend\bin\Debug\net8.0\PosBackend.staticwebassets.endpoints.json
 C:\Users\pinto\Documents\Development\POS\backend\bin\Debug\net8.0\PosBackend.exe
 C:\Users\pinto\Documents\Development\POS\backend\bin\Debug\net8.0\PosBackend.deps.json
 C:\Users\pinto\Documents\Development\POS\backend\bin\Debug\net8.0\PosBackend.runtimeconfig.json
 C:\Users\pinto\Documents\Development\POS\backend\bin\Debug\net8.0\PosBackend.dll
 C:\Users\pinto\Documents\Development\POS\backend\bin\Debug\net8.0\PosBackend.pdb
+C:\Users\pinto\Documents\Development\POS\backend\bin\Debug\net8.0\PosBackend.xml
 C:\Users\pinto\Documents\Development\POS\backend\bin\Debug\net8.0\Azure.Core.dll
 C:\Users\pinto\Documents\Development\POS\backend\bin\Debug\net8.0\Azure.Identity.dll
 C:\Users\pinto\Documents\Development\POS\backend\bin\Debug\net8.0\Humanizer.dll
@@ -391,6 +397,7 @@ C:\Users\pinto\Documents\Development\POS\backend\obj\Debug\net8.0\staticwebasset
 C:\Users\pinto\Documents\Development\POS\backend\obj\Debug\net8.0\PosBackend.csproj.Up2Date
 C:\Users\pinto\Documents\Development\POS\backend\obj\Debug\net8.0\PosBackend.dll
 C:\Users\pinto\Documents\Development\POS\backend\obj\Debug\net8.0\refint\PosBackend.dll
+C:\Users\pinto\Documents\Development\POS\backend\obj\Debug\net8.0\PosBackend.xml
 C:\Users\pinto\Documents\Development\POS\backend\obj\Debug\net8.0\PosBackend.pdb
 C:\Users\pinto\Documents\Development\POS\backend\obj\Debug\net8.0\PosBackend.genruntimeconfig.cache
 C:\Users\pinto\Documents\Development\POS\backend\obj\Debug\net8.0\ref\PosBackend.dll

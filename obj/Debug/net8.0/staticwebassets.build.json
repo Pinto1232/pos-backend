@@ -1,12 +1,434 @@
 {
   "Version": 1,
-  "Hash": "uLOkJTJs/lbq+KThUFLeb7UA68ivHkE1/LW9HJ8sz54=",
+  "Hash": "Xo0lUZYDaYytdDkdYXJbDXktHKpr2rvHvv7TX2zUXqM=",
   "Source": "PosBackend",
   "BasePath": "_content/PosBackend",
   "Mode": "Default",
   "ManifestType": "Build",
   "ReferencedProjectsConfiguration": [],
-  "DiscoveryPatterns": [],
-  "Assets": [],
-  "Endpoints": []
+  "DiscoveryPatterns": [
+    {
+      "Name": "PosBackend\\wwwroot",
+      "Source": "PosBackend",
+      "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\POS\\backend\\wwwroot\\",
+      "BasePath": "_content/PosBackend",
+      "Pattern": "**"
+    }
+  ],
+  "Assets": [
+    {
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\POS\\backend\\wwwroot\\swagger-minimal.html",
+      "SourceId": "PosBackend",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\POS\\backend\\wwwroot\\",
+      "BasePath": "_content/PosBackend",
+      "RelativePath": "swagger-minimal#[.{fingerprint}]?.html",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "nq6fny46mx",
+      "Integrity": "384NxV06Sw178Q8MGYGUVyxoDeNqomrbDldLJdXcMao=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\swagger-minimal.html"
+    },
+    {
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\POS\\backend\\wwwroot\\swagger-test.html",
+      "SourceId": "PosBackend",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\POS\\backend\\wwwroot\\",
+      "BasePath": "_content/PosBackend",
+      "RelativePath": "swagger-test#[.{fingerprint}]?.html",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "aa3qawq34c",
+      "Integrity": "3kISmzVmeavxlPDs7px5ipdNiG4Jf+mW0J82JqvtxlA=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\swagger-test.html"
+    },
+    {
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\POS\\backend\\wwwroot\\swagger-ui\\custom.css",
+      "SourceId": "PosBackend",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\POS\\backend\\wwwroot\\",
+      "BasePath": "_content/PosBackend",
+      "RelativePath": "swagger-ui/custom#[.{fingerprint}]?.css",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "sc6jx3qcfa",
+      "Integrity": "7PMkQpB8he1seqbQvJ7mZqf5r6CjUQPAN8LGlz1jXnE=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\swagger-ui\\custom.css"
+    },
+    {
+      "Identity": "C:\\Users\\pinto\\Documents\\Development\\POS\\backend\\wwwroot\\swagger\\index.html",
+      "SourceId": "PosBackend",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\POS\\backend\\wwwroot\\",
+      "BasePath": "_content/PosBackend",
+      "RelativePath": "swagger/index#[.{fingerprint}]?.html",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "3bcincxcgz",
+      "Integrity": "z0USYzhPLqMurQITRzbIfpwOmMKSW3UnB5+rKO+O15k=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\swagger\\index.html"
+    }
+  ],
+  "Endpoints": [
+    {
+      "Route": "swagger-minimal.html",
+      "AssetFile": "C:\\Users\\pinto\\Documents\\Development\\POS\\backend\\wwwroot\\swagger-minimal.html",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "11576"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/html"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"384NxV06Sw178Q8MGYGUVyxoDeNqomrbDldLJdXcMao=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 13 May 2025 02:05:10 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-384NxV06Sw178Q8MGYGUVyxoDeNqomrbDldLJdXcMao="
+        }
+      ]
+    },
+    {
+      "Route": "swagger-minimal.nq6fny46mx.html",
+      "AssetFile": "C:\\Users\\pinto\\Documents\\Development\\POS\\backend\\wwwroot\\swagger-minimal.html",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "11576"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/html"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"384NxV06Sw178Q8MGYGUVyxoDeNqomrbDldLJdXcMao=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 13 May 2025 02:05:10 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "nq6fny46mx"
+        },
+        {
+          "Name": "label",
+          "Value": "swagger-minimal.html"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-384NxV06Sw178Q8MGYGUVyxoDeNqomrbDldLJdXcMao="
+        }
+      ]
+    },
+    {
+      "Route": "swagger-test.aa3qawq34c.html",
+      "AssetFile": "C:\\Users\\pinto\\Documents\\Development\\POS\\backend\\wwwroot\\swagger-test.html",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "3162"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/html"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"3kISmzVmeavxlPDs7px5ipdNiG4Jf+mW0J82JqvtxlA=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 13 May 2025 01:54:47 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "aa3qawq34c"
+        },
+        {
+          "Name": "label",
+          "Value": "swagger-test.html"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-3kISmzVmeavxlPDs7px5ipdNiG4Jf+mW0J82JqvtxlA="
+        }
+      ]
+    },
+    {
+      "Route": "swagger-test.html",
+      "AssetFile": "C:\\Users\\pinto\\Documents\\Development\\POS\\backend\\wwwroot\\swagger-test.html",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "3162"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/html"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"3kISmzVmeavxlPDs7px5ipdNiG4Jf+mW0J82JqvtxlA=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 13 May 2025 01:54:47 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-3kISmzVmeavxlPDs7px5ipdNiG4Jf+mW0J82JqvtxlA="
+        }
+      ]
+    },
+    {
+      "Route": "swagger-ui/custom.css",
+      "AssetFile": "C:\\Users\\pinto\\Documents\\Development\\POS\\backend\\wwwroot\\swagger-ui\\custom.css",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "1926"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"7PMkQpB8he1seqbQvJ7mZqf5r6CjUQPAN8LGlz1jXnE=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 13 May 2025 01:45:05 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-7PMkQpB8he1seqbQvJ7mZqf5r6CjUQPAN8LGlz1jXnE="
+        }
+      ]
+    },
+    {
+      "Route": "swagger-ui/custom.sc6jx3qcfa.css",
+      "AssetFile": "C:\\Users\\pinto\\Documents\\Development\\POS\\backend\\wwwroot\\swagger-ui\\custom.css",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "1926"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"7PMkQpB8he1seqbQvJ7mZqf5r6CjUQPAN8LGlz1jXnE=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 13 May 2025 01:45:05 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "sc6jx3qcfa"
+        },
+        {
+          "Name": "label",
+          "Value": "swagger-ui/custom.css"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-7PMkQpB8he1seqbQvJ7mZqf5r6CjUQPAN8LGlz1jXnE="
+        }
+      ]
+    },
+    {
+      "Route": "swagger/index.3bcincxcgz.html",
+      "AssetFile": "C:\\Users\\pinto\\Documents\\Development\\POS\\backend\\wwwroot\\swagger\\index.html",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "33976"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/html"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"z0USYzhPLqMurQITRzbIfpwOmMKSW3UnB5+rKO+O15k=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 13 May 2025 02:16:13 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "3bcincxcgz"
+        },
+        {
+          "Name": "label",
+          "Value": "swagger/index.html"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-z0USYzhPLqMurQITRzbIfpwOmMKSW3UnB5+rKO+O15k="
+        }
+      ]
+    },
+    {
+      "Route": "swagger/index.html",
+      "AssetFile": "C:\\Users\\pinto\\Documents\\Development\\POS\\backend\\wwwroot\\swagger\\index.html",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "33976"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/html"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"z0USYzhPLqMurQITRzbIfpwOmMKSW3UnB5+rKO+O15k=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 13 May 2025 02:16:13 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-z0USYzhPLqMurQITRzbIfpwOmMKSW3UnB5+rKO+O15k="
+        }
+      ]
+    }
+  ]
 }

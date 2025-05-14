@@ -3,3 +3,9 @@
 bin/
 obj/
 Keycloack/data/h2/keycloakdb.mv.db
+
+# Flyway ignores
+*.user.toml
+*.artifact
+report.html
+report.json

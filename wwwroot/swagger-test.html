@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swagger Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #2c3e50;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 5px;
+            overflow: auto;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #result {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Swagger API Test</h1>
+        <p>This page tests if the Swagger JSON endpoint is accessible.</p>
+        
+        <button id="testButton">Test Swagger Endpoint</button>
+        
+        <div id="result"></div>
+        
+        <script>
+            document.getElementById('testButton').addEventListener('click', function() {
+                const resultDiv = document.getElementById('result');
+                resultDiv.innerHTML = '<p>Testing connection to Swagger JSON...</p>';
+                
+                fetch('/swagger/v1/swagger.json')
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! Status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        resultDiv.innerHTML = '<p>✅ Successfully connected to Swagger JSON!</p>';
+                        resultDiv.innerHTML += '<p>API Info:</p>';
+                        resultDiv.innerHTML += `<pre>${JSON.stringify(data.info, null, 2)}</pre>`;
+                        resultDiv.innerHTML += '<p>Available Paths:</p>';
+                        resultDiv.innerHTML += `<pre>${JSON.stringify(Object.keys(data.paths), null, 2)}</pre>`;
+                    })
+                    .catch(error => {
+                        resultDiv.innerHTML = `<p>❌ Error: ${error.message}</p>`;
+                        resultDiv.innerHTML += '<p>Possible reasons for failure:</p>';
+                        resultDiv.innerHTML += '<ul>';
+                        resultDiv.innerHTML += '<li>The API server is not running</li>';
+                        resultDiv.innerHTML += '<li>CORS policy is blocking the request</li>';
+                        resultDiv.innerHTML += '<li>The Swagger JSON endpoint path is incorrect</li>';
+                        resultDiv.innerHTML += '<li>There are errors in the Swagger configuration</li>';
+                        resultDiv.innerHTML += '</ul>';
+                    });
+            });
+        </script>
+    </div>
+</body>
+</html>

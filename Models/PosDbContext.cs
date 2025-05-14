@@ -66,6 +66,9 @@ namespace PosBackend.Models
         // User Login History
         public DbSet<UserLoginHistory> UserLoginHistories { get; set; }
 
+        // User Subscriptions
+        public DbSet<UserSubscription> UserSubscriptions { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

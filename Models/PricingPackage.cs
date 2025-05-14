@@ -51,6 +51,27 @@ namespace PosBackend.Models
         public string Name { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public decimal Price { get; set; }
+
+        // Default/base currency (e.g., "USD")
+        public string Currency { get; set; } = "USD";
+
+        // JSON string to store prices for multiple currencies
+        public string MultiCurrencyPrices { get; set; } = "{}";
+
+        // Category for grouping related add-ons
+        public string Category { get; set; } = string.Empty;
+
+        // Flag to indicate if the add-on is active/available
+        public bool IsActive { get; set; } = true;
+
+        // JSON string to store specific capabilities/functionalities that the addon enables
+        public string Features { get; set; } = "[]";
+
+        // JSON string to store any requirements or prerequisites needed for the addon to function
+        public string Dependencies { get; set; } = "[]";
+
+        // Icon or visual indicator for the addon (can be a URL or a class name)
+        public string Icon { get; set; } = string.Empty;
     }
 
     public class UsageBasedPricing

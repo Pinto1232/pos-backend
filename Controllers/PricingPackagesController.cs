@@ -3,12 +3,14 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using PosBackend.Models;
 using PosBackend.Services;
+using System.Text.Json;
+using System.ComponentModel.DataAnnotations;
 
 namespace PosBackend.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
+    [Authorize(AuthenticationSchemes = "Bearer")]
     public class PricingPackagesController : ControllerBase
     {
         private readonly PosDbContext _context;
@@ -42,6 +44,7 @@ namespace PosBackend.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<ActionResult<object>> GetAll([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             try
@@ -111,6 +114,73 @@ namespace PosBackend.Controllers
             catch (System.Exception ex)
             {
                 _logger.LogError(ex, "Error in GetAll pricing packages");
+                return StatusCode(500, new { message = "Internal server error", error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Gets a specific pricing package by ID
+        /// </summary>
+        /// <param name="id">The ID of the pricing package to retrieve</param>
+        /// <returns>The pricing package</returns>
+        [HttpGet("{id}")]
+        [AllowAnonymous]
+        public async Task<ActionResult<PricingPackageDto>> GetById(int id)
+        {
+            try
+            {
+                var package = await _context.PricingPackages.FindAsync(id);
+
+                if (package == null)
+                {
+                    return NotFound($"Pricing package with ID {id} not found");
+                }
+
+                string ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "127.0.0.1";
+                string countryCode = _geoService.GetCountryCode(ipAddress);
+
+                string userCurrency = _countryToCurrency.ContainsKey(countryCode)
+                    ? _countryToCurrency[countryCode]
+                    : "USD";
+
+                decimal finalPrice = package.Price;
+
+                // Try to get price in user's currency
+                if (userCurrency != package.Currency && !string.IsNullOrEmpty(package.MultiCurrencyPrices))
+                {
+                    try
+                    {
+                        var prices = JsonSerializer.Deserialize<Dictionary<string, decimal>>(package.MultiCurrencyPrices);
+                        if (prices != null && prices.TryGetValue(userCurrency, out decimal currencyPrice))
+                        {
+                            finalPrice = currencyPrice;
+                        }
+                    }
+                    catch (JsonException)
+                    {
+                        // If JSON parsing fails, use the default price
+                    }
+                }
+
+                return Ok(new PricingPackageDto
+                {
+                    Id = package.Id,
+                    Title = package.Title,
+                    Description = package.Description,
+                    Icon = package.Icon,
+                    ExtraDescription = package.ExtraDescription,
+                    Price = finalPrice,
+                    TestPeriodDays = package.TestPeriodDays,
+                    Type = package.Type,
+                    DescriptionList = package.Description.Split(';').ToList(),
+                    IsCustomizable = package.Type.ToLower() == "custom",
+                    Currency = userCurrency,
+                    MultiCurrencyPrices = package.MultiCurrencyPrices
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error retrieving pricing package with ID {id}");
                 return StatusCode(500, new { message = "Internal server error", error = ex.Message });
             }
         }
@@ -220,6 +290,160 @@ namespace PosBackend.Controllers
             return Ok(new { basePrice, totalPrice });
         }
 
+        /// <summary>
+        /// Creates a new pricing package
+        /// </summary>
+        /// <param name="packageDto">The pricing package data</param>
+        /// <returns>The newly created pricing package</returns>
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<ActionResult<PricingPackageDto>> CreatePricingPackage([FromBody] CreatePricingPackageDto packageDto)
+        {
+            try
+            {
+                // Check if a package with the same type already exists
+                var existingPackage = await _context.PricingPackages
+                    .FirstOrDefaultAsync(p => p.Type.ToLower() == packageDto.Type.ToLower());
+
+                if (existingPackage != null)
+                {
+                    return Conflict($"A pricing package with type '{packageDto.Type}' already exists");
+                }
+
+                // Create new pricing package
+                var newPackage = new PricingPackage
+                {
+                    Title = packageDto.Title,
+                    Description = packageDto.Description,
+                    Icon = packageDto.Icon,
+                    ExtraDescription = packageDto.ExtraDescription,
+                    Price = packageDto.Price,
+                    TestPeriodDays = packageDto.TestPeriodDays,
+                    Type = packageDto.Type,
+                    Currency = packageDto.Currency,
+                    MultiCurrencyPrices = packageDto.MultiCurrencyPrices
+                };
+
+                _context.PricingPackages.Add(newPackage);
+                await _context.SaveChangesAsync();
+
+                // Return the created package
+                return CreatedAtAction(
+                    nameof(GetAll),
+                    new { id = newPackage.Id },
+                    new PricingPackageDto
+                    {
+                        Id = newPackage.Id,
+                        Title = newPackage.Title,
+                        Description = newPackage.Description,
+                        Icon = newPackage.Icon,
+                        ExtraDescription = newPackage.ExtraDescription,
+                        Price = newPackage.Price,
+                        TestPeriodDays = newPackage.TestPeriodDays,
+                        Type = newPackage.Type,
+                        DescriptionList = newPackage.Description.Split(';').ToList(),
+                        IsCustomizable = newPackage.Type.ToLower() == "custom",
+                        Currency = newPackage.Currency,
+                        MultiCurrencyPrices = newPackage.MultiCurrencyPrices
+                    });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating pricing package");
+                return StatusCode(500, new { message = "Internal server error", error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Updates an existing pricing package
+        /// </summary>
+        /// <param name="id">The ID of the pricing package to update</param>
+        /// <param name="packageDto">The updated pricing package data</param>
+        /// <returns>No content if successful</returns>
+        [HttpPut("{id}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> UpdatePricingPackage(int id, [FromBody] CreatePricingPackageDto packageDto)
+        {
+            try
+            {
+                var package = await _context.PricingPackages.FindAsync(id);
+
+                if (package == null)
+                {
+                    return NotFound($"Pricing package with ID {id} not found");
+                }
+
+                // Check if trying to change the type to one that already exists
+                if (package.Type.ToLower() != packageDto.Type.ToLower())
+                {
+                    var existingPackage = await _context.PricingPackages
+                        .FirstOrDefaultAsync(p => p.Type.ToLower() == packageDto.Type.ToLower() && p.Id != id);
+
+                    if (existingPackage != null)
+                    {
+                        return Conflict($"A pricing package with type '{packageDto.Type}' already exists");
+                    }
+                }
+
+                // Update package properties
+                package.Title = packageDto.Title;
+                package.Description = packageDto.Description;
+                package.Icon = packageDto.Icon;
+                package.ExtraDescription = packageDto.ExtraDescription;
+                package.Price = packageDto.Price;
+                package.TestPeriodDays = packageDto.TestPeriodDays;
+                package.Type = packageDto.Type;
+                package.Currency = packageDto.Currency;
+                package.MultiCurrencyPrices = packageDto.MultiCurrencyPrices;
+
+                await _context.SaveChangesAsync();
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error updating pricing package with ID {id}");
+                return StatusCode(500, new { message = "Internal server error", error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Deletes a pricing package
+        /// </summary>
+        /// <param name="id">The ID of the pricing package to delete</param>
+        /// <returns>No content if successful</returns>
+        [HttpDelete("{id}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> DeletePricingPackage(int id)
+        {
+            try
+            {
+                var package = await _context.PricingPackages.FindAsync(id);
+
+                if (package == null)
+                {
+                    return NotFound($"Pricing package with ID {id} not found");
+                }
+
+                // Check if this is a default package type that shouldn't be deleted
+                var defaultTypes = new[] { "starter", "growth", "premium", "enterprise", "custom" };
+                if (defaultTypes.Contains(package.Type.ToLower()))
+                {
+                    return BadRequest($"Cannot delete default package type '{package.Type}'. Consider updating it instead.");
+                }
+
+                _context.PricingPackages.Remove(package);
+                await _context.SaveChangesAsync();
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error deleting pricing package with ID {id}");
+                return StatusCode(500, new { message = "Internal server error", error = ex.Message });
+            }
+        }
+
         public class PricingPackageDto
         {
             public int Id { get; set; }
@@ -234,6 +458,32 @@ namespace PosBackend.Controllers
             public bool IsCustomizable { get; set; }
             public string Currency { get; set; } = string.Empty;
             public string MultiCurrencyPrices { get; set; } = string.Empty;
+        }
+
+        public class CreatePricingPackageDto
+        {
+            [Required]
+            public string Title { get; set; } = string.Empty;
+
+            [Required]
+            public string Description { get; set; } = string.Empty;
+
+            [Required]
+            public string Icon { get; set; } = string.Empty;
+
+            public string ExtraDescription { get; set; } = string.Empty;
+
+            [Required]
+            public decimal Price { get; set; }
+
+            public int TestPeriodDays { get; set; } = 14;
+
+            [Required]
+            public string Type { get; set; } = string.Empty;
+
+            public string Currency { get; set; } = "USD";
+
+            public string MultiCurrencyPrices { get; set; } = "{}";
         }
 
         public class CustomSelectionRequest
