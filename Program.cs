@@ -2,18 +2,26 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using PosBackend.Application.Interfaces;
 using PosBackend.Application.Services;
+using PosBackend.Application.Services.Caching;
 using PosBackend.Filters;
 using PosBackend.Middlewares;
 using PosBackend.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add memory cache for response caching
+// Add memory cache for response caching and our cache service
 builder.Services.AddMemoryCache();
+
+// Configure and register the cache service
+var cacheConfiguration = new CacheConfiguration();
+builder.Configuration.GetSection("Cache").Bind(cacheConfiguration);
+builder.Services.AddSingleton(cacheConfiguration);
+builder.Services.AddSingleton<ICacheService, MemoryCacheService>();
 
 // Add response compression for better performance
 builder.Services.AddResponseCompression(options =>
