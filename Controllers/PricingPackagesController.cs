@@ -1,9 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
-using PosBackend.Application.Services.Caching;
 using PosBackend.Models;
 using PosBackend.Services;
 using System.Text.Json;
@@ -19,7 +16,6 @@ namespace PosBackend.Controllers
         private readonly PosDbContext _context;
         private readonly GeoLocationService _geoService;
         private readonly ILogger<PricingPackagesController> _logger;
-        private readonly ICacheService _cacheService;
 
 
         private readonly Dictionary<string, string> _countryToCurrency = new Dictionary<string, string>
@@ -31,30 +27,19 @@ namespace PosBackend.Controllers
 
         };
 
-        public PricingPackagesController(
-            PosDbContext context,
-            ILogger<PricingPackagesController> logger,
-            ICacheService cacheService)
+        public PricingPackagesController(PosDbContext context, ILogger<PricingPackagesController> logger)
         {
             _context = context;
             _logger = logger;
-            _cacheService = cacheService;
-
             string dbPath = Path.Combine(Directory.GetCurrentDirectory(), "GeoLite2-Country.mmdb");
             try
             {
-                // Create a logger factory to get the correct logger type
-                var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
-                var geoLogger = loggerFactory.CreateLogger<GeoLocationService>();
-                _geoService = new GeoLocationService(dbPath, cacheService, geoLogger);
+                _geoService = new GeoLocationService(dbPath);
             }
             catch (System.Exception ex)
             {
                 _logger.LogError(ex, "Failed to initialize GeoLocationService with dbPath: {dbPath}", dbPath);
-                // Create a logger factory to get the correct logger type
-                var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
-                var geoLogger = loggerFactory.CreateLogger<GeoLocationService>();
-                _geoService = new GeoLocationServiceFallback(cacheService, geoLogger);
+                _geoService = new GeoLocationServiceFallback();
             }
         }
 
@@ -69,28 +54,20 @@ namespace PosBackend.Controllers
                     return NotFound("Pricing packages not found");
                 }
 
-                // Create a cache key based on pagination parameters
-                string cacheKey = CacheKeys.AllPackages + $":page:{pageNumber}:size:{pageSize}";
+                string ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "127.0.0.1";
+                string countryCode = _geoService.GetCountryCode(ipAddress);
 
-                // Try to get from cache first
-                return await _cacheService.GetOrSetAsync<ActionResult<object>>(cacheKey, async () =>
-                {
-                    _logger.LogDebug("Cache miss for pricing packages. Fetching from database.");
+                string userCurrency = _countryToCurrency.ContainsKey(countryCode)
+                    ? _countryToCurrency[countryCode]
+                    : "USD";
 
-                    string ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "127.0.0.1";
-                    string countryCode = _geoService.GetCountryCode(ipAddress);
+                var totalItems = await _context.PricingPackages.CountAsync();
 
-                    string userCurrency = _countryToCurrency.ContainsKey(countryCode)
-                        ? _countryToCurrency[countryCode]
-                        : "USD";
-
-                    var totalItems = await _context.PricingPackages.CountAsync();
-
-                    var packagesData = await _context.PricingPackages
-                        .OrderBy(p => p.Id)
-                        .Skip((pageNumber - 1) * pageSize)
-                        .Take(pageSize)
-                        .ToListAsync();
+                var packagesData = await _context.PricingPackages
+                    .OrderBy(p => p.Id)
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
 
                 var packages = packagesData.Select(p =>
                 {
@@ -128,11 +105,10 @@ namespace PosBackend.Controllers
                     };
                 }).ToList();
 
-                    return Ok(new
-                    {
-                        totalItems,
-                        data = packages
-                    });
+                return Ok(new
+                {
+                    totalItems,
+                    data = packages
                 });
             }
             catch (System.Exception ex)
@@ -153,62 +129,53 @@ namespace PosBackend.Controllers
         {
             try
             {
-                // Create a cache key for this package
-                string cacheKey = CacheKeys.Package(id);
+                var package = await _context.PricingPackages.FindAsync(id);
 
-                // Try to get from cache first
-                return await _cacheService.GetOrSetAsync<ActionResult<PricingPackageDto>>(cacheKey, async () =>
+                if (package == null)
                 {
-                    _logger.LogDebug("Cache miss for pricing package ID: {Id}. Fetching from database.", id);
+                    return NotFound($"Pricing package with ID {id} not found");
+                }
 
-                    var package = await _context.PricingPackages.FindAsync(id);
+                string ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "127.0.0.1";
+                string countryCode = _geoService.GetCountryCode(ipAddress);
 
-                    if (package == null)
+                string userCurrency = _countryToCurrency.ContainsKey(countryCode)
+                    ? _countryToCurrency[countryCode]
+                    : "USD";
+
+                decimal finalPrice = package.Price;
+
+                // Try to get price in user's currency
+                if (userCurrency != package.Currency && !string.IsNullOrEmpty(package.MultiCurrencyPrices))
+                {
+                    try
                     {
-                        return NotFound($"Pricing package with ID {id} not found");
-                    }
-
-                    string ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "127.0.0.1";
-                    string countryCode = _geoService.GetCountryCode(ipAddress);
-
-                    string userCurrency = _countryToCurrency.ContainsKey(countryCode)
-                        ? _countryToCurrency[countryCode]
-                        : "USD";
-
-                    decimal finalPrice = package.Price;
-
-                    // Try to get price in user's currency
-                    if (userCurrency != package.Currency && !string.IsNullOrEmpty(package.MultiCurrencyPrices))
-                    {
-                        try
+                        var prices = JsonSerializer.Deserialize<Dictionary<string, decimal>>(package.MultiCurrencyPrices);
+                        if (prices != null && prices.TryGetValue(userCurrency, out decimal currencyPrice))
                         {
-                            var prices = JsonSerializer.Deserialize<Dictionary<string, decimal>>(package.MultiCurrencyPrices);
-                            if (prices != null && prices.TryGetValue(userCurrency, out decimal currencyPrice))
-                            {
-                                finalPrice = currencyPrice;
-                            }
-                        }
-                        catch (JsonException)
-                        {
-                            // If JSON parsing fails, use the default price
+                            finalPrice = currencyPrice;
                         }
                     }
-
-                    return Ok(new PricingPackageDto
+                    catch (JsonException)
                     {
-                        Id = package.Id,
-                        Title = package.Title,
-                        Description = package.Description,
-                        Icon = package.Icon,
-                        ExtraDescription = package.ExtraDescription,
-                        Price = finalPrice,
-                        TestPeriodDays = package.TestPeriodDays,
-                        Type = package.Type,
-                        DescriptionList = package.Description.Split(';').ToList(),
-                        IsCustomizable = package.Type.ToLower() == "custom",
-                        Currency = userCurrency,
-                        MultiCurrencyPrices = package.MultiCurrencyPrices
-                    });
+                        // If JSON parsing fails, use the default price
+                    }
+                }
+
+                return Ok(new PricingPackageDto
+                {
+                    Id = package.Id,
+                    Title = package.Title,
+                    Description = package.Description,
+                    Icon = package.Icon,
+                    ExtraDescription = package.ExtraDescription,
+                    Price = finalPrice,
+                    TestPeriodDays = package.TestPeriodDays,
+                    Type = package.Type,
+                    DescriptionList = package.Description.Split(';').ToList(),
+                    IsCustomizable = package.Type.ToLower() == "custom",
+                    Currency = userCurrency,
+                    MultiCurrencyPrices = package.MultiCurrencyPrices
                 });
             }
             catch (Exception ex)
@@ -221,36 +188,27 @@ namespace PosBackend.Controllers
         [HttpGet("custom/features")]
         public async Task<ActionResult<object>> GetCustomFeatures()
         {
-            // Create a cache key for custom features
-            string cacheKey = "CustomFeatures";
+            var features = await _context.CoreFeatures.ToListAsync();
+            var addOns = await _context.AddOns.ToListAsync();
+            var usageBasedPricing = await _context.UsageBasedPricing.ToListAsync();
 
-            // Try to get from cache first
-            return await _cacheService.GetOrSetAsync<ActionResult<object>>(cacheKey, async () =>
+            var usageBasedPricingWithDefault = usageBasedPricing.Select(u => new
             {
-                _logger.LogDebug("Cache miss for custom features. Fetching from database.");
+                u.Id,
+                u.FeatureId,
+                u.Name,
+                u.Unit,
+                u.MinValue,
+                u.MaxValue,
+                u.PricePerUnit,
+                defaultValue = u.MinValue
+            }).ToList();
 
-                var features = await _context.CoreFeatures.ToListAsync();
-                var addOns = await _context.AddOns.ToListAsync();
-                var usageBasedPricing = await _context.UsageBasedPricing.ToListAsync();
-
-                var usageBasedPricingWithDefault = usageBasedPricing.Select(u => new
-                {
-                    u.Id,
-                    u.FeatureId,
-                    u.Name,
-                    u.Unit,
-                    u.MinValue,
-                    u.MaxValue,
-                    u.PricePerUnit,
-                    defaultValue = u.MinValue
-                }).ToList();
-
-                return Ok(new
-                {
-                    coreFeatures = features,
-                    addOns = addOns,
-                    usageBasedPricing = usageBasedPricingWithDefault
-                });
+            return Ok(new
+            {
+                coreFeatures = features,
+                addOns = addOns,
+                usageBasedPricing = usageBasedPricingWithDefault
             });
         }
 
@@ -293,11 +251,6 @@ namespace PosBackend.Controllers
                 }).ToList();
 
             await _context.SaveChangesAsync();
-
-            // Invalidate cache for this package and all packages
-            await _cacheService.RemoveAsync(CacheKeys.Package(request.PackageId));
-            await _cacheService.RemoveByPrefixAsync(CacheKeys.PackagePrefix);
-
             return Ok(new { message = "Custom package updated successfully" });
         }
 
@@ -374,9 +327,6 @@ namespace PosBackend.Controllers
                 _context.PricingPackages.Add(newPackage);
                 await _context.SaveChangesAsync();
 
-                // Invalidate cache for all packages
-                await _cacheService.RemoveByPrefixAsync(CacheKeys.PackagePrefix);
-
                 // Return the created package
                 return CreatedAtAction(
                     nameof(GetAll),
@@ -448,10 +398,6 @@ namespace PosBackend.Controllers
 
                 await _context.SaveChangesAsync();
 
-                // Invalidate cache for this package and all packages
-                await _cacheService.RemoveAsync(CacheKeys.Package(id));
-                await _cacheService.RemoveByPrefixAsync(CacheKeys.PackagePrefix);
-
                 return NoContent();
             }
             catch (Exception ex)
@@ -488,10 +434,6 @@ namespace PosBackend.Controllers
 
                 _context.PricingPackages.Remove(package);
                 await _context.SaveChangesAsync();
-
-                // Invalidate cache for this package and all packages
-                await _cacheService.RemoveAsync(CacheKeys.Package(id));
-                await _cacheService.RemoveByPrefixAsync(CacheKeys.PackagePrefix);
 
                 return NoContent();
             }
