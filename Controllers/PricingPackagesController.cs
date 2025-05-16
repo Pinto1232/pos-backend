@@ -8,6 +8,7 @@ using PosBackend.Models;
 using PosBackend.Services;
 using System.Text.Json;
 using System.ComponentModel.DataAnnotations;
+using AppCacheKeys = PosBackend.Application.Services.Caching.CacheKeys;
 
 namespace PosBackend.Controllers
 {
@@ -70,7 +71,7 @@ namespace PosBackend.Controllers
                 }
 
                 // Create a cache key based on pagination parameters
-                string cacheKey = CacheKeys.AllPackages + $":page:{pageNumber}:size:{pageSize}";
+                string cacheKey = AppCacheKeys.AllPackages + $":page:{pageNumber}:size:{pageSize}";
 
                 // Try to get from cache first
                 return await _cacheService.GetOrSetAsync<ActionResult<object>>(cacheKey, async () =>
@@ -154,7 +155,7 @@ namespace PosBackend.Controllers
             try
             {
                 // Create a cache key for this package
-                string cacheKey = CacheKeys.Package(id);
+                string cacheKey = AppCacheKeys.Package(id);
 
                 // Try to get from cache first
                 return await _cacheService.GetOrSetAsync<ActionResult<PricingPackageDto>>(cacheKey, async () =>
@@ -295,8 +296,8 @@ namespace PosBackend.Controllers
             await _context.SaveChangesAsync();
 
             // Invalidate cache for this package and all packages
-            await _cacheService.RemoveAsync(CacheKeys.Package(request.PackageId));
-            await _cacheService.RemoveByPrefixAsync(CacheKeys.PackagePrefix);
+            await _cacheService.RemoveAsync(AppCacheKeys.Package(request.PackageId));
+            await _cacheService.RemoveByPrefixAsync(AppCacheKeys.PackagePrefix);
 
             return Ok(new { message = "Custom package updated successfully" });
         }
@@ -375,7 +376,7 @@ namespace PosBackend.Controllers
                 await _context.SaveChangesAsync();
 
                 // Invalidate cache for all packages
-                await _cacheService.RemoveByPrefixAsync(CacheKeys.PackagePrefix);
+                await _cacheService.RemoveByPrefixAsync(AppCacheKeys.PackagePrefix);
 
                 // Return the created package
                 return CreatedAtAction(
@@ -449,8 +450,8 @@ namespace PosBackend.Controllers
                 await _context.SaveChangesAsync();
 
                 // Invalidate cache for this package and all packages
-                await _cacheService.RemoveAsync(CacheKeys.Package(id));
-                await _cacheService.RemoveByPrefixAsync(CacheKeys.PackagePrefix);
+                await _cacheService.RemoveAsync(AppCacheKeys.Package(id));
+                await _cacheService.RemoveByPrefixAsync(AppCacheKeys.PackagePrefix);
 
                 return NoContent();
             }
@@ -490,8 +491,8 @@ namespace PosBackend.Controllers
                 await _context.SaveChangesAsync();
 
                 // Invalidate cache for this package and all packages
-                await _cacheService.RemoveAsync(CacheKeys.Package(id));
-                await _cacheService.RemoveByPrefixAsync(CacheKeys.PackagePrefix);
+                await _cacheService.RemoveAsync(AppCacheKeys.Package(id));
+                await _cacheService.RemoveByPrefixAsync(AppCacheKeys.PackagePrefix);
 
                 return NoContent();
             }

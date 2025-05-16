@@ -151,6 +151,7 @@ builder.Services.AddIdentity<User, UserRole>()
 
 builder.Services.AddScoped<IUserRepository, UserService>();
 builder.Services.AddScoped<PosBackend.Services.PackageFeatureService>();
+builder.Services.AddScoped<PosBackend.Services.KeycloakAuthorizationService>();
 
 builder.Services.AddSignalR();
 

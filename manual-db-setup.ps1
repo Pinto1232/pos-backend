@@ -15,7 +15,8 @@ $PGPASSWORD = "rj200100p"
 $PGDATABASE = "pos_system"
 
 Write-Host "Step 1: Dropping the database..." -ForegroundColor Yellow
-$result = dotnet ef database drop --force
+# Execute the command to drop the database
+dotnet ef database drop --force
 if ($LASTEXITCODE -ne 0) {
     Write-Host "ERROR: Failed to drop the database." -ForegroundColor Red
     Write-Host "Please check your connection details and try again."
@@ -52,7 +53,7 @@ if (-not $psqlExists) {
     Write-Host "PostgreSQL tools found. Creating database..." -ForegroundColor Green
     $env:PGPASSWORD = $PGPASSWORD
     # Connect to postgres database to create our database
-    $result = psql -h $PGHOST -U $PGUSER -d postgres -f create-db.sql
+    psql -h $PGHOST -U $PGUSER -d postgres -f create-db.sql
     if ($LASTEXITCODE -ne 0) {
         Write-Host "WARNING: Failed to create database." -ForegroundColor Yellow
         Write-Host "Please create the database manually using pgAdmin."
@@ -84,7 +85,7 @@ CREATE TABLE IF NOT EXISTS "Scope" (
 
 -- Insert default values into Scope
 INSERT INTO "Scope" ("Type", "Name", "Description")
-VALUES 
+VALUES
 (0, 'Global', 'Global scope for system-wide settings'),
 (1, 'Store', 'Store-level scope for store-specific settings'),
 (2, 'Terminal', 'Terminal-level scope for terminal-specific settings');
@@ -99,7 +100,7 @@ CREATE TABLE IF NOT EXISTS "AddOns" (
 
 -- Insert some default add-ons
 INSERT INTO "AddOns" ("Name", "Description", "Price")
-VALUES 
+VALUES
 ('Advanced Analytics', 'Detailed business analytics and insights', 15.00),
 ('API Access', 'Access to API for custom integrations', 25.00),
 ('Custom Branding', 'White-label solution with your branding', 20.00),
@@ -108,7 +109,7 @@ VALUES
 
 -- Mark migrations as applied
 INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
-VALUES 
+VALUES
 ('20250505122341_InitialCreate', '9.0.4'),
 ('20250505182910_PerformanceOptimizations', '9.0.4'),
 ('20250505230750_AddOwnedEntitiesConfiguration', '9.0.4'),
@@ -132,7 +133,7 @@ if (-not $psqlExists) {
 } else {
     Write-Host "PostgreSQL tools found. Creating tables..." -ForegroundColor Green
     $env:PGPASSWORD = $PGPASSWORD
-    $result = psql -h $PGHOST -U $PGUSER -d $PGDATABASE -f create-tables.sql
+    psql -h $PGHOST -U $PGUSER -d $PGDATABASE -f create-tables.sql
     if ($LASTEXITCODE -ne 0) {
         Write-Host "WARNING: Failed to create tables." -ForegroundColor Yellow
         Write-Host "Please run the SQL script manually using pgAdmin."
@@ -145,7 +146,7 @@ if (-not $psqlExists) {
 Write-Host ""
 
 Write-Host "Step 4: Applying remaining migrations..." -ForegroundColor Yellow
-$result = dotnet ef database update
+dotnet ef database update
 if ($LASTEXITCODE -ne 0) {
     Write-Host "WARNING: Some migrations may have failed." -ForegroundColor Yellow
     Write-Host "You may need to manually fix remaining issues."

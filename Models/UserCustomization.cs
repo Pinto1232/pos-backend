@@ -78,7 +78,7 @@ namespace PosBackend.Models
             get => string.IsNullOrEmpty(TaxSettingsJson)
                 ? null
                 : JsonSerializer.Deserialize<TaxSettings>(TaxSettingsJson);
-            set => TaxSettingsJson = value == null ? null : JsonSerializer.Serialize(value);
+            set => TaxSettingsJson = value == null ? null : JsonSerializer.Serialize(value, new JsonSerializerOptions { WriteIndented = false });
         }
 
         [NotMapped]
@@ -88,7 +88,7 @@ namespace PosBackend.Models
             get => string.IsNullOrEmpty(RegionalSettingsJson)
                 ? null
                 : JsonSerializer.Deserialize<RegionalSettings>(RegionalSettingsJson);
-            set => RegionalSettingsJson = value == null ? null : JsonSerializer.Serialize(value);
+            set => RegionalSettingsJson = value == null ? null : JsonSerializer.Serialize(value, new JsonSerializerOptions { WriteIndented = false });
         }
     }
 }

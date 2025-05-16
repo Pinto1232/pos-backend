@@ -5,6 +5,7 @@ using PosBackend.Application.Services.Caching;
 using System;
 using System.Net;
 using System.IO;
+using AppCacheKeys = PosBackend.Application.Services.Caching.CacheKeys;
 
 namespace PosBackend.Services
 {
@@ -45,7 +46,7 @@ namespace PosBackend.Services
                 // If caching is available, try to get from cache first
                 if (_cacheService != null)
                 {
-                    string cacheKey = CacheKeys.GeoLocation(ipAddress);
+                    string cacheKey = AppCacheKeys.GeoLocation(ipAddress);
                     return _cacheService.GetOrSet(cacheKey, () => LookupCountryCode(ipAddress));
                 }
 

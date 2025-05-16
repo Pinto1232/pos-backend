@@ -1263,14 +1263,14 @@ namespace PosBackend.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("RegionalSettingsJson")
-                        .HasColumnType("text");
+                        .HasColumnType("jsonb");
 
                     b.Property<string>("SidebarColor")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("TaxSettingsJson")
-                        .HasColumnType("text");
+                        .HasColumnType("jsonb");
 
                     b.Property<string>("UserId")
                         .IsRequired()

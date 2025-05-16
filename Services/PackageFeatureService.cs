@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using PosBackend.Application.Services.Caching;
 using PosBackend.Models;
+using AppCacheKeys = PosBackend.Application.Services.Caching.CacheKeys;
 
 namespace PosBackend.Services
 {
@@ -106,7 +107,7 @@ namespace PosBackend.Services
         public List<string> GetFeaturesForPackage(string packageType)
         {
             // Create a cache key for this package type's features
-            string cacheKey = CacheKeys.PackageFeatures(packageType);
+            string cacheKey = AppCacheKeys.PackageFeatures(packageType);
 
             // Try to get from cache first
             return _cacheService.GetOrSet(cacheKey, () =>
@@ -126,7 +127,7 @@ namespace PosBackend.Services
         public async Task<UserSubscription?> GetUserActiveSubscription(string userId)
         {
             // Create a cache key for this user's subscription
-            string cacheKey = CacheKeys.UserPackages(userId);
+            string cacheKey = AppCacheKeys.UserPackages(userId);
 
             // Try to get from cache first
             return await _cacheService.GetOrSetAsync(cacheKey, async () =>
@@ -145,7 +146,7 @@ namespace PosBackend.Services
         public async Task<List<string>> GetUserAvailableFeatures(string userId)
         {
             // Create a cache key for this user's features
-            string cacheKey = CacheKeys.UserFeatures(userId);
+            string cacheKey = AppCacheKeys.UserFeatures(userId);
 
             // Try to get from cache first
             return await _cacheService.GetOrSetAsync(cacheKey, async () =>
@@ -207,8 +208,8 @@ namespace PosBackend.Services
                 await _context.SaveChangesAsync();
 
                 // Invalidate cache for this user's features and packages
-                await _cacheService.RemoveAsync(CacheKeys.UserFeatures(userId));
-                await _cacheService.RemoveAsync(CacheKeys.UserPackages(userId));
+                await _cacheService.RemoveAsync(AppCacheKeys.UserFeatures(userId));
+                await _cacheService.RemoveAsync(AppCacheKeys.UserPackages(userId));
             }
 
             return true;
@@ -230,8 +231,8 @@ namespace PosBackend.Services
                 await _context.SaveChangesAsync();
 
                 // Invalidate cache for this user's features and packages
-                await _cacheService.RemoveAsync(CacheKeys.UserFeatures(userId));
-                await _cacheService.RemoveAsync(CacheKeys.UserPackages(userId));
+                await _cacheService.RemoveAsync(AppCacheKeys.UserFeatures(userId));
+                await _cacheService.RemoveAsync(AppCacheKeys.UserPackages(userId));
             }
 
             return true;

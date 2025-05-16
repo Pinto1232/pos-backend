@@ -192,6 +192,15 @@ namespace PosBackend.Models
             modelBuilder.Entity<CustomPackageUsageBasedPricing>()
                 .HasKey(c => new { c.PricingPackageId, c.UsageBasedPricingId });
 
+            // Configure JSON columns for UserCustomization
+            modelBuilder.Entity<UserCustomization>()
+                .Property(u => u.RegionalSettingsJson)
+                .HasColumnType("jsonb");
+
+            modelBuilder.Entity<UserCustomization>()
+                .Property(u => u.TaxSettingsJson)
+                .HasColumnType("jsonb");
+
             modelBuilder.Entity<CustomerGroupMember>()
                 .HasKey(c => new { c.GroupId, c.CustomerId });
         }

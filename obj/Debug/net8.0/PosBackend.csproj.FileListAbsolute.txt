@@ -401,3 +401,4 @@ C:\Users\pinto\Documents\Development\POS\backend\obj\Debug\net8.0\PosBackend.xml
 C:\Users\pinto\Documents\Development\POS\backend\obj\Debug\net8.0\PosBackend.pdb
 C:\Users\pinto\Documents\Development\POS\backend\obj\Debug\net8.0\PosBackend.genruntimeconfig.cache
 C:\Users\pinto\Documents\Development\POS\backend\obj\Debug\net8.0\ref\PosBackend.dll
+C:\Users\pinto\Documents\Development\POS\backend\bin\Debug\net8.0\package.json
