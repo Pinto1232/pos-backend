@@ -1,6 +1,7 @@
 
 // Database configuration for the POS system
 // Added this comment to test CI workflow
+// Testing CI pipeline with updated configuration
 module.exports = {
   "development": {
     "username": "pos_user",
