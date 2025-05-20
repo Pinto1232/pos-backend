@@ -91,7 +91,6 @@ namespace PosBackend.Controllers
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
                 var keycloakRoleId = await GetKeycloakRoleId(roleId);
-                var keycloakRoleId = await GetKeycloakRoleId(roleId);
 
                 if (string.IsNullOrEmpty(keycloakRoleId))
                 {
