@@ -40,14 +40,10 @@ namespace PosBackend.Controllers
                     return BadRequest("Keycloak configuration is missing");
                 }
 
-                // Get the access token from the request
                 var accessToken = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
-
-                // Create HTTP client
                 var client = _httpClientFactory.CreateClient();
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
-                // Get resources from Keycloak
                 var resourcesUrl = $"{keycloakAuthority}/authz/protection/resource_set";
                 var resourcesResponse = await client.GetAsync(resourcesUrl);
 
@@ -59,8 +55,6 @@ namespace PosBackend.Controllers
 
                 var resourcesContent = await resourcesResponse.Content.ReadAsStringAsync();
                 var resources = JsonSerializer.Deserialize<List<KeycloakResource>>(resourcesContent) ?? new List<KeycloakResource>();
-
-                // Map resources to permissions
                 var permissions = resources.Select(r => new
                 {
                     id = r.Id,
@@ -92,15 +86,11 @@ namespace PosBackend.Controllers
                     return BadRequest("Keycloak configuration is missing");
                 }
 
-                // Get the access token from the request
                 var accessToken = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
-
-                // Create HTTP client
                 var client = _httpClientFactory.CreateClient();
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
-                // Get role from database to get the Keycloak role ID
-                // This is a placeholder - you would need to implement this based on your database schema
+                var keycloakRoleId = await GetKeycloakRoleId(roleId);
                 var keycloakRoleId = await GetKeycloakRoleId(roleId);
 
                 if (string.IsNullOrEmpty(keycloakRoleId))
@@ -183,7 +173,6 @@ namespace PosBackend.Controllers
         {
             try
             {
-                // Get the access token from the request
                 var accessToken = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
 
                 if (string.IsNullOrEmpty(accessToken))
@@ -191,12 +180,10 @@ namespace PosBackend.Controllers
                     return Unauthorized("No access token provided");
                 }
 
-                // Parse the permission string (e.g., "users.view" -> resource="users", scope="view")
                 var parts = permission.Split('.');
                 var resource = parts[0];
-                var scope = parts.Length > 1 ? parts[1] : string.Empty; // Use empty string instead of null
+                var scope = parts.Length > 1 ? parts[1] : string.Empty;
 
-                // Get the user ID from the token claims
                 var userId = User.FindFirst("sub")?.Value;
 
                 if (string.IsNullOrEmpty(userId))
@@ -204,7 +191,6 @@ namespace PosBackend.Controllers
                     return Unauthorized("User ID not found in token");
                 }
 
-                // Use the KeycloakAuthorizationService to check the permission
                 var keycloakAuthzService = HttpContext.RequestServices.GetRequiredService<Services.KeycloakAuthorizationService>();
                 var hasPermission = await keycloakAuthzService.HasPermissionAsync(userId, resource, scope, accessToken);
 
@@ -217,12 +203,8 @@ namespace PosBackend.Controllers
             }
         }
 
-        // Helper method to get Keycloak role ID from database
         private Task<string> GetKeycloakRoleId(int roleId)
         {
-            // This is a placeholder - you would need to implement this based on your database schema
-            // For now, we'll return a mock ID
-            // Changed to non-async method that returns a completed task to avoid CS1998 warning
             return Task.FromResult($"role-{roleId}");
         }
     }

@@ -16,10 +16,6 @@ namespace PosBackend.Controllers
             _logger = logger;
         }
 
-        /// <summary>
-        /// Root-level health check endpoint for CI/CD and monitoring
-        /// </summary>
-        /// <returns>Health status information</returns>
         [HttpGet]
         public IActionResult Get()
         {

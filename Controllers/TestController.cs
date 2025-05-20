@@ -23,20 +23,12 @@ namespace PosBackend.Controllers
             _logger = logger;
         }
 
-        /// <summary>
-        /// A simple test endpoint to verify the API is working
-        /// </summary>
-        /// <returns>A simple message</returns>
         [HttpGet]
         public IActionResult Get()
         {
             return Ok(new { message = "API is working correctly!" });
         }
 
-        /// <summary>
-        /// Check Keycloak configuration and connectivity
-        /// </summary>
-        /// <returns>Keycloak configuration status</returns>
         [HttpGet("keycloak-config")]
         public async Task<IActionResult> GetKeycloakConfig()
         {

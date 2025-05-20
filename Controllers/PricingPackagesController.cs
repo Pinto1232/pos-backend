@@ -44,7 +44,6 @@ namespace PosBackend.Controllers
             string dbPath = Path.Combine(Directory.GetCurrentDirectory(), "GeoLite2-Country.mmdb");
             try
             {
-                // Create a logger factory to get the correct logger type
                 var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
                 var geoLogger = loggerFactory.CreateLogger<GeoLocationService>();
                 _geoService = new GeoLocationService(dbPath, cacheService, geoLogger);
@@ -52,7 +51,6 @@ namespace PosBackend.Controllers
             catch (System.Exception ex)
             {
                 _logger.LogError(ex, "Failed to initialize GeoLocationService with dbPath: {dbPath}", dbPath);
-                // Create a logger factory to get the correct logger type
                 var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
                 var geoLogger = loggerFactory.CreateLogger<GeoLocationService>();
                 _geoService = new GeoLocationServiceFallback(cacheService, geoLogger);
@@ -70,10 +68,8 @@ namespace PosBackend.Controllers
                     return NotFound("Pricing packages not found");
                 }
 
-                // Create a cache key based on pagination parameters
                 string cacheKey = AppCacheKeys.AllPackages + $":page:{pageNumber}:size:{pageSize}";
 
-                // Try to get from cache first
                 return await _cacheService.GetOrSetAsync<ActionResult<object>>(cacheKey, async () =>
                 {
                     _logger.LogDebug("Cache miss for pricing packages. Fetching from database.");
@@ -93,41 +89,33 @@ namespace PosBackend.Controllers
                         .Take(pageSize)
                         .ToListAsync();
 
-                var packages = packagesData.Select(p =>
-                {
-                    var multiPrices = new Dictionary<string, decimal>();
-                    try
+                    var packages = packagesData.Select(p =>
                     {
-                        multiPrices = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, decimal>>(p.MultiCurrencyPrices)
+                        var multiPrices = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, decimal>>(p.MultiCurrencyPrices)
                             ?? new Dictionary<string, decimal>();
-                    }
-                    catch (System.Exception ex)
-                    {
-                        _logger.LogError(ex, "Failed to parse MultiCurrencyPrices for package id {PackageId}", p.Id);
-                    }
 
-                    var finalPrice = p.Price;
-                    if (multiPrices.TryGetValue(userCurrency, out decimal currencyPrice))
-                    {
-                        finalPrice = currencyPrice;
-                    }
+                        var finalPrice = p.Price;
+                        if (multiPrices.TryGetValue(userCurrency, out decimal currencyPrice))
+                        {
+                            finalPrice = currencyPrice;
+                        }
 
-                    return new PricingPackageDto
-                    {
-                        Id = p.Id,
-                        Title = p.Title,
-                        Description = p.Description,
-                        Icon = p.Icon,
-                        ExtraDescription = p.ExtraDescription,
-                        Price = finalPrice,
-                        TestPeriodDays = p.TestPeriodDays,
-                        Type = p.Type,
-                        DescriptionList = p.Description.Split(';').ToList(),
-                        IsCustomizable = p.Type.ToLower() == "custom",
-                        Currency = userCurrency,
-                        MultiCurrencyPrices = p.MultiCurrencyPrices
-                    };
-                }).ToList();
+                        return new PricingPackageDto
+                        {
+                            Id = p.Id,
+                            Title = p.Title,
+                            Description = p.Description,
+                            Icon = p.Icon,
+                            ExtraDescription = p.ExtraDescription,
+                            Price = finalPrice,
+                            TestPeriodDays = p.TestPeriodDays,
+                            Type = p.Type,
+                            DescriptionList = p.Description.Split(';').ToList(),
+                            IsCustomizable = p.Type.ToLower() == "custom",
+                            Currency = userCurrency,
+                            MultiCurrencyPrices = p.MultiCurrencyPrices
+                        };
+                    }).ToList();
 
                     return Ok(new
                     {
@@ -143,21 +131,14 @@ namespace PosBackend.Controllers
             }
         }
 
-        /// <summary>
-        /// Gets a specific pricing package by ID
-        /// </summary>
-        /// <param name="id">The ID of the pricing package to retrieve</param>
-        /// <returns>The pricing package</returns>
         [HttpGet("{id}")]
         [AllowAnonymous]
         public async Task<ActionResult<PricingPackageDto>> GetById(int id)
         {
             try
             {
-                // Create a cache key for this package
                 string cacheKey = AppCacheKeys.Package(id);
 
-                // Try to get from cache first
                 return await _cacheService.GetOrSetAsync<ActionResult<PricingPackageDto>>(cacheKey, async () =>
                 {
                     _logger.LogDebug("Cache miss for pricing package ID: {Id}. Fetching from database.", id);
@@ -178,7 +159,6 @@ namespace PosBackend.Controllers
 
                     decimal finalPrice = package.Price;
 
-                    // Try to get price in user's currency
                     if (userCurrency != package.Currency && !string.IsNullOrEmpty(package.MultiCurrencyPrices))
                     {
                         try
@@ -191,7 +171,6 @@ namespace PosBackend.Controllers
                         }
                         catch (JsonException)
                         {
-                            // If JSON parsing fails, use the default price
                         }
                     }
 
@@ -222,10 +201,8 @@ namespace PosBackend.Controllers
         [HttpGet("custom/features")]
         public async Task<ActionResult<object>> GetCustomFeatures()
         {
-            // Create a cache key for custom features
             string cacheKey = "CustomFeatures";
 
-            // Try to get from cache first
             return await _cacheService.GetOrSetAsync<ActionResult<object>>(cacheKey, async () =>
             {
                 _logger.LogDebug("Cache miss for custom features. Fetching from database.");
@@ -295,7 +272,6 @@ namespace PosBackend.Controllers
 
             await _context.SaveChangesAsync();
 
-            // Invalidate cache for this package and all packages
             await _cacheService.RemoveAsync(AppCacheKeys.Package(request.PackageId));
             await _cacheService.RemoveByPrefixAsync(AppCacheKeys.PackagePrefix);
 

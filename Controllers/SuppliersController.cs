@@ -19,7 +19,6 @@ namespace PosBackend.Controllers
             _context = context;
         }
 
-        // GET: api/Suppliers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Supplier>>> GetSuppliers()
         {
@@ -28,7 +27,6 @@ namespace PosBackend.Controllers
                 .ToListAsync();
         }
 
-        // GET: api/Suppliers/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Supplier>> GetSupplier(int id)
         {
@@ -44,11 +42,9 @@ namespace PosBackend.Controllers
             return supplier;
         }
 
-        // POST: api/Suppliers
         [HttpPost]
         public async Task<ActionResult<Supplier>> CreateSupplier(Supplier supplier)
         {
-            // Set default values if not provided
             supplier.CreatedDate = DateTime.UtcNow;
             supplier.IsActive = true;
 
@@ -58,7 +54,6 @@ namespace PosBackend.Controllers
             return CreatedAtAction(nameof(GetSupplier), new { id = supplier.SupplierId }, supplier);
         }
 
-        // PUT: api/Suppliers/5
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateSupplier(int id, Supplier supplier)
         {
@@ -67,7 +62,6 @@ namespace PosBackend.Controllers
                 return BadRequest();
             }
 
-            // Set the modified date
             supplier.ModifiedDate = DateTime.UtcNow;
 
             _context.Entry(supplier).State = EntityState.Modified;
@@ -91,7 +85,6 @@ namespace PosBackend.Controllers
             return NoContent();
         }
 
-        // DELETE: api/Suppliers/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteSupplier(int id)
         {
@@ -101,7 +94,6 @@ namespace PosBackend.Controllers
                 return NotFound();
             }
 
-            // Instead of deleting, mark as inactive
             supplier.IsActive = false;
             supplier.ModifiedDate = DateTime.UtcNow;
 
@@ -110,7 +102,6 @@ namespace PosBackend.Controllers
             return NoContent();
         }
 
-        // Hard delete if needed
         [HttpDelete("{id}/hard")]
         public async Task<IActionResult> HardDeleteSupplier(int id)
         {

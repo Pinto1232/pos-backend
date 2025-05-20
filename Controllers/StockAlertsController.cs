@@ -31,14 +31,12 @@ namespace PosBackend.Controllers
         [HttpPost]
         public async Task<ActionResult<StockAlert>> CreateStockAlert(StockAlert stockAlert)
         {
-            // Validate inventory exists
             var inventory = await _context.Inventories.FindAsync(stockAlert.InventoryId);
             if (inventory == null)
             {
                 return BadRequest("Inventory not found");
             }
 
-            // Set alert to active by default
             stockAlert.IsActive = true;
 
             _context.StockAlerts.Add(stockAlert);
@@ -68,13 +66,11 @@ namespace PosBackend.Controllers
         [HttpGet("check")]
         public async Task<ActionResult<IEnumerable<StockAlert>>> CheckInventoryLevels()
         {
-            // Get all inventories with quantity below reorder level
             var lowStockInventories = await _context.Inventories
                 .Where(i => i.Quantity <= i.ReorderLevel)
                 .Include(i => i.ProductVariant)
                 .ToListAsync();
 
-            // Create or update stock alerts for low stock items
             var stockAlerts = new List<StockAlert>();
             foreach (var inventory in lowStockInventories)
             {
@@ -89,7 +85,7 @@ namespace PosBackend.Controllers
                     var newAlert = new StockAlert
                     {
                         InventoryId = inventory.InventoryId,
-                        Inventory = inventory,  // Add this line to set the required Inventory property
+                        Inventory = inventory,
                         AlertType = "Low Stock",
                         Threshold = inventory.ReorderLevel,
                         IsActive = true
