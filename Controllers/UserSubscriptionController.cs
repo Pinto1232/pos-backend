@@ -27,7 +27,7 @@ namespace PosBackend.Controllers
         public async Task<ActionResult<UserSubscription>> GetUserSubscription(string userId)
         {
             var subscription = await _packageFeatureService.GetUserActiveSubscription(userId);
-            
+
             if (subscription == null)
             {
                 return NotFound("No active subscription found for this user");
@@ -50,7 +50,7 @@ namespace PosBackend.Controllers
         {
             // Check if user already has an active subscription
             var existingSubscription = await _packageFeatureService.GetUserActiveSubscription(subscription.UserId);
-            
+
             if (existingSubscription != null)
             {
                 // Deactivate existing subscription

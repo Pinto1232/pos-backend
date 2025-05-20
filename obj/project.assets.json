@@ -73,7 +73,7 @@
           }
         }
       },
-      "MaxMind.Db/4.1.0": {
+      "MaxMind.Db/4.2.0": {
         "type": "package",
         "compile": {
           "lib/net8.0/MaxMind.Db.dll": {
@@ -86,11 +86,11 @@
           }
         }
       },
-      "MaxMind.GeoIP2/5.2.0": {
+      "MaxMind.GeoIP2/5.3.0": {
         "type": "package",
         "dependencies": {
-          "MaxMind.Db": "4.1.0",
-          "Microsoft.Extensions.Options": "8.0.0"
+          "MaxMind.Db": "4.2.0",
+          "Microsoft.Extensions.Options": "9.0.0"
         },
         "compile": {
           "lib/net8.0/MaxMind.GeoIP2.dll": {
@@ -2544,49 +2544,45 @@
         "lib/netstandard2.0/IdentityModel.xml"
       ]
     },
-    "MaxMind.Db/4.1.0": {
-      "sha512": "lEjCFX0TUQCRmFS8xrXIQSi+4omJ1Fwy0gAHlbnjg8cgSBa0cllP5zOEftQ23EP247EbnF7mNCQ3JsG/bMkHAA==",
+    "MaxMind.Db/4.2.0": {
+      "sha512": "gXrJSN5zko+b7hYD5ZMf3J5gSx1GWbKxr4/in5byzL81Qi9vB7lbXJUByZyrcQArSg9iiojwhPRzyiWpH7Raxg==",
       "type": "package",
-      "path": "maxmind.db/4.1.0",
+      "path": "maxmind.db/4.2.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "MaxMind-logo.png",
         "README.md",
-        "lib/net6.0/MaxMind.Db.dll",
-        "lib/net6.0/MaxMind.Db.xml",
-        "lib/net7.0/MaxMind.Db.dll",
-        "lib/net7.0/MaxMind.Db.xml",
         "lib/net8.0/MaxMind.Db.dll",
         "lib/net8.0/MaxMind.Db.xml",
+        "lib/net9.0/MaxMind.Db.dll",
+        "lib/net9.0/MaxMind.Db.xml",
         "lib/netstandard2.0/MaxMind.Db.dll",
         "lib/netstandard2.0/MaxMind.Db.xml",
         "lib/netstandard2.1/MaxMind.Db.dll",
         "lib/netstandard2.1/MaxMind.Db.xml",
-        "maxmind.db.4.1.0.nupkg.sha512",
+        "maxmind.db.4.2.0.nupkg.sha512",
         "maxmind.db.nuspec"
       ]
     },
-    "MaxMind.GeoIP2/5.2.0": {
-      "sha512": "E8i6yQPlAznLTfS8w208uY3oqCg6i7sQ9cxKmlDdhFMXVLfm4sKphOTMsIWdAHJCV7RxW2a3DlqxAPkQrqmqlA==",
+    "MaxMind.GeoIP2/5.3.0": {
+      "sha512": "CDCpMqTZRf2+VOQoUwSyxSw9b7rJkwMY8YIKTMBqzTEAP6OyJEiI7VuG+PqcgYvVSV1ERRKX2c03iy7dGRGPGw==",
       "type": "package",
-      "path": "maxmind.geoip2/5.2.0",
+      "path": "maxmind.geoip2/5.3.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "MaxMind-logo.png",
         "README.md",
-        "lib/net6.0/MaxMind.GeoIP2.dll",
-        "lib/net6.0/MaxMind.GeoIP2.xml",
-        "lib/net7.0/MaxMind.GeoIP2.dll",
-        "lib/net7.0/MaxMind.GeoIP2.xml",
         "lib/net8.0/MaxMind.GeoIP2.dll",
         "lib/net8.0/MaxMind.GeoIP2.xml",
+        "lib/net9.0/MaxMind.GeoIP2.dll",
+        "lib/net9.0/MaxMind.GeoIP2.xml",
         "lib/netstandard2.0/MaxMind.GeoIP2.dll",
         "lib/netstandard2.0/MaxMind.GeoIP2.xml",
         "lib/netstandard2.1/MaxMind.GeoIP2.dll",
         "lib/netstandard2.1/MaxMind.GeoIP2.xml",
-        "maxmind.geoip2.5.2.0.nupkg.sha512",
+        "maxmind.geoip2.5.3.0.nupkg.sha512",
         "maxmind.geoip2.nuspec"
       ]
     },
@@ -6590,7 +6586,7 @@
   "projectFileDependencyGroups": {
     "net8.0": [
       "IdentityModel >= 7.0.0",
-      "MaxMind.GeoIP2 >= 5.2.0",
+      "MaxMind.GeoIP2 >= 5.3.0",
       "Microsoft.AspNetCore.Authentication.JwtBearer >= 8.0.10",
       "Microsoft.AspNetCore.Identity >= 2.3.1",
       "Microsoft.AspNetCore.Identity.EntityFrameworkCore >= 8.0.10",
@@ -6666,7 +6662,7 @@
           },
           "MaxMind.GeoIP2": {
             "target": "Package",
-            "version": "[5.2.0, )"
+            "version": "[5.3.0, )"
           },
           "Microsoft.AspNetCore.Authentication.JwtBearer": {
             "target": "Package",

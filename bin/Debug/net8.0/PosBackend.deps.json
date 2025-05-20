@@ -9,7 +9,7 @@
       "PosBackend/1.0.0": {
         "dependencies": {
           "IdentityModel": "7.0.0",
-          "MaxMind.GeoIP2": "5.2.0",
+          "MaxMind.GeoIP2": "5.3.0",
           "Microsoft.AspNetCore.Authentication.JwtBearer": "8.0.10",
           "Microsoft.AspNetCore.Identity": "2.3.1",
           "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "8.0.10",
@@ -82,7 +82,7 @@
           }
         }
       },
-      "MaxMind.Db/4.1.0": {
+      "MaxMind.Db/4.2.0": {
         "runtime": {
           "lib/net8.0/MaxMind.Db.dll": {
             "assemblyVersion": "4.0.0.0",
@@ -90,9 +90,9 @@
           }
         }
       },
-      "MaxMind.GeoIP2/5.2.0": {
+      "MaxMind.GeoIP2/5.3.0": {
         "dependencies": {
-          "MaxMind.Db": "4.1.0",
+          "MaxMind.Db": "4.2.0",
           "Microsoft.Extensions.Options": "9.0.4"
         },
         "runtime": {
@@ -1572,19 +1572,19 @@
       "path": "identitymodel/7.0.0",
       "hashPath": "identitymodel.7.0.0.nupkg.sha512"
     },
-    "MaxMind.Db/4.1.0": {
+    "MaxMind.Db/4.2.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-lEjCFX0TUQCRmFS8xrXIQSi+4omJ1Fwy0gAHlbnjg8cgSBa0cllP5zOEftQ23EP247EbnF7mNCQ3JsG/bMkHAA==",
-      "path": "maxmind.db/4.1.0",
-      "hashPath": "maxmind.db.4.1.0.nupkg.sha512"
+      "sha512": "sha512-gXrJSN5zko+b7hYD5ZMf3J5gSx1GWbKxr4/in5byzL81Qi9vB7lbXJUByZyrcQArSg9iiojwhPRzyiWpH7Raxg==",
+      "path": "maxmind.db/4.2.0",
+      "hashPath": "maxmind.db.4.2.0.nupkg.sha512"
     },
-    "MaxMind.GeoIP2/5.2.0": {
+    "MaxMind.GeoIP2/5.3.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-E8i6yQPlAznLTfS8w208uY3oqCg6i7sQ9cxKmlDdhFMXVLfm4sKphOTMsIWdAHJCV7RxW2a3DlqxAPkQrqmqlA==",
-      "path": "maxmind.geoip2/5.2.0",
-      "hashPath": "maxmind.geoip2.5.2.0.nupkg.sha512"
+      "sha512": "sha512-CDCpMqTZRf2+VOQoUwSyxSw9b7rJkwMY8YIKTMBqzTEAP6OyJEiI7VuG+PqcgYvVSV1ERRKX2c03iy7dGRGPGw==",
+      "path": "maxmind.geoip2/5.3.0",
+      "hashPath": "maxmind.geoip2.5.3.0.nupkg.sha512"
     },
     "Microsoft.AspNetCore.Authentication/2.3.0": {
       "type": "package",

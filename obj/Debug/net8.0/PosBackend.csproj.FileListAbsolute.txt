@@ -194,11 +194,13 @@ C:\Users\pinto\Documents\Development\POS\backend\bin\Debug\net8.0\appsettings.De
 C:\Users\pinto\Documents\Development\POS\backend\bin\Debug\net8.0\appsettings.json
 C:\Users\pinto\Documents\Development\POS\backend\bin\Debug\net8.0\global.json
 C:\Users\pinto\Documents\Development\POS\backend\bin\Debug\net8.0\package-lock.json
+C:\Users\pinto\Documents\Development\POS\backend\bin\Debug\net8.0\package.json
 C:\Users\pinto\Documents\Development\POS\backend\bin\Debug\net8.0\UpdatePriceConsole\appsettings.json
 C:\Users\pinto\Documents\Development\POS\backend\bin\Debug\net8.0\UpdatePriceConsole\obj\project.assets.json
 C:\Users\pinto\Documents\Development\POS\backend\bin\Debug\net8.0\UpdatePriceConsole\obj\UpdatePriceConsole.csproj.nuget.dgspec.json
 C:\Users\pinto\Documents\Development\POS\backend\bin\Debug\net8.0\PosBackend.staticwebassets.runtime.json
 C:\Users\pinto\Documents\Development\POS\backend\bin\Debug\net8.0\PosBackend.staticwebassets.endpoints.json
+C:\Users\pinto\Documents\Development\POS\backend\bin\Debug\net8.0\GeoLite2-Country.mmdb
 C:\Users\pinto\Documents\Development\POS\backend\bin\Debug\net8.0\PosBackend.exe
 C:\Users\pinto\Documents\Development\POS\backend\bin\Debug\net8.0\PosBackend.deps.json
 C:\Users\pinto\Documents\Development\POS\backend\bin\Debug\net8.0\PosBackend.runtimeconfig.json
@@ -401,4 +403,3 @@ C:\Users\pinto\Documents\Development\POS\backend\obj\Debug\net8.0\PosBackend.xml
 C:\Users\pinto\Documents\Development\POS\backend\obj\Debug\net8.0\PosBackend.pdb
 C:\Users\pinto\Documents\Development\POS\backend\obj\Debug\net8.0\PosBackend.genruntimeconfig.cache
 C:\Users\pinto\Documents\Development\POS\backend\obj\Debug\net8.0\ref\PosBackend.dll
-C:\Users\pinto\Documents\Development\POS\backend\bin\Debug\net8.0\package.json

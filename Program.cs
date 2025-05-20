@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -14,16 +14,12 @@ using PosBackend.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add memory cache for response caching and our cache service
 builder.Services.AddMemoryCache();
-
-// Configure and register the cache service
 var cacheConfiguration = new CacheConfiguration();
 builder.Configuration.GetSection("Cache").Bind(cacheConfiguration);
 builder.Services.AddSingleton(cacheConfiguration);
 builder.Services.AddSingleton<ICacheService, MemoryCacheService>();
 
-// Add response compression for better performance
 builder.Services.AddResponseCompression(options =>
 {
     options.EnableForHttps = true;
@@ -44,11 +40,11 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowAll", policy =>
     {
         policy.WithOrigins(
-                "http://localhost:3000",  // Next.js default port
-                "http://localhost:3001",  // Alternative Next.js port
-                "http://localhost:5107",  // Backend API
-                "https://localhost:7005", // Backend API with HTTPS
-                "http://localhost:8282"   // Keycloak
+                "http://localhost:3000",
+                "http://localhost:3001",
+                "http://localhost:5107",
+                "https://localhost:7005",
+                "http://localhost:8282"
               )
               .AllowAnyHeader()
               .AllowAnyMethod()
@@ -72,7 +68,6 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 
-    // Enable XML comments
     var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
     if (File.Exists(xmlPath))
@@ -84,7 +79,6 @@ builder.Services.AddSwaggerGen(c =>
         Console.WriteLine($"⚠️ XML documentation file not found at: {xmlPath}");
     }
 
-    // Add JWT Bearer Authentication
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",
@@ -110,38 +104,30 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 
-    // Configure operation filter to handle [Authorize] attribute
     c.OperationFilter<SecurityRequirementsOperationFilter>();
 });
 
-// Configure DbContext with performance optimizations
 builder.Services.AddDbContext<PosDbContext>(options =>
 {
     options.UseNpgsql(
         builder.Configuration.GetConnectionString("DefaultConnection"),
         npgsqlOptions =>
         {
-            // Enable connection resiliency
             npgsqlOptions.EnableRetryOnFailure(
                 maxRetryCount: 5,
                 maxRetryDelay: TimeSpan.FromSeconds(30),
                 errorCodesToAdd: null);
 
-            // Set command timeout
             npgsqlOptions.CommandTimeout(30);
         });
 
-    // Enable sensitive data logging only in development and if explicitly enabled in config
     if (builder.Environment.IsDevelopment() &&
         builder.Configuration.GetValue<bool>("EnableSensitiveDataLogging", false))
     {
         options.EnableSensitiveDataLogging();
     }
 
-    // Disable change tracking for read-only operations
     options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
-
-    // Suppress the pending model changes warning
     options.ConfigureWarnings(warnings => warnings.Ignore(RelationalEventId.PendingModelChangesWarning));
 });
 
@@ -313,7 +299,6 @@ using (var scope = app.Services.CreateScope())
         {
             Console.WriteLine("No pricing packages found. Seeding initial data...");
 
-            // Add pricing packages
             var packages = new List<PricingPackage>
             {
                 new PricingPackage
@@ -370,11 +355,11 @@ using (var scope = app.Services.CreateScope())
                     Description = "Build your own package;Select only the features you need;Add modules as your business grows;Flexible pricing based on selections;Pay only for what you use;Scalable solution for any business size",
                     Icon = "MUI:SettingsIcon",
                     ExtraDescription = "Create a custom solution that fits your exact needs",
-                    Price = 49.99m, // Updated price from 0.00m to 49.99m
+                    Price = 49.99m,
                     TestPeriodDays = 14,
                     Type = "custom",
                     Currency = "USD",
-                    MultiCurrencyPrices = "{\"ZAR\": 899.99, \"EUR\": 45.99, \"GBP\": 39.99}" // Updated prices
+                    MultiCurrencyPrices = "{\"ZAR\": 899.99, \"EUR\": 45.99, \"GBP\": 39.99}"
                 }
             };
 
@@ -386,25 +371,19 @@ using (var scope = app.Services.CreateScope())
         {
             Console.WriteLine("Pricing packages already exist in the database.");
 
-            // Update the Custom package price if it exists
             var customPackage = await context.PricingPackages
                 .FirstOrDefaultAsync(p => p.Type == "custom");
 
             if (customPackage != null)
             {
                 Console.WriteLine($"Found Custom package with current price: {customPackage.Price}");
-
-                // Update the price
                 customPackage.Price = 49.99m;
                 customPackage.MultiCurrencyPrices = "{\"ZAR\": 899.99, \"EUR\": 45.99, \"GBP\": 39.99}";
-
-                // Save changes
                 await context.SaveChangesAsync();
                 Console.WriteLine("Custom package price updated successfully to 49.99.");
             }
         }
 
-        // Add core features if they don't exist
         if (!context.CoreFeatures.Any())
         {
             var features = new List<Feature>

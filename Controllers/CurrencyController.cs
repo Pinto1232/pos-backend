@@ -3,6 +3,10 @@ using Microsoft.Extensions.Logging;
 using System.Net;
 using System.Collections.Generic;
 using System.Linq;
+using MaxMind.GeoIP2;
+using MaxMind.GeoIP2.Responses;
+using System.IO;
+using System.Net.Http.Headers;
 
 namespace PosBackend.Controllers
 {
@@ -26,9 +30,6 @@ namespace PosBackend.Controllers
         [HttpGet("location")]
         public IActionResult GetUserLocation()
         {
-            // Log the incoming request for debugging
-            _logger.LogInformation("GetUserLocation method called");
-
             try
             {
                 var ipAddress = HttpContext.Connection.RemoteIpAddress;
@@ -63,10 +64,42 @@ namespace PosBackend.Controllers
 
         private string DetectCountryFromIP(IPAddress ipAddress)
         {
-            // In a real-world scenario, you would use a more sophisticated
-            // method to detect the country from the IP address
-            // This is a simplified placeholder
-            return "ZA"; // Default to South Africa for this example
+            try
+            {
+                string databasePath = Path.Combine(AppContext.BaseDirectory, "GeoLite2-Country.mmdb");
+                
+                if (!System.IO.File.Exists(databasePath))
+                {
+                    _logger.LogWarning("GeoLite2 database file not found. Using default country.");
+                    return "ZA";
+                }
+
+                if (ipAddress == null)
+                {
+                    _logger.LogWarning("IP address is null. Using default country.");
+                    return "ZA";
+                }
+
+                if (ipAddress.ToString() == "127.0.0.1" || ipAddress.ToString() == "::1")
+                {
+                    _logger.LogWarning("Loopback address detected. Using default country.");
+                    return "ZA";
+                }
+
+                using var reader = new DatabaseReader(databasePath);
+                var country = reader.Country(ipAddress);
+                return country.Country.IsoCode ?? "ZA";
+            }
+            catch (MaxMind.GeoIP2.Exceptions.AddressNotFoundException)
+            {
+                _logger.LogWarning($"IP address {ipAddress} not found in database. Using default country.");
+                return "ZA";
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error detecting country from IP {ipAddress}: {ex.Message}");
+                return "ZA";
+            }
         }
 
         [HttpGet("available")]
@@ -99,7 +132,6 @@ namespace PosBackend.Controllers
 
         private List<CountryCurrencyMapping> LoadCountryCurrencyMappings()
         {
-            // In a production environment, you might load this from a JSON or CSV file
             return new List<CountryCurrencyMapping>
             {
                 new CountryCurrencyMapping { CountryCode = "US", CurrencyCode = "USD" },
@@ -109,7 +141,6 @@ namespace PosBackend.Controllers
                 new CountryCurrencyMapping { CountryCode = "JP", CurrencyCode = "JPY" },
                 new CountryCurrencyMapping { CountryCode = "CN", CurrencyCode = "CNY" },
                 new CountryCurrencyMapping { CountryCode = "IN", CurrencyCode = "INR" }
-                // Add more country-currency mappings as needed
             };
         }
     }
