@@ -8,7 +8,7 @@ Write-Host "3. Applying custom SQL to fix the Type column"
 Write-Host ""
 
 Write-Host "Step 1: Dropping the database..." -ForegroundColor Yellow
-$result = dotnet ef database drop --force
+dotnet ef database drop --force
 if ($LASTEXITCODE -ne 0) {
     Write-Host "ERROR: Failed to drop the database." -ForegroundColor Red
     Write-Host "Please check your connection details and try again."
@@ -20,7 +20,7 @@ Write-Host ""
 
 Write-Host "Step 2: Creating a new database with migrations..." -ForegroundColor Yellow
 Write-Host "This will apply all migrations except the problematic ones."
-$result = dotnet ef database update 20250513012432_UpdateCustomPackagePrice
+dotnet ef database update 20250513012432_UpdateCustomPackagePrice
 if ($LASTEXITCODE -ne 0) {
     Write-Host "ERROR: Failed to apply migrations." -ForegroundColor Red
     Write-Host "Please check your migration files and try again."
@@ -39,22 +39,22 @@ BEGIN
     IF EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'scope') THEN
         -- Check if Type column is text
         IF EXISTS (
-            SELECT FROM information_schema.columns 
-            WHERE table_schema = 'public' 
-            AND table_name = 'scope' 
-            AND column_name = 'type' 
+            SELECT FROM information_schema.columns
+            WHERE table_schema = 'public'
+            AND table_name = 'scope'
+            AND column_name = 'type'
             AND data_type = 'text'
         ) THEN
             -- Alter the Type column with a USING clause to convert string values to integers
-            ALTER TABLE "Scope" 
-            ALTER COLUMN "Type" TYPE integer 
-            USING CASE 
+            ALTER TABLE "Scope"
+            ALTER COLUMN "Type" TYPE integer
+            USING CASE
                 WHEN "Type" = 'Global' THEN 0
                 WHEN "Type" = 'Store' THEN 1
                 WHEN "Type" = 'Terminal' THEN 2
                 ELSE 0 -- Default to Global if unknown
             END;
-            
+
             RAISE NOTICE 'Successfully converted Type column from text to integer';
         ELSE
             RAISE NOTICE 'Type column is already an integer or does not exist';
@@ -67,7 +67,7 @@ END
 
 -- Mark migrations as applied
 INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
-VALUES 
+VALUES
 ('20250513012432_UpdateCustomPackagePrice', '9.0.4'),
 ('20250514012611_FixWarningsOnly', '9.0.4')
 ON CONFLICT ("MigrationId") DO NOTHING;
@@ -95,7 +95,7 @@ if (-not $psqlExists) {
     $env:PGUSER = "pos_user"
     $env:PGPASSWORD = "rj200100p"
     $env:PGDATABASE = "pos_system"
-    $result = psql -h $env:PGHOST -U $env:PGUSER -d $env:PGDATABASE -f fix-type-column.sql
+    psql -h $env:PGHOST -U $env:PGUSER -d $env:PGDATABASE -f fix-type-column.sql
     if ($LASTEXITCODE -ne 0) {
         Write-Host "WARNING: Failed to apply SQL script." -ForegroundColor Yellow
         Write-Host "Please run the SQL in fix-type-column.sql manually using pgAdmin."
@@ -111,7 +111,7 @@ if (-not $psqlExists) {
 Write-Host ""
 
 Write-Host "Step 5: Applying remaining migrations..." -ForegroundColor Yellow
-$result = dotnet ef database update
+dotnet ef database update
 if ($LASTEXITCODE -ne 0) {
     Write-Host "WARNING: Some migrations may have failed." -ForegroundColor Yellow
     Write-Host "You may need to manually fix remaining issues."
