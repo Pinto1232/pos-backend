@@ -11,7 +11,6 @@ using PosBackend.Application.Services.Caching;
 using PosBackend.Filters;
 using PosBackend.Middlewares;
 using PosBackend.Models;
-using POS.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -43,6 +42,7 @@ builder.Services.AddCors(options =>
         policy.WithOrigins(
                 "http://localhost:3000",
                 "http://localhost:3001",
+                "http://localhost:3002",
                 "http://localhost:5107",
                 "https://localhost:7005",
                 "http://localhost:8282"

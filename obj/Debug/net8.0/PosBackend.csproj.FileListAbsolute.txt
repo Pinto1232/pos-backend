@@ -382,7 +382,6 @@ C:\Users\pinto\Documents\Development\POS\backend\obj\Debug\net8.0\PosBackend.csp
 C:\Users\pinto\Documents\Development\POS\backend\obj\Debug\net8.0\PosBackend.MvcApplicationPartsAssemblyInfo.cs
 C:\Users\pinto\Documents\Development\POS\backend\obj\Debug\net8.0\PosBackend.MvcApplicationPartsAssemblyInfo.cache
 C:\Users\pinto\Documents\Development\POS\backend\obj\Debug\net8.0\PosBackend.sourcelink.json
-C:\Users\pinto\Documents\Development\POS\backend\obj\Debug\net8.0\scopedcss\bundle\PosBackend.styles.css
 C:\Users\pinto\Documents\Development\POS\backend\obj\Debug\net8.0\staticwebassets.build.json
 C:\Users\pinto\Documents\Development\POS\backend\obj\Debug\net8.0\staticwebassets.development.json
 C:\Users\pinto\Documents\Development\POS\backend\obj\Debug\net8.0\staticwebassets\msbuild.PosBackend.Microsoft.AspNetCore.StaticWebAssets.props
@@ -390,6 +389,7 @@ C:\Users\pinto\Documents\Development\POS\backend\obj\Debug\net8.0\staticwebasset
 C:\Users\pinto\Documents\Development\POS\backend\obj\Debug\net8.0\staticwebassets\msbuild.buildMultiTargeting.PosBackend.props
 C:\Users\pinto\Documents\Development\POS\backend\obj\Debug\net8.0\staticwebassets\msbuild.buildTransitive.PosBackend.props
 C:\Users\pinto\Documents\Development\POS\backend\obj\Debug\net8.0\staticwebassets.pack.json
+C:\Users\pinto\Documents\Development\POS\backend\obj\Debug\net8.0\scopedcss\bundle\PosBackend.styles.css
 C:\Users\pinto\Documents\Development\POS\backend\obj\Debug\net8.0\PosBackend.csproj.Up2Date
 C:\Users\pinto\Documents\Development\POS\backend\obj\Debug\net8.0\PosBackend.dll
 C:\Users\pinto\Documents\Development\POS\backend\obj\Debug\net8.0\refint\PosBackend.dll
