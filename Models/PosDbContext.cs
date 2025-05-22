@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using POS.Models;
 
 namespace PosBackend.Models
 {
@@ -50,6 +51,7 @@ namespace PosBackend.Models
 
         // Pricing and Packages
         public DbSet<PricingPackage> PricingPackages { get; set; }
+        public DbSet<PaymentPlan> PaymentPlans { get; set; }
         public DbSet<Feature> CoreFeatures { get; set; }
         public DbSet<AddOn> AddOns { get; set; }
         public DbSet<UsageBasedPricing> UsageBasedPricing { get; set; }

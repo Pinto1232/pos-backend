@@ -11,6 +11,7 @@ using PosBackend.Application.Services.Caching;
 using PosBackend.Filters;
 using PosBackend.Middlewares;
 using PosBackend.Models;
+using POS.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 

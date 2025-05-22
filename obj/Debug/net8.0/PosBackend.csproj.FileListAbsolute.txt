@@ -195,11 +195,7 @@ C:\Users\pinto\Documents\Development\POS\backend\bin\Debug\net8.0\appsettings.js
 C:\Users\pinto\Documents\Development\POS\backend\bin\Debug\net8.0\global.json
 C:\Users\pinto\Documents\Development\POS\backend\bin\Debug\net8.0\package-lock.json
 C:\Users\pinto\Documents\Development\POS\backend\bin\Debug\net8.0\package.json
-C:\Users\pinto\Documents\Development\POS\backend\bin\Debug\net8.0\UpdatePriceConsole\appsettings.json
-C:\Users\pinto\Documents\Development\POS\backend\bin\Debug\net8.0\UpdatePriceConsole\obj\project.assets.json
-C:\Users\pinto\Documents\Development\POS\backend\bin\Debug\net8.0\UpdatePriceConsole\obj\UpdatePriceConsole.csproj.nuget.dgspec.json
 C:\Users\pinto\Documents\Development\POS\backend\bin\Debug\net8.0\PosBackend.staticwebassets.runtime.json
-C:\Users\pinto\Documents\Development\POS\backend\bin\Debug\net8.0\PosBackend.staticwebassets.endpoints.json
 C:\Users\pinto\Documents\Development\POS\backend\bin\Debug\net8.0\GeoLite2-Country.mmdb
 C:\Users\pinto\Documents\Development\POS\backend\bin\Debug\net8.0\PosBackend.exe
 C:\Users\pinto\Documents\Development\POS\backend\bin\Debug\net8.0\PosBackend.deps.json
@@ -389,9 +385,7 @@ C:\Users\pinto\Documents\Development\POS\backend\obj\Debug\net8.0\PosBackend.sou
 C:\Users\pinto\Documents\Development\POS\backend\obj\Debug\net8.0\scopedcss\bundle\PosBackend.styles.css
 C:\Users\pinto\Documents\Development\POS\backend\obj\Debug\net8.0\staticwebassets.build.json
 C:\Users\pinto\Documents\Development\POS\backend\obj\Debug\net8.0\staticwebassets.development.json
-C:\Users\pinto\Documents\Development\POS\backend\obj\Debug\net8.0\staticwebassets.build.endpoints.json
 C:\Users\pinto\Documents\Development\POS\backend\obj\Debug\net8.0\staticwebassets\msbuild.PosBackend.Microsoft.AspNetCore.StaticWebAssets.props
-C:\Users\pinto\Documents\Development\POS\backend\obj\Debug\net8.0\staticwebassets\msbuild.PosBackend.Microsoft.AspNetCore.StaticWebAssetEndpoints.props
 C:\Users\pinto\Documents\Development\POS\backend\obj\Debug\net8.0\staticwebassets\msbuild.build.PosBackend.props
 C:\Users\pinto\Documents\Development\POS\backend\obj\Debug\net8.0\staticwebassets\msbuild.buildMultiTargeting.PosBackend.props
 C:\Users\pinto\Documents\Development\POS\backend\obj\Debug\net8.0\staticwebassets\msbuild.buildTransitive.PosBackend.props

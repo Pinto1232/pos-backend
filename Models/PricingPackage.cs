@@ -28,7 +28,7 @@ namespace PosBackend.Models
             set => Description = string.Join(';', value);
         }
 
-        public bool IsCustomizable => Type.ToLower() == "custom";
+        public bool IsCustomizable => Type.ToLower() == "custom" || Type.ToLower() == "custom-pro";
 
         // Navigation properties
         public ICollection<CustomPackageSelectedFeature>? SelectedFeatures { get; set; }

@@ -111,7 +111,7 @@ namespace PosBackend.Controllers
                             TestPeriodDays = p.TestPeriodDays,
                             Type = p.Type,
                             DescriptionList = p.Description.Split(';').ToList(),
-                            IsCustomizable = p.Type.ToLower() == "custom",
+                            IsCustomizable = p.Type.ToLower() == "custom" || p.Type.ToLower() == "custom-pro",
                             Currency = userCurrency,
                             MultiCurrencyPrices = p.MultiCurrencyPrices
                         };
@@ -239,7 +239,7 @@ namespace PosBackend.Controllers
                 .Include(p => p.SelectedFeatures)
                 .Include(p => p.SelectedAddOns)
                 .Include(p => p.SelectedUsageBasedPricing)
-                .FirstOrDefaultAsync(p => p.Id == request.PackageId && p.Type.ToLower() == "custom");
+                .FirstOrDefaultAsync(p => p.Id == request.PackageId && (p.Type.ToLower() == "custom" || p.Type.ToLower() == "custom-pro"));
 
             if (package == null)
                 return NotFound("Custom package not found");
@@ -369,7 +369,7 @@ namespace PosBackend.Controllers
                         TestPeriodDays = newPackage.TestPeriodDays,
                         Type = newPackage.Type,
                         DescriptionList = newPackage.Description.Split(';').ToList(),
-                        IsCustomizable = newPackage.Type.ToLower() == "custom",
+                        IsCustomizable = newPackage.Type.ToLower() == "custom" || newPackage.Type.ToLower() == "custom-pro",
                         Currency = newPackage.Currency,
                         MultiCurrencyPrices = newPackage.MultiCurrencyPrices
                     });
