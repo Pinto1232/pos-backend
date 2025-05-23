@@ -199,6 +199,7 @@ namespace PosBackend.Controllers
         }
 
         [HttpGet("custom/features")]
+        [AllowAnonymous]
         public async Task<ActionResult<object>> GetCustomFeatures()
         {
             string cacheKey = "CustomFeatures";
@@ -279,6 +280,7 @@ namespace PosBackend.Controllers
         }
 
         [HttpPost("custom/calculate-price")]
+        [AllowAnonymous]
         public async Task<ActionResult<object>> CalculateCustomPrice([FromBody] CustomPricingRequest request)
         {
             var package = await _context.PricingPackages.FirstOrDefaultAsync(p => p.Id == request.PackageId);
