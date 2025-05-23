@@ -302,66 +302,7 @@ using (var scope = app.Services.CreateScope())
 
             var packages = new List<PricingPackage>
             {
-                new PricingPackage
-                {
-                    Title = "Starter",
-                    Description = "Basic POS functionality;Inventory management;Single store support;Email support;Basic reporting",
-                    Icon = "MUI:StarIcon",
-                    ExtraDescription = "Perfect for small businesses just getting started",
-                    Price = 29.99m,
-                    TestPeriodDays = 14,
-                    Type = "starter",
-                    Currency = "USD",
-                    MultiCurrencyPrices = "{\"ZAR\": 549.99, \"EUR\": 27.99, \"GBP\": 23.99}"
-                },
-                new PricingPackage
-                {
-                    Title = "Growth",
-                    Description = "Everything in Starter;Multi-store support;Customer loyalty program;Priority support;Advanced reporting;Employee management",
-                    Icon = "MUI:TrendingUpIcon",
-                    ExtraDescription = "Ideal for growing businesses with multiple locations",
-                    Price = 59.99m,
-                    TestPeriodDays = 14,
-                    Type = "growth",
-                    Currency = "USD",
-                    MultiCurrencyPrices = "{\"ZAR\": 999.99, \"EUR\": 54.99, \"GBP\": 47.99}"
-                },
-                new PricingPackage
-                {
-                    Title = "Premium",
-                    Description = "Everything in Growth;Advanced inventory forecasting;Custom branding;24/7 support;API access;Advanced analytics;Multi-currency support",
-                    Icon = "MUI:DiamondIcon",
-                    ExtraDescription = "For established businesses requiring advanced features",
-                    Price = 99.99m,
-                    TestPeriodDays = 14,
-                    Type = "premium",
-                    Currency = "USD",
-                    MultiCurrencyPrices = "{\"ZAR\": 1799.99, \"EUR\": 89.99, \"GBP\": 79.99}"
-                },
-                new PricingPackage
-                {
-                    Title = "Enterprise",
-                    Description = "Everything in Premium;Dedicated account manager;Custom development;White-label solution;Unlimited users;Advanced security features;Data migration assistance",
-                    Icon = "MUI:BusinessIcon",
-                    ExtraDescription = "Tailored solutions for large enterprises",
-                    Price = 199.99m,
-                    TestPeriodDays = 30,
-                    Type = "enterprise",
-                    Currency = "USD",
-                    MultiCurrencyPrices = "{\"ZAR\": 3499.99, \"EUR\": 179.99, \"GBP\": 159.99}"
-                },
-                new PricingPackage
-                {
-                    Title = "Custom",
-                    Description = "Build your own package;Select only the features you need;Add modules as your business grows;Flexible pricing based on selections;Pay only for what you use;Scalable solution for any business size",
-                    Icon = "MUI:SettingsIcon",
-                    ExtraDescription = "Create a custom solution that fits your exact needs",
-                    Price = 49.99m,
-                    TestPeriodDays = 14,
-                    Type = "custom",
-                    Currency = "USD",
-                    MultiCurrencyPrices = "{\"ZAR\": 899.99, \"EUR\": 45.99, \"GBP\": 39.99}"
-                }
+
             };
 
             context.PricingPackages.AddRange(packages);
@@ -371,18 +312,6 @@ using (var scope = app.Services.CreateScope())
         else
         {
             Console.WriteLine("Pricing packages already exist in the database.");
-
-            var customPackage = await context.PricingPackages
-                .FirstOrDefaultAsync(p => p.Type == "custom");
-
-            if (customPackage != null)
-            {
-                Console.WriteLine($"Found Custom package with current price: {customPackage.Price}");
-                customPackage.Price = 49.99m;
-                customPackage.MultiCurrencyPrices = "{\"ZAR\": 899.99, \"EUR\": 45.99, \"GBP\": 39.99}";
-                await context.SaveChangesAsync();
-                Console.WriteLine("Custom package price updated successfully to 49.99.");
-            }
         }
 
         if (!context.CoreFeatures.Any())
