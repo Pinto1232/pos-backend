@@ -36,7 +36,7 @@ namespace PosBackend.Controllers
         {
             try
             {
-                _logger.LogInformation("Fetching payment plans for currency: {Currency}, region: {Region}, userType: {UserType}", 
+                _logger.LogInformation("Fetching payment plans for currency: {Currency}, region: {Region}, userType: {UserType}",
                     currency, region, userType);
 
                 var query = _context.PaymentPlans.AsQueryable();
@@ -44,10 +44,13 @@ namespace PosBackend.Controllers
                 // Filter by currency
                 query = query.Where(p => p.Currency == currency);
 
-                // Filter by active status
+                // Filter by active status and validity dates
                 if (!includeInactive)
                 {
-                    query = query.Where(p => p.IsActive && p.IsCurrentlyValid());
+                    var now = DateTime.UtcNow;
+                    query = query.Where(p => p.IsActive &&
+                                           (p.ValidFrom == null || p.ValidFrom <= now) &&
+                                           (p.ValidTo == null || p.ValidTo >= now));
                 }
 
                 var allPlans = await query.OrderBy(p => p.Id).ToListAsync();
