@@ -22,8 +22,8 @@ namespace PosBackend.Controllers
         {
             return await _context.Customers
                 .Include(c => c.CustomerGroupMembers)
-                .Include(c => c.Sales)
                 .Include(c => c.LoyaltyPoint)
+                .AsNoTracking()
                 .ToListAsync();
         }
 

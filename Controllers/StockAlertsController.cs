@@ -24,6 +24,7 @@ namespace PosBackend.Controllers
                 .Include(sa => sa.Inventory)
                     .ThenInclude(i => i.ProductVariant)
                 .Where(sa => sa.IsActive)
+                .AsNoTracking()
                 .ToListAsync();
         }
 
@@ -69,6 +70,7 @@ namespace PosBackend.Controllers
             var lowStockInventories = await _context.Inventories
                 .Where(i => i.Quantity <= i.ReorderLevel)
                 .Include(i => i.ProductVariant)
+                .AsNoTracking()
                 .ToListAsync();
 
             var stockAlerts = new List<StockAlert>();

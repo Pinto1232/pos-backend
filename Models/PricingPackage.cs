@@ -21,6 +21,18 @@ namespace PosBackend.Models
         // JSON string to store prices for multiple currencies.
         public string MultiCurrencyPrices { get; set; } = "{}";
 
+        // Stripe integration fields
+        public string? StripeProductId { get; set; }
+        public string? StripePriceId { get; set; }
+
+        // JSON string to store Stripe price IDs for multiple currencies
+        public string StripeMultiCurrencyPriceIds { get; set; } = "{}";
+
+        // Subscription-specific fields
+        public bool IsSubscription { get; set; } = true;
+        public string BillingInterval { get; set; } = "month"; // month, year
+        public int BillingIntervalCount { get; set; } = 1;
+
         [NotMapped]
         public List<string> DescriptionList
         {

@@ -70,6 +70,16 @@ namespace PosBackend.Models
 
         // User Subscriptions
         public DbSet<UserSubscription> UserSubscriptions { get; set; }
+        public DbSet<StripeSubscription> StripeSubscriptions { get; set; }
+        public DbSet<PaymentMethodInfo> PaymentMethodInfos { get; set; }
+        public DbSet<PaymentNotificationHistory> PaymentNotificationHistories { get; set; }
+        public DbSet<PaymentRetryAttempt> PaymentRetryAttempts { get; set; }
+
+        // Feature Flags and Access Control
+        public DbSet<FeatureFlag> FeatureFlags { get; set; }
+        public DbSet<UserFeatureUsage> UserFeatureUsages { get; set; }
+        public DbSet<FeatureFlagOverride> FeatureFlagOverrides { get; set; }
+        public DbSet<FeatureAccessLog> FeatureAccessLogs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

@@ -26,7 +26,8 @@ namespace PosBackend.Controllers
             return await _context.Inventories
                 .Include(inventoryItem => inventoryItem.Store)
                 .Include(inventoryItem => inventoryItem.ProductVariant)
-                .Include(inventoryItem => inventoryItem.StockAlerts)
+                .Include(inventoryItem => inventoryItem.StockAlerts.Where(sa => sa.IsActive))
+                .AsNoTracking()
                 .ToListAsync();
         }
 

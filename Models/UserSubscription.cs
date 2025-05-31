@@ -23,10 +23,34 @@ namespace PosBackend.Models
         public PricingPackage? Package { get; set; }
 
         public DateTime StartDate { get; set; } = DateTime.UtcNow;
-        
+
         public DateTime? EndDate { get; set; }
 
         public bool IsActive { get; set; } = true;
+
+        // Stripe subscription fields
+        public string? StripeSubscriptionId { get; set; }
+        public string? StripeCustomerId { get; set; }
+        public string? StripePriceId { get; set; }
+
+        [StringLength(50)]
+        public string Status { get; set; } = "active"; // active, trialing, past_due, canceled, unpaid
+
+        public DateTime? TrialStart { get; set; }
+        public DateTime? TrialEnd { get; set; }
+        public DateTime? CurrentPeriodStart { get; set; }
+        public DateTime? CurrentPeriodEnd { get; set; }
+
+        public bool CancelAtPeriodEnd { get; set; } = false;
+        public DateTime? CanceledAt { get; set; }
+
+        // Payment and billing
+        public decimal? LastPaymentAmount { get; set; }
+        public DateTime? LastPaymentDate { get; set; }
+        public DateTime? NextBillingDate { get; set; }
+
+        [StringLength(10)]
+        public string Currency { get; set; } = "USD";
 
         public string EnabledFeaturesJson { get; set; } = "[]";
 

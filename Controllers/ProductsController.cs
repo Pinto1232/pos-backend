@@ -24,6 +24,7 @@ namespace PosBackend.Controllers
                 .Include(p => p.Category)
                 .Include(p => p.Supplier)
                 .Include(p => p.ProductVariants)
+                .AsNoTracking()
                 .ToListAsync();
         }
 
