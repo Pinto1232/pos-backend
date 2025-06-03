@@ -17,6 +17,29 @@ using System.Net;
 using Microsoft.AspNetCore.HttpOverrides;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configure CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("DefaultPolicy", policy =>
+    {
+        policy
+            .WithOrigins(
+                "http://localhost:3000",  // React dev server
+                "http://localhost:8080",   // Keycloak
+                "http://localhost:8282"    // Keycloak alternative port
+            )
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials()
+            .SetIsOriginAllowed(origin => {
+                // Allow localhost with any port for development
+                if (origin.StartsWith("http://localhost:")) return true;
+                return false;
+            });
+    });
+});
+
 // Add JWT Bearer authentication for Keycloak
 builder.Services.AddAuthentication(options =>
 {
@@ -27,7 +50,22 @@ builder.Services.AddAuthentication(options =>
     {
         options.Authority = builder.Configuration["Keycloak:Authority"];
         options.Audience = builder.Configuration["Keycloak:Audience"];
-        options.RequireHttpsMetadata = true; // Set to false only for local dev with HTTP
+        // Disable HTTPS metadata requirement in development
+        options.RequireHttpsMetadata = !builder.Environment.IsDevelopment();
+        // Add handler to trust development certificates
+        options.BackchannelHttpHandler = new HttpClientHandler
+        {
+            ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => 
+                builder.Environment.IsDevelopment()
+        };
+        // Configure token validation for development
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateAudience = true,
+            ValidateIssuer = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true
+        };
     });
 
 
@@ -77,6 +115,7 @@ builder.Services.AddSignalR();
 
 builder.Services.AddHttpClient();
 
+// Configure controllers and JSON options
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
@@ -84,6 +123,42 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
         options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
     });
+
+// Add Swagger services
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { 
+        Title = "POS API", 
+        Version = "v1",
+        Description = "API for the POS System"
+    });
+    
+    // Add JWT authentication support in Swagger UI
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = "JWT Authorization header using the Bearer scheme. Enter 'Bearer' [space] and then your token in the text input below.",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
 
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
@@ -117,16 +192,21 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseHttpsRedirection();
 }
-app.UseCors("AllowAll");
+// CORS configuration is already applied above
 
 // Add security headers middleware
 app.Use(async (context, next) =>
-{
-    context.Response.Headers.Append("X-Frame-Options", "DENY");
+{    context.Response.Headers.Append("X-Frame-Options", "DENY");
     context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
     context.Response.Headers.Append("X-XSS-Protection", "1; mode=block");
     context.Response.Headers.Append("Referrer-Policy", "no-referrer");
-    context.Response.Headers.Append("Content-Security-Policy", "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self';");
+    context.Response.Headers.Append("Content-Security-Policy", 
+        "default-src 'self' http://localhost:8282 http://localhost:8080; " +
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
+        "style-src 'self' 'unsafe-inline'; " +
+        "img-src 'self' data: http://localhost:8282 http://localhost:8080; " +
+        "font-src 'self' data:; " +
+        "connect-src 'self' http://localhost:8282 http://localhost:8080");
     await next();
 });
 
