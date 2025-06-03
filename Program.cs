@@ -5,133 +5,65 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.RateLimiting;
+using System.Threading.RateLimiting;
 using PosBackend.Application.Interfaces;
 using PosBackend.Application.Services;
 using PosBackend.Application.Services.Caching;
 using PosBackend.Filters;
 using PosBackend.Middlewares;
 using PosBackend.Models;
+using System.Net;
+using Microsoft.AspNetCore.HttpOverrides;
 
 var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddMemoryCache();
-var cacheConfiguration = new CacheConfiguration();
-builder.Configuration.GetSection("Cache").Bind(cacheConfiguration);
-builder.Services.AddSingleton(cacheConfiguration);
-builder.Services.AddSingleton<ICacheService, MemoryCacheService>();
-
-builder.Services.AddResponseCompression(options =>
+// Add JWT Bearer authentication for Keycloak
+builder.Services.AddAuthentication(options =>
 {
-    options.EnableForHttps = true;
-    options.MimeTypes = new[] {
-        "text/plain",
-        "text/css",
-        "application/javascript",
-        "text/html",
-        "application/xml",
-        "text/xml",
-        "application/json",
-        "text/json",
-    };
-});
-
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAll", policy =>
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+    .AddJwtBearer(options =>
     {
-        policy.WithOrigins(
-                "http://localhost:3000",
-                "http://localhost:3001",
-                "http://localhost:3002",
-                "http://localhost:5107",
-                "https://localhost:7005",
-                "http://localhost:8282"
-              )
-              .AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials()
-              .SetIsOriginAllowed(_ => true);
-    });
-});
-
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc("v1", new OpenApiInfo
-    {
-        Title = "POS API",
-        Version = "v1",
-        Description = "API for Pisval Tech POS System",
-        Contact = new OpenApiContact
-        {
-            Name = "Pisval Tech",
-            Email = "support@pisvaltech.com"
-        }
+        options.Authority = builder.Configuration["Keycloak:Authority"];
+        options.Audience = builder.Configuration["Keycloak:Audience"];
+        options.RequireHttpsMetadata = true; // Set to false only for local dev with HTTP
     });
 
-    var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
-    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-    if (File.Exists(xmlPath))
-    {
-        c.IncludeXmlComments(xmlPath);
-    }
-    else
-    {
-        Console.WriteLine($"⚠️ XML documentation file not found at: {xmlPath}");
-    }
 
-    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        Name = "Authorization",
-        Type = SecuritySchemeType.ApiKey,
-        Scheme = "Bearer",
-        BearerFormat = "JWT",
-        In = ParameterLocation.Header,
-        Description = "JWT Authorization header using the Bearer scheme. \r\n\r\n Enter 'Bearer' [space] and then your token in the text input below.\r\n\r\nExample: \"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\""
-    });
+// Load environment variables
+DotEnv.Load();
 
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            Array.Empty<string>()
-        }
-    });
-
-    c.OperationFilter<SecurityRequirementsOperationFilter>();
-});
-
+// Register PosDbContext for EF Core and Identity
 builder.Services.AddDbContext<PosDbContext>(options =>
 {
-    options.UseNpgsql(
-        builder.Configuration.GetConnectionString("DefaultConnection"),
-        npgsqlOptions =>
-        {
-            npgsqlOptions.EnableRetryOnFailure(
-                maxRetryCount: 5,
-                maxRetryDelay: TimeSpan.FromSeconds(30),
-                errorCodesToAdd: null);
-
-            npgsqlOptions.CommandTimeout(30);
-        });
-
-    if (builder.Environment.IsDevelopment() &&
-        builder.Configuration.GetValue<bool>("EnableSensitiveDataLogging", false))
-    {
-        options.EnableSensitiveDataLogging();
-    }
-
-    options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
-    options.ConfigureWarnings(warnings => warnings.Ignore(RelationalEventId.PendingModelChangesWarning));
+    // Use Npgsql for PostgreSQL, or change to UseSqlServer/UseSqlite as needed
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
+// Add services to the container
+// Add memory cache for both distributed and local caching
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddMemoryCache();
+
+// Configure session
+builder.Services.AddSession(options =>
+{
+    options.Cookie.Name = ".POS.Session";
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    options.Cookie.SameSite = SameSiteMode.Strict;
+    options.IdleTimeout = TimeSpan.FromMinutes(
+        int.Parse(Environment.GetEnvironmentVariable("SESSION_TIMEOUT_MINUTES") ?? "60")
+    );
+});
+
+// Caching services
+builder.Services.AddMemoryCache();
+builder.Services.AddSingleton<CacheConfiguration>();
+builder.Services.AddScoped<ICacheService, MemoryCacheService>();
+
+// Identity, UserRepo and other services
 builder.Services.AddIdentity<User, UserRole>()
     .AddEntityFrameworkStores<PosDbContext>()
     .AddDefaultTokenProviders();
@@ -139,72 +71,11 @@ builder.Services.AddIdentity<User, UserRole>()
 builder.Services.AddScoped<IUserRepository, UserService>();
 builder.Services.AddScoped<PosBackend.Services.PackageFeatureService>();
 builder.Services.AddScoped<PosBackend.Services.KeycloakAuthorizationService>();
+builder.Services.AddScoped<PosBackend.Services.SubscriptionService>();
 
 builder.Services.AddSignalR();
 
 builder.Services.AddHttpClient();
-
-builder.Services.AddAuthentication(options =>
-    {
-        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    })
-    .AddJwtBearer(options =>
-    {
-        string? keycloakAuthority = builder.Configuration["Keycloak:Authority"];
-        string? keycloakClientId = builder.Configuration["Keycloak:ClientId"];
-
-        if (string.IsNullOrEmpty(keycloakAuthority) || string.IsNullOrEmpty(keycloakClientId))
-        {
-            Console.WriteLine("⚠️ Keycloak settings are missing in appsettings.json! Exiting...");
-            return;
-        }
-
-        options.Authority = keycloakAuthority;
-        options.Audience = keycloakClientId;
-        options.RequireHttpsMetadata = false;
-
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidIssuer = keycloakAuthority,
-            ValidateAudience = true,
-            ValidAudiences = new[] { keycloakClientId, "realm-management", "broker", "account" },
-            ValidateLifetime = true,
-            ClockSkew = TimeSpan.Zero
-        };
-
-        options.Events = new JwtBearerEvents
-        {
-            OnAuthenticationFailed = async context =>
-            {
-                if (!context.Response.HasStarted)
-                {
-                    Console.WriteLine($"❌ Authentication failed: {context.Exception.Message}");
-                    context.Response.StatusCode = 401;
-                    context.Response.ContentType = "application/json";
-                    await context.Response.WriteAsync("{\"error\": \"Authentication failed\", \"message\": \"Invalid token\"}");
-                }
-            },
-
-            OnForbidden = async context =>
-            {
-                if (!context.Response.HasStarted)
-                {
-                    Console.WriteLine("⛔ Access forbidden.");
-                    context.Response.StatusCode = 403;
-                    context.Response.ContentType = "application/json";
-                    await context.Response.WriteAsync("{\"error\": \"Forbidden\", \"message\": \"You do not have permission.\"}");
-                }
-            },
-
-            OnTokenValidated = context =>
-            {
-                Console.WriteLine("✅ Token validated successfully.");
-                return Task.CompletedTask;
-            }
-        };
-    });
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
@@ -217,13 +88,24 @@ builder.Services.AddControllers()
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
 
+
+// Register response compression
+builder.Services.AddResponseCompression();
+
 var app = builder.Build();
 
 // Use CORS early in the pipeline
-app.UseCors("AllowAll");
+app.UseCors("DefaultPolicy");
 
-// Use exception handling middleware
-app.UseMiddleware<ExceptionHandlingMiddleware>();
+// Add security headers
+app.UseSecurityHeaders();
+
+// Enable session before auth and endpoints
+app.UseSession();
+
+// Authentication & Authorization
+app.UseAuthentication();
+app.UseAuthorization();
 
 // Enable response compression
 app.UseResponseCompression();
@@ -235,12 +117,23 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseHttpsRedirection();
 }
+app.UseCors("AllowAll");
 
-// Use built-in response caching middleware
-app.UseResponseCaching();
+// Add security headers middleware
+app.Use(async (context, next) =>
+{
+    context.Response.Headers.Append("X-Frame-Options", "DENY");
+    context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
+    context.Response.Headers.Append("X-XSS-Protection", "1; mode=block");
+    context.Response.Headers.Append("Referrer-Policy", "no-referrer");
+    context.Response.Headers.Append("Content-Security-Policy", "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self';");
+    await next();
+});
 
-// Use our custom response caching middleware
-app.UseCustomResponseCaching();
+// Use exception handling middleware
+app.UseMiddleware<ExceptionHandlingMiddleware>();
+
+// Enable response compression
 
 // Add cache control headers middleware
 app.Use(async (context, next) =>

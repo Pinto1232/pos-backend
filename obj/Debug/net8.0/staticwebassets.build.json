@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "dY5pOU0nfLWQsnECKBiiM5kFhrvUdEPK+fSxnQLAvAo=",
+  "Hash": "jMKHTAKDdMWV3nlmO8iEcwg+2nw4cRZnfNL7mROEP5I=",
   "Source": "PosBackend",
   "BasePath": "_content/PosBackend",
   "Mode": "Default",
@@ -34,25 +34,6 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\swagger-minimal.html"
-    },
-    {
-      "Identity": "C:\\Users\\pinto\\Documents\\Development\\POS\\backend\\wwwroot\\swagger-test.html",
-      "SourceId": "PosBackend",
-      "SourceType": "Discovered",
-      "ContentRoot": "C:\\Users\\pinto\\Documents\\Development\\POS\\backend\\wwwroot\\",
-      "BasePath": "_content/PosBackend",
-      "RelativePath": "swagger-test.html",
-      "AssetKind": "All",
-      "AssetMode": "All",
-      "AssetRole": "Primary",
-      "AssetMergeBehavior": "PreferTarget",
-      "AssetMergeSource": "",
-      "RelatedAsset": "",
-      "AssetTraitName": "",
-      "AssetTraitValue": "",
-      "CopyToOutputDirectory": "Never",
-      "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "wwwroot\\swagger-test.html"
     },
     {
       "Identity": "C:\\Users\\pinto\\Documents\\Development\\POS\\backend\\wwwroot\\swagger-ui\\custom.css",

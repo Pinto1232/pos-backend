@@ -423,15 +423,18 @@ namespace PosBackend.Services
 
         public async Task InvalidateUserCacheAsync(string userId)
         {
-            _cache.Remove($"{CACHE_PREFIX_USER_FEATURES}{userId}");
+            await Task.Run(() =>
+            {
+                // Remove user features cache
+                _cache.Remove($"{CACHE_PREFIX_USER_FEATURES}{userId}");
 
-            // Remove all usage cache entries for this user
-            var usageCacheKeys = _cache.GetType()
-                .GetField("_coherentState", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?
-                .GetValue(_cache);
+                // Remove all usage cache entries for this user
+                // Note: Since IMemoryCache doesn't provide a way to enumerate keys,
+                // we'll have to rely on explicit key patterns we know about
+                _cache.Remove($"{CACHE_PREFIX_USER_USAGE}{userId}");
 
-            // Note: This is a simplified cache invalidation. In production, consider using a more sophisticated cache invalidation strategy
-            _logger.LogDebug("Invalidated cache for user {UserId}", userId);
+                _logger.LogDebug("Invalidated cache for user {UserId}", userId);
+            });
         }
 
         // Private helper methods

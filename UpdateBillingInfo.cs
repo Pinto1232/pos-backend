@@ -5,7 +5,7 @@ namespace PosBackend
 {
     public static class UpdateBillingInfo
     {
-        public static async Task Main(string[] args)
+        public static async Task UpdateBillingInfoAsync(string[] args)
         {
             var connectionString = "Host=localhost;Database=pos_db;Username=postgres;Password=admin123";
 

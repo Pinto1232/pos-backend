@@ -24,15 +24,74 @@ namespace PosBackend.Services
             ILogger<SubscriptionService> logger,
             IConfiguration configuration)
         {
-            _context = context;
-            _logger = logger;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+
+            var stripeKey = configuration["Stripe:SecretKey"] ?? 
+                throw new InvalidOperationException("Stripe API key not configured");
 
             // Initialize Stripe services
-            StripeConfiguration.ApiKey = configuration["Stripe:SecretKey"];
+            StripeConfiguration.ApiKey = stripeKey;
             _stripeCustomerService = new CustomerService();
             _stripeSubscriptionService = new Stripe.SubscriptionService();
             _stripePaymentMethodService = new PaymentMethodService();
             _stripeInvoiceService = new InvoiceService();
+        }
+
+        // Helper method to safely get Stripe Customer
+        private Stripe.Customer? GetStripeCustomer(string customerId)
+        {
+            try
+            {
+                return _stripeCustomerService.Get(customerId);
+            }
+            catch (StripeException ex)
+            {
+                _logger.LogError(ex, "Error retrieving Stripe customer {CustomerId}", customerId);
+                return null;
+            }
+        }
+
+        // Helper method to safely get Stripe Subscription
+        private Stripe.Subscription? GetStripeSubscription(string subscriptionId)
+        {
+            try
+            {
+                return _stripeSubscriptionService.Get(subscriptionId);
+            }
+            catch (StripeException ex)
+            {
+                _logger.LogError(ex, "Error retrieving Stripe subscription {SubscriptionId}", subscriptionId);
+                return null;
+            }
+        }
+
+        // Helper method to safely get Stripe PaymentMethod
+        private PaymentMethod? GetStripePaymentMethod(string paymentMethodId)
+        {
+            try
+            {
+                return _stripePaymentMethodService.Get(paymentMethodId);
+            }
+            catch (StripeException ex)
+            {
+                _logger.LogError(ex, "Error retrieving Stripe payment method {PaymentMethodId}", paymentMethodId);
+                return null;
+            }
+        }
+
+        // Helper method to safely get Stripe Invoice
+        private Stripe.Invoice? GetStripeInvoice(string invoiceId)
+        {
+            try
+            {
+                return _stripeInvoiceService.Get(invoiceId);
+            }
+            catch (StripeException ex)
+            {
+                _logger.LogError(ex, "Error retrieving Stripe invoice {InvoiceId}", invoiceId);
+                return null;
+            }
         }
 
         public async Task<UserSubscription?> CreateSubscriptionAsync(

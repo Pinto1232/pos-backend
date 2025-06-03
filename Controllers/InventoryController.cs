@@ -23,12 +23,14 @@ namespace PosBackend.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Inventory>>> GetInventoryItems()
         {
-            return await _context.Inventories
+            var inventories = await _context.Inventories
                 .Include(inventoryItem => inventoryItem.Store)
                 .Include(inventoryItem => inventoryItem.ProductVariant)
-                .Include(inventoryItem => inventoryItem.StockAlerts.Where(sa => sa.IsActive))
+                .Include(inventoryItem => inventoryItem.StockAlerts)
                 .AsNoTracking()
                 .ToListAsync();
+
+            return inventories ?? new List<Inventory>();
         }
 
         // GET: api/Inventory/5
