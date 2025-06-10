@@ -13,6 +13,7 @@ using PosBackend.Application.Services.Caching;
 using PosBackend.Filters;
 using PosBackend.Middlewares;
 using PosBackend.Models;
+using PosBackend.Data;
 using System.Net;
 using Microsoft.AspNetCore.HttpOverrides;
 
@@ -75,8 +76,16 @@ DotEnv.Load();
 // Register PosDbContext for EF Core and Identity
 builder.Services.AddDbContext<PosDbContext>(options =>
 {
-    // Use Npgsql for PostgreSQL, or change to UseSqlServer/UseSqlite as needed
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+    if (connectionString == "InMemory")
+    {
+        options.UseInMemoryDatabase("PosDatabase");
+    }
+    else
+    {
+        // Use Npgsql for PostgreSQL, or change to UseSqlServer/UseSqlite as needed
+        options.UseNpgsql(connectionString);
+    }
 });
 
 // Add services to the container
@@ -133,6 +142,12 @@ builder.Services.AddSwaggerGen(c =>
         Version = "v1",
         Description = "API for the POS System"
     });
+    
+    // Add a document filter to ensure OpenAPI version is set
+    c.DocumentFilter<OpenApiVersionFilter>();
+    
+    // Ensure all APIs are included
+    c.DocInclusionPredicate((docName, apiDesc) => true);
     
     // Add JWT authentication support in Swagger UI
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -194,21 +209,8 @@ if (!app.Environment.IsDevelopment())
 }
 // CORS configuration is already applied above
 
-// Add security headers middleware
-app.Use(async (context, next) =>
-{    context.Response.Headers.Append("X-Frame-Options", "DENY");
-    context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
-    context.Response.Headers.Append("X-XSS-Protection", "1; mode=block");
-    context.Response.Headers.Append("Referrer-Policy", "no-referrer");
-    context.Response.Headers.Append("Content-Security-Policy", 
-        "default-src 'self' http://localhost:8282 http://localhost:8080; " +
-        "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
-        "style-src 'self' 'unsafe-inline'; " +
-        "img-src 'self' data: http://localhost:8282 http://localhost:8080; " +
-        "font-src 'self' data:; " +
-        "connect-src 'self' http://localhost:8282 http://localhost:8080");
-    await next();
-});
+// We're using SecurityHeadersMiddleware for security headers
+// No need to set them here as well
 
 // Use exception handling middleware
 app.UseMiddleware<ExceptionHandlingMiddleware>();
@@ -260,13 +262,54 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-// Seed pricing packages data if none exist
+// Ensure database exists and apply migrations, then seed data
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     try
     {
         var context = services.GetRequiredService<PosDbContext>();
+        
+        // Ensure database is created and apply migrations if needed
+        Console.WriteLine("Ensuring database exists and applying migrations...");
+        
+        var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+        if (connectionString == "InMemory")
+        {
+            // For InMemory database, just ensure it's created
+            context.Database.EnsureCreated();
+            Console.WriteLine("InMemory database created successfully.");
+        }
+        else
+        {
+            try
+            {
+                // Apply any pending migrations (this will create the database if it doesn't exist)
+                var pendingMigrations = context.Database.GetPendingMigrations();
+                if (pendingMigrations.Any())
+                {
+                    Console.WriteLine($"Applying {pendingMigrations.Count()} pending migrations...");
+                    context.Database.Migrate();
+                    Console.WriteLine("Migrations applied successfully.");
+                }
+                else
+                {
+                    Console.WriteLine("Database is up to date.");
+                }
+            }
+            catch (Exception migrationEx)
+            {
+                Console.WriteLine($"Migration failed: {migrationEx.Message}");
+                Console.WriteLine("Attempting to create database and apply migrations...");
+                
+                // If migrations fail, try to ensure database is created first
+                context.Database.EnsureCreated();
+                Console.WriteLine("Database created successfully.");
+            }
+        }
+
+        // Seed package tiers first
+        await PackageTierSeeder.SeedPackageTiers(context);
 
         // Check if there are any pricing packages
         if (!context.PricingPackages.Any())
@@ -329,6 +372,53 @@ using (var scope = app.Services.CreateScope())
             context.SaveChanges();
             Console.WriteLine($"Added {addOns.Count} add-ons.");
         }
+
+        // Create default user subscription if it doesn't exist
+        if (!context.UserSubscriptions.Any(us => us.UserId == "default-user"))
+        {
+            Console.WriteLine("Creating default user subscription...");
+            
+            // Get the first available pricing package (should be Starter Plus)
+            var defaultPackage = await context.PricingPackages.FirstOrDefaultAsync();
+            if (defaultPackage != null)
+            {
+                var defaultSubscription = new UserSubscription
+                {
+                    UserId = "default-user",
+                    PricingPackageId = defaultPackage.Id,
+                    StartDate = DateTime.UtcNow,
+                    IsActive = true,
+                    Status = "active",
+                    EnabledFeatures = new List<string>
+                    {
+                        "Dashboard",
+                        "Products List",
+                        "Add/Edit Product",
+                        "Sales Reports",
+                        "Inventory Management",
+                        "Customer Management"
+                    },
+                    AdditionalPackages = new List<int>(),
+                    CreatedAt = DateTime.UtcNow,
+                    LastUpdatedAt = DateTime.UtcNow
+                };
+
+                context.UserSubscriptions.Add(defaultSubscription);
+                await context.SaveChangesAsync();
+                Console.WriteLine("Default user subscription created successfully.");
+            }
+            else
+            {
+                Console.WriteLine("No pricing packages found. Cannot create default subscription.");
+            }
+        }
+        else
+        {
+            Console.WriteLine("Default user subscription already exists.");
+        }
+
+        // Update pricing packages with tier information
+        await PackageTierSeeder.UpdatePricingPackagesWithTiers(context);
     }
     catch (Exception ex)
     {

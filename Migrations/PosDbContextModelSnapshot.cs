@@ -17,7 +17,7 @@ namespace PosBackend.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.4")
+                .HasAnnotation("ProductVersion", "9.0.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -968,6 +968,55 @@ namespace PosBackend.Migrations
                     b.ToTable("OrderItems");
                 });
 
+            modelBuilder.Entity("PosBackend.Models.PackageTier", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("EnabledFeaturesJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("Level")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("MaxPrice")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("MinPrice")
+                        .HasColumnType("numeric");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("RestrictedFeaturesJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PackageTiers");
+                });
+
             modelBuilder.Entity("PosBackend.Models.Payment", b =>
                 {
                     b.Property<int>("PaymentId")
@@ -1307,6 +1356,12 @@ namespace PosBackend.Migrations
                     b.Property<int>("TestPeriodDays")
                         .HasColumnType("integer");
 
+                    b.Property<int?>("TierId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TierLevel")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("text");
@@ -1316,6 +1371,8 @@ namespace PosBackend.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("TierId");
 
                     b.ToTable("PricingPackages");
                 });
@@ -2463,6 +2520,15 @@ namespace PosBackend.Migrations
                     b.Navigation("Sale");
                 });
 
+            modelBuilder.Entity("PosBackend.Models.PricingPackage", b =>
+                {
+                    b.HasOne("PosBackend.Models.PackageTier", "Tier")
+                        .WithMany("PricingPackages")
+                        .HasForeignKey("TierId");
+
+                    b.Navigation("Tier");
+                });
+
             modelBuilder.Entity("PosBackend.Models.Product", b =>
                 {
                     b.HasOne("PosBackend.Models.Category", "Category")
@@ -2688,6 +2754,11 @@ namespace PosBackend.Migrations
             modelBuilder.Entity("PosBackend.Models.Order", b =>
                 {
                     b.Navigation("OrderItems");
+                });
+
+            modelBuilder.Entity("PosBackend.Models.PackageTier", b =>
+                {
+                    b.Navigation("PricingPackages");
                 });
 
             modelBuilder.Entity("PosBackend.Models.PricingPackage", b =>

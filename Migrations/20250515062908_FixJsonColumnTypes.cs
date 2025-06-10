@@ -10,23 +10,41 @@ namespace PosBackend.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AlterColumn<string>(
-                name: "TaxSettingsJson",
-                table: "UserCustomizations",
-                type: "jsonb",
-                nullable: true,
-                oldClrType: typeof(string),
-                oldType: "text",
-                oldNullable: true);
+            // migrationBuilder.AlterColumn<string>(
+            //     name: "TaxSettingsJson",
+            //     table: "UserCustomizations",
+            //     type: "jsonb",
+            //     nullable: true,
+            //     oldClrType: typeof(string),
+            //     oldType: "text",
+            //     oldNullable: true);
 
-            migrationBuilder.AlterColumn<string>(
-                name: "RegionalSettingsJson",
-                table: "UserCustomizations",
-                type: "jsonb",
-                nullable: true,
-                oldClrType: typeof(string),
-                oldType: "text",
-                oldNullable: true);
+            migrationBuilder.Sql(@"
+                ALTER TABLE ""UserCustomizations""
+                ALTER COLUMN ""TaxSettingsJson"" TYPE jsonb
+                USING CASE
+                    WHEN ""TaxSettingsJson"" IS NULL OR TRIM(""TaxSettingsJson"") = '' THEN NULL
+                    ELSE ""TaxSettingsJson""::jsonb
+                END;
+            ");
+
+            // migrationBuilder.AlterColumn<string>(
+            //     name: "RegionalSettingsJson",
+            //     table: "UserCustomizations",
+            //     type: "jsonb",
+            //     nullable: true,
+            //     oldClrType: typeof(string),
+            //     oldType: "text",
+            //     oldNullable: true);
+
+            migrationBuilder.Sql(@"
+                ALTER TABLE ""UserCustomizations""
+                ALTER COLUMN ""RegionalSettingsJson"" TYPE jsonb
+                USING CASE
+                    WHEN ""RegionalSettingsJson"" IS NULL OR TRIM(""RegionalSettingsJson"") = '' THEN NULL
+                    ELSE ""RegionalSettingsJson""::jsonb
+                END;
+            ");
         }
 
         /// <inheritdoc />

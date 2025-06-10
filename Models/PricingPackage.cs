@@ -15,6 +15,13 @@ namespace PosBackend.Models
         public int TestPeriodDays { get; set; }
         public string Type { get; set; } = string.Empty;
 
+        // Tier information
+        public int? TierId { get; set; }
+        [ForeignKey("TierId")]
+        public PackageTier? Tier { get; set; }
+
+        public int TierLevel { get; set; } = 1; // 1-5 for quick access, default to 1
+
         // default/base currency (e.g., "USD").
         public string Currency { get; set; } = "";
 

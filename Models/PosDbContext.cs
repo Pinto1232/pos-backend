@@ -50,6 +50,7 @@ namespace PosBackend.Models
         public DbSet<Supplier> Suppliers { get; set; }
 
         // Pricing and Packages
+        public DbSet<PackageTier> PackageTiers { get; set; }
         public DbSet<PricingPackage> PricingPackages { get; set; }
         public DbSet<PaymentPlan> PaymentPlans { get; set; }
         public DbSet<Feature> CoreFeatures { get; set; }

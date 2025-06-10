@@ -84,7 +84,9 @@ namespace PosBackend.Controllers
                     var totalItems = await _context.PricingPackages.CountAsync();
 
                     var packagesData = await _context.PricingPackages
-                        .OrderBy(p => p.Id)
+                        .Include(p => p.Tier)
+                        .OrderBy(p => p.TierLevel)
+                        .ThenBy(p => p.Id)
                         .Skip((pageNumber - 1) * pageSize)
                         .Take(pageSize)
                         .ToListAsync();
@@ -113,7 +115,11 @@ namespace PosBackend.Controllers
                             DescriptionList = p.Description.Split(';').ToList(),
                             IsCustomizable = p.Type.ToLower() == "custom" || p.Type.ToLower() == "custom-pro",
                             Currency = userCurrency,
-                            MultiCurrencyPrices = p.MultiCurrencyPrices
+                            MultiCurrencyPrices = p.MultiCurrencyPrices,
+                            TierId = p.TierId,
+                            TierLevel = p.TierLevel,
+                            TierName = p.Tier?.Name,
+                            TierDescription = p.Tier?.Description
                         };
                     }).ToList();
 
@@ -143,7 +149,9 @@ namespace PosBackend.Controllers
                 {
                     _logger.LogDebug("Cache miss for pricing package ID: {Id}. Fetching from database.", id);
 
-                    var package = await _context.PricingPackages.FindAsync(id);
+                    var package = await _context.PricingPackages
+                        .Include(p => p.Tier)
+                        .FirstOrDefaultAsync(p => p.Id == id);
 
                     if (package == null)
                     {
@@ -185,9 +193,13 @@ namespace PosBackend.Controllers
                         TestPeriodDays = package.TestPeriodDays,
                         Type = package.Type,
                         DescriptionList = package.Description.Split(';').ToList(),
-                        IsCustomizable = package.Type.ToLower() == "custom",
+                        IsCustomizable = package.Type.ToLower() == "custom" || package.Type.ToLower() == "custom-pro",
                         Currency = userCurrency,
-                        MultiCurrencyPrices = package.MultiCurrencyPrices
+                        MultiCurrencyPrices = package.MultiCurrencyPrices,
+                        TierId = package.TierId,
+                        TierLevel = package.TierLevel,
+                        TierName = package.Tier?.Name,
+                        TierDescription = package.Tier?.Description
                     });
                 });
             }
@@ -199,6 +211,7 @@ namespace PosBackend.Controllers
         }
 
         [HttpGet("custom/features")]
+        [AllowAnonymous]
         public async Task<ActionResult<object>> GetCustomFeatures()
         {
             string cacheKey = "CustomFeatures";
@@ -279,6 +292,7 @@ namespace PosBackend.Controllers
         }
 
         [HttpPost("custom/calculate-price")]
+        [AllowAnonymous]
         public async Task<ActionResult<object>> CalculateCustomPrice([FromBody] CustomPricingRequest request)
         {
             var package = await _context.PricingPackages.FirstOrDefaultAsync(p => p.Id == request.PackageId);
@@ -493,6 +507,12 @@ namespace PosBackend.Controllers
             public bool IsCustomizable { get; set; }
             public string Currency { get; set; } = string.Empty;
             public string MultiCurrencyPrices { get; set; } = string.Empty;
+            
+            // Tier information
+            public int? TierId { get; set; }
+            public int TierLevel { get; set; }
+            public string? TierName { get; set; }
+            public string? TierDescription { get; set; }
         }
 
         public class CreatePricingPackageDto

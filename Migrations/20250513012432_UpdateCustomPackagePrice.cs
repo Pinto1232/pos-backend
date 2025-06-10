@@ -245,13 +245,48 @@ namespace PosBackend.Migrations
                 oldClrType: typeof(decimal),
                 oldType: "numeric(18,4)");
 
-            migrationBuilder.AlterColumn<int>(
-                name: "Type",
-                table: "Scope",
-                type: "integer",
-                nullable: false,
-                oldClrType: typeof(string),
-                oldType: "text");
+            // migrationBuilder.AlterColumn<int>(
+            //     name: "Type",
+            //     table: "Scope",
+            //     type: "integer",
+            //     nullable: false,
+            //     oldClrType: typeof(string),
+            //     oldType: "text");
+
+            // Use raw SQL for the Scope.Type conversion with USING clause
+            migrationBuilder.Sql(@"
+                -- Ensure the Scope table and Type column exist and Type is text before altering
+                DO $$
+                BEGIN
+                    IF EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'Scope') THEN
+                        IF EXISTS (
+                            SELECT FROM information_schema.columns
+                            WHERE table_schema = 'public'
+                            AND table_name = 'Scope'
+                            AND column_name = 'Type'
+                            AND (data_type = 'text' OR data_type = 'character varying')
+                        ) THEN
+                            RAISE NOTICE 'Altering Scope.Type column in 20250513012432_UpdateCustomPackagePrice migration.';
+                            ALTER TABLE ""Scope""
+                            ALTER COLUMN ""Type"" TYPE integer
+                            USING CASE
+                                WHEN TRIM(BOTH ' ' FROM ""Type"") = 'Global' THEN 0
+                                WHEN TRIM(BOTH ' ' FROM ""Type"") = 'Store' THEN 1
+                                WHEN TRIM(BOTH ' ' FROM ""Type"") = 'Terminal' THEN 2
+                                WHEN ""Type"" IS NULL THEN 0 -- Explicitly handle NULL
+                                WHEN TRIM(BOTH ' ' FROM ""Type"") = '' THEN 0 -- Handle empty strings
+                                ELSE 0 -- Default to Global if unknown or other values
+                            END;
+                            RAISE NOTICE 'Successfully converted Scope.Type column to integer in 20250513012432_UpdateCustomPackagePrice migration.';
+                        ELSE
+                            RAISE NOTICE 'Scope.Type column is not text/varchar or does not exist. Skipping alteration in 20250513012432_UpdateCustomPackagePrice.';
+                        END IF;
+                    ELSE
+                        RAISE NOTICE 'Scope table does not exist. Skipping Scope.Type alteration in 20250513012432_UpdateCustomPackagePrice.';
+                    END IF;
+                END
+                $$;
+            ");
 
             migrationBuilder.AddPrimaryKey(
                 name: "PK_CustomerGroupMembers",
