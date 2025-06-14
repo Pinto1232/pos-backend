@@ -52,6 +52,7 @@ namespace PosBackend.Models
         // Pricing and Packages
         public DbSet<PackageTier> PackageTiers { get; set; }
         public DbSet<PricingPackage> PricingPackages { get; set; }
+        public DbSet<PackagePrice> PackagePrices { get; set; }
         public DbSet<PaymentPlan> PaymentPlans { get; set; }
         public DbSet<Feature> CoreFeatures { get; set; }
         public DbSet<AddOn> AddOns { get; set; }
@@ -65,6 +66,7 @@ namespace PosBackend.Models
 
         // Currency
         public DbSet<Currency> Currencies { get; set; }
+        public DbSet<ExchangeRate> ExchangeRates { get; set; }
 
         // User Login History
         public DbSet<UserLoginHistory> UserLoginHistories { get; set; }

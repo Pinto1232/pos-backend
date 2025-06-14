@@ -16,8 +16,32 @@ using PosBackend.Models;
 using PosBackend.Data;
 using System.Net;
 using Microsoft.AspNetCore.HttpOverrides;
+using Serilog;
+using Serilog.Events;
+using PosBackend.Security;
+using Microsoft.AspNetCore.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configure Serilog
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+    .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
+    .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Warning)
+    .Enrich.FromLogContext()
+    .Enrich.WithProperty("Application", "POS Backend")
+    .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}")
+    .WriteTo.File(
+        path: "logs/log-.txt",
+        rollingInterval: RollingInterval.Day,
+        outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}",
+        retainedFileCountLimit: 7,
+        fileSizeLimitBytes: 10 * 1024 * 1024) // 10MB
+    .CreateLogger();
+
+// Use Serilog for logging
+builder.Host.UseSerilog();
 
 // Configure CORS
 builder.Services.AddCors(options =>
@@ -41,7 +65,7 @@ builder.Services.AddCors(options =>
     });
 });
 
-// Add JWT Bearer authentication for Keycloak
+// Add JWT Bearer authentication for Keycloak and API Key authentication
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -65,10 +89,79 @@ builder.Services.AddAuthentication(options =>
             ValidateAudience = true,
             ValidateIssuer = true,
             ValidateLifetime = true,
-            ValidateIssuerSigningKey = true
+            ValidateIssuerSigningKey = true,
+            // Add clock skew tolerance
+            ClockSkew = TimeSpan.FromMinutes(5)
         };
-    });
+        
+        // Add events for better logging
+        options.Events = new JwtBearerEvents
+        {
+            OnAuthenticationFailed = context =>
+            {
+                var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+                logger.LogWarning("JWT authentication failed: {Exception}", context.Exception.Message);
+                return Task.CompletedTask;
+            },
+            OnTokenValidated = context =>
+            {
+                var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+                logger.LogDebug("JWT token validated for user: {UserId}", 
+                    context.Principal?.Identity?.Name ?? "Unknown");
+                return Task.CompletedTask;
+            }
+        };
+    })
+    .AddScheme<ApiKeyAuthenticationSchemeOptions, ApiKeyAuthenticationHandler>(
+        ApiKeyAuthenticationSchemeOptions.Scheme, options => { });
 
+// Add Authorization policies
+builder.Services.AddAuthorization(options =>
+{
+    // Default policy requires authentication
+    options.DefaultPolicy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme, ApiKeyAuthenticationSchemeOptions.Scheme)
+        .Build();
+
+    // Specific policies
+    options.AddPolicy(SecurityConstants.Policies.RequireAuthentication, policy =>
+        policy.RequireAuthenticatedUser()
+              .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme));
+
+    options.AddPolicy(SecurityConstants.Policies.RequireAdmin, policy =>
+        policy.RequireAuthenticatedUser()
+              .RequireRole(SecurityConstants.Roles.Admin, SecurityConstants.Roles.SystemAdmin));
+
+    options.AddPolicy(SecurityConstants.Policies.RequireUser, policy =>
+        policy.RequireAuthenticatedUser()
+              .RequireRole(SecurityConstants.Roles.User, SecurityConstants.Roles.Admin, SecurityConstants.Roles.SystemAdmin));
+
+    options.AddPolicy(SecurityConstants.Policies.RequireValidSubscription, policy =>
+        policy.RequireAuthenticatedUser()
+              .AddRequirements(new ValidSubscriptionRequirement()));
+
+    options.AddPolicy(SecurityConstants.Policies.RequirePackageManagement, policy =>
+        policy.RequireAuthenticatedUser()
+              .AddRequirements(new PackageManagementRequirement()));
+
+    options.AddPolicy(SecurityConstants.Policies.RequireSystemAdmin, policy =>
+        policy.RequireAuthenticatedUser()
+              .AddRequirements(new SystemAdminRequirement())
+              .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme, ApiKeyAuthenticationSchemeOptions.Scheme));
+
+    // Anonymous policies for specific read-only operations
+    options.AddPolicy(SecurityConstants.Policies.AllowAnonymousRead, policy =>
+        policy.RequireAssertion(context => true)); // Always allow
+
+    options.AddPolicy(SecurityConstants.Policies.AllowAnonymousHealthCheck, policy =>
+        policy.RequireAssertion(context => true)); // Always allow
+});
+
+// Register authorization handlers
+builder.Services.AddScoped<IAuthorizationHandler, ValidSubscriptionHandler>();
+builder.Services.AddScoped<IAuthorizationHandler, PackageManagementHandler>();
+builder.Services.AddScoped<IAuthorizationHandler, SystemAdminHandler>();
 
 // Load environment variables
 DotEnv.Load();
@@ -120,6 +213,37 @@ builder.Services.AddScoped<PosBackend.Services.PackageFeatureService>();
 builder.Services.AddScoped<PosBackend.Services.KeycloakAuthorizationService>();
 builder.Services.AddScoped<PosBackend.Services.SubscriptionService>();
 
+// Register Input Sanitization Services
+builder.Services.AddScoped<PosBackend.Services.IInputSanitizationService, PosBackend.Services.InputSanitizationService>();
+builder.Services.AddScoped<PosBackend.Filters.InputSanitizationFilter>();
+
+// Configure pricing configuration
+builder.Services.Configure<PosBackend.Services.PricingOptions>(
+    builder.Configuration.GetSection("Pricing"));
+
+// Register GeoLocationService
+builder.Services.AddScoped<PosBackend.Services.GeoLocationService>(provider =>
+{
+    var cacheService = provider.GetRequiredService<ICacheService>();
+    var logger = provider.GetRequiredService<ILogger<PosBackend.Services.GeoLocationService>>();
+    
+    var dbPath = "GeoLite2-Country.mmdb";
+    
+    try
+    {
+        return new PosBackend.Services.GeoLocationService(dbPath, cacheService, logger);
+    }
+    catch
+    {
+        return new PosBackend.Services.GeoLocationServiceFallback(cacheService, logger);
+    }
+});
+
+// Register new pricing services
+builder.Services.AddScoped<PosBackend.Services.Interfaces.ICurrencyService, PosBackend.Services.CurrencyService>();
+builder.Services.AddScoped<PosBackend.Services.Interfaces.ICurrencyDetectionService, PosBackend.Services.CurrencyDetectionService>();
+builder.Services.AddScoped<PosBackend.Services.Interfaces.IPricingService, PosBackend.Services.PricingService>();
+
 builder.Services.AddSignalR();
 
 builder.Services.AddHttpClient();
@@ -159,6 +283,15 @@ builder.Services.AddSwaggerGen(c =>
         Scheme = "Bearer"
     });
 
+    // Add API Key authentication support in Swagger UI
+    c.AddSecurityDefinition("ApiKey", new OpenApiSecurityScheme
+    {
+        Description = "API Key for system-level access. Enter your API key in the text input below.",
+        Name = SecurityConstants.ApiKeys.HeaderName,
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey
+    });
+
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
@@ -171,21 +304,125 @@ builder.Services.AddSwaggerGen(c =>
                 }
             },
             Array.Empty<string>()
+        },
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "ApiKey"
+                }
+            },
+            Array.Empty<string>()
         }
     });
 });
 
-builder.Logging.AddConsole();
-builder.Logging.AddDebug();
+// Serilog is already configured above and will handle all logging
 
 
 // Register response compression
 builder.Services.AddResponseCompression();
 
+// Enhanced Rate Limiting Configuration
+builder.Services.AddRateLimiter(options =>
+{
+    // Default policy for authenticated users
+    options.AddPolicy(SecurityConstants.RateLimiting.AuthenticatedUserPolicy, httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: httpContext.User.Identity?.Name ?? httpContext.Connection.RemoteIpAddress?.ToString() ?? "anonymous",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 100,
+                Window = TimeSpan.FromMinutes(1),
+                QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                QueueLimit = 10
+            }));
+
+    // Stricter policy for anonymous users
+    options.AddPolicy(SecurityConstants.RateLimiting.AnonymousUserPolicy, httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "anonymous",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 20,
+                Window = TimeSpan.FromMinutes(1),
+                QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                QueueLimit = 2
+            }));
+
+    // Admin users get higher limits
+    options.AddPolicy(SecurityConstants.RateLimiting.AdminUserPolicy, httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: httpContext.User.Identity?.Name ?? "admin",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 500,
+                Window = TimeSpan.FromMinutes(1),
+                QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                QueueLimit = 50
+            }));
+
+    // Health check endpoints get minimal limits
+    options.AddPolicy(SecurityConstants.RateLimiting.HealthCheckPolicy, httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "health",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 10,
+                Window = TimeSpan.FromMinutes(1),
+                QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                QueueLimit = 1
+            }));
+
+    // Global fallback
+    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
+    {
+        var isAuthenticated = httpContext.User.Identity?.IsAuthenticated == true;
+        var isAdmin = httpContext.User.IsInRole(SecurityConstants.Roles.Admin) || 
+                     httpContext.User.IsInRole(SecurityConstants.Roles.SystemAdmin);
+
+        var key = isAuthenticated 
+            ? httpContext.User.Identity?.Name ?? "authenticated"
+            : httpContext.Connection.RemoteIpAddress?.ToString() ?? "anonymous";
+
+        var limits = isAdmin ? (1000, 60) : isAuthenticated ? (200, 60) : (50, 60);
+
+        return RateLimitPartition.GetFixedWindowLimiter(key, _ => 
+            new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = limits.Item1,
+                Window = TimeSpan.FromSeconds(limits.Item2)
+            });
+    });
+
+    options.OnRejected = async (context, token) =>
+    {
+        context.HttpContext.Response.StatusCode = 429;
+        
+        var logger = context.HttpContext.RequestServices.GetService<ILogger<Program>>();
+        logger?.LogWarning("Rate limit exceeded for {UserName} from IP {RemoteIpAddress}", 
+            context.HttpContext.User.Identity?.Name ?? "Anonymous",
+            context.HttpContext.Connection.RemoteIpAddress);
+
+        await context.HttpContext.Response.WriteAsync("Too many requests. Please try again later.", token);
+    };
+});
+
 var app = builder.Build();
 
 // Use CORS early in the pipeline
 app.UseCors("DefaultPolicy");
+
+// Add security middleware (includes security headers)
+app.UseSecurityMiddleware();
+
+// Add input sanitization middleware
+app.UseInputSanitization();
+
+// Add rate limiting
+app.UseRateLimiter();
 
 // Add security headers
 app.UseSecurityHeaders();
@@ -426,7 +663,19 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-app.Run();
+try
+{
+    Log.Information("Starting POS Backend application");
+    app.Run();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Application terminated unexpectedly");
+}
+finally
+{
+    Log.CloseAndFlush();
+}
 
 // Make Program class public for testing
 public partial class Program { }

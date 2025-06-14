@@ -281,13 +281,14 @@ namespace PosBackend.Services
 
                 if (!string.IsNullOrEmpty(userEmail) && subscription.NextBillingDate.HasValue && subscription.Package != null)
                 {
+                    var packagePrice = subscription.Package.GetPrice();
                     var success = await _emailService.SendUpcomingPaymentReminderAsync(
-                        userEmail, userName, subscription.Package.Price, subscription.NextBillingDate.Value, daysUntilBilling);
+                        userEmail, userName, packagePrice, subscription.NextBillingDate.Value, daysUntilBilling);
 
                     // Log notification
                     await LogNotification(subscription.UserId, "UpcomingPayment",
                         $"Payment reminder - {daysUntilBilling} days", userEmail, success,
-                        contextData: $"{{\"billingDate\":\"{subscription.NextBillingDate.Value:yyyy-MM-dd}\",\"amount\":{subscription.Package.Price}}}");
+                        contextData: $"{{\"billingDate\":\"{subscription.NextBillingDate.Value:yyyy-MM-dd}\",\"amount\":{packagePrice}}}");
                 }
             }
             catch (Exception ex)

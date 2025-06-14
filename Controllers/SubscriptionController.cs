@@ -3,16 +3,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using PosBackend.Models;
 using PosBackend.Services;
+using PosBackend.Security;
 
 namespace PosBackend.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class SubscriptionController : ControllerBase
+    [Authorize(Policy = SecurityConstants.Policies.RequireValidSubscription)]
+    [EnableRateLimiting(SecurityConstants.RateLimiting.AuthenticatedUserPolicy)]
+    public class SubscriptionController : SecureBaseController
     {
         private const string InternalServerErrorMessage = "Internal server error";
 
@@ -70,7 +75,7 @@ namespace PosBackend.Controllers
                         Id = subscription.Package.Id,
                         Title = subscription.Package.Title,
                         Type = subscription.Package.Type,
-                        Price = subscription.Package.Price
+                        Price = subscription.Package.GetPrice()
                     } : null
                 };
 
@@ -116,7 +121,7 @@ namespace PosBackend.Controllers
                         Id = subscription.Package.Id,
                         Title = subscription.Package.Title,
                         Type = subscription.Package.Type,
-                        Price = subscription.Package.Price
+                        Price = subscription.Package.GetPrice()
                     } : null
                 };
 

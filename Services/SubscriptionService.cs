@@ -212,7 +212,7 @@ namespace PosBackend.Services
                     StripePriceId = stripePriceId,
                     StripeProductId = package.StripeProductId ?? "",
                     Status = stripeSubscription.Status,
-                    Amount = package.Price,
+                    Amount = package.GetPrice(currency),
                     Currency = currency.ToUpper(),
                     BillingInterval = package.BillingInterval,
                     BillingIntervalCount = package.BillingIntervalCount,
@@ -620,7 +620,7 @@ namespace PosBackend.Services
                         Id = subscription.Package?.Id,
                         Title = subscription.Package?.Title,
                         Type = subscription.Package?.Type,
-                        Price = subscription.Package?.Price
+                        Price = subscription.Package?.GetPrice() ?? 0
                     },
                     Status = subscription.Status,
                     IsActive = subscription.IsActive,

@@ -96,15 +96,18 @@ namespace PosBackend
                     {
                         // Find the Custom package
                         var customPackage = await context.PricingPackages
+                            .Include(p => p.Prices)
                             .FirstOrDefaultAsync(p => p.Type == "custom");
 
                         if (customPackage != null)
                         {
-                            Console.WriteLine($"Found Custom package with current price: {customPackage.Price}");
+                            Console.WriteLine($"Found Custom package with current price: {customPackage.GetPrice()}");
 
-                            // Update the price
-                            customPackage.Price = 49.99m;
-                            customPackage.MultiCurrencyPrices = "{\"ZAR\": 899.99, \"EUR\": 45.99, \"GBP\": 39.99}";
+                            // Update the prices using the new collection
+                            customPackage.SetPrice(49.99m, "USD");
+                            customPackage.SetPrice(899.99m, "ZAR");
+                            customPackage.SetPrice(45.99m, "EUR");
+                            customPackage.SetPrice(39.99m, "GBP");
 
                             // Save changes
                             await context.SaveChangesAsync();
@@ -121,15 +124,20 @@ namespace PosBackend
                                 Description = "Build your own package;Select only what you need;Flexible pricing;Scalable solution;Pay for what you use",
                                 Icon = "MUI:SettingsIcon",
                                 ExtraDescription = "Create a custom solution that fits your exact needs",
-                                Price = 49.99m,
                                 TestPeriodDays = 14,
-                                Type = "custom",
-                                Currency = "USD",
-                                MultiCurrencyPrices = "{\"ZAR\": 899.99, \"EUR\": 45.99, \"GBP\": 39.99}"
+                                Type = "custom"
                             };
 
                             // Add and save the new package
                             context.PricingPackages.Add(newCustomPackage);
+                            await context.SaveChangesAsync();
+                            
+                            // Now add the prices
+                            newCustomPackage.SetPrice(49.99m, "USD");
+                            newCustomPackage.SetPrice(899.99m, "ZAR");
+                            newCustomPackage.SetPrice(45.99m, "EUR");
+                            newCustomPackage.SetPrice(39.99m, "GBP");
+                            
                             await context.SaveChangesAsync();
                             Console.WriteLine("Custom package created successfully with price 49.99.");
                         }

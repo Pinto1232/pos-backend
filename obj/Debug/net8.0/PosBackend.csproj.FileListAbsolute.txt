@@ -757,3 +757,4 @@ c:\Users\pinto\Documents\Development\POS\backend\obj\Debug\net8.0\PosBackend.xml
 c:\Users\pinto\Documents\Development\POS\backend\obj\Debug\net8.0\PosBackend.pdb
 c:\Users\pinto\Documents\Development\POS\backend\obj\Debug\net8.0\PosBackend.genruntimeconfig.cache
 c:\Users\pinto\Documents\Development\POS\backend\obj\Debug\net8.0\ref\PosBackend.dll
+C:\Users\pinto\Documents\Development\POS\backend\bin\Debug\net8.0\HtmlAgilityPack.dll

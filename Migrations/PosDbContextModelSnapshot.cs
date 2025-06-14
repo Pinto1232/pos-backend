@@ -302,10 +302,30 @@ namespace PosBackend.Migrations
             modelBuilder.Entity("PosBackend.Models.Currency", b =>
                 {
                     b.Property<string>("Code")
-                        .HasColumnType("text");
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("DecimalPlaces")
+                        .HasColumnType("integer");
 
                     b.Property<decimal>("ExchangeRate")
                         .HasColumnType("numeric");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Symbol")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
 
                     b.HasKey("Code");
 
@@ -523,6 +543,38 @@ namespace PosBackend.Migrations
                     b.HasKey("DiscountId");
 
                     b.ToTable("Discounts");
+                });
+
+            modelBuilder.Entity("PosBackend.Models.ExchangeRate", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("FromCurrency")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)");
+
+                    b.Property<decimal>("Rate")
+                        .HasColumnType("numeric");
+
+                    b.Property<string>("ToCurrency")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ExchangeRates");
                 });
 
             modelBuilder.Entity("PosBackend.Models.Feature", b =>
@@ -966,6 +1018,38 @@ namespace PosBackend.Migrations
                     b.HasIndex("VariantId");
 
                     b.ToTable("OrderItems");
+                });
+
+            modelBuilder.Entity("PosBackend.Models.PackagePrice", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)");
+
+                    b.Property<int>("PackageId")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime?>("ValidUntil")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PackageId");
+
+                    b.ToTable("PackagePrices");
                 });
 
             modelBuilder.Entity("PosBackend.Models.PackageTier", b =>
@@ -2509,6 +2593,17 @@ namespace PosBackend.Migrations
                     b.Navigation("ProductVariant");
                 });
 
+            modelBuilder.Entity("PosBackend.Models.PackagePrice", b =>
+                {
+                    b.HasOne("PosBackend.Models.PricingPackage", "Package")
+                        .WithMany("Prices")
+                        .HasForeignKey("PackageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Package");
+                });
+
             modelBuilder.Entity("PosBackend.Models.Payment", b =>
                 {
                     b.HasOne("PosBackend.Models.Sale", "Sale")
@@ -2763,6 +2858,8 @@ namespace PosBackend.Migrations
 
             modelBuilder.Entity("PosBackend.Models.PricingPackage", b =>
                 {
+                    b.Navigation("Prices");
+
                     b.Navigation("SelectedAddOns");
 
                     b.Navigation("SelectedFeatures");

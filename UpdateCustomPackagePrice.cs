@@ -42,13 +42,16 @@ namespace PosBackend
 
                 // Find the Custom package
                 var customPackage = await context.PricingPackages
+                    .Include(p => p.Prices)
                     .FirstOrDefaultAsync(p => p.Type == "custom");
 
                 if (customPackage != null)
                 {
-                    // Update the price
-                    customPackage.Price = 49.99m;
-                    customPackage.MultiCurrencyPrices = "{\"ZAR\": 899.99, \"EUR\": 45.99, \"GBP\": 39.99}";
+                    // Update the prices using the new collection
+                    customPackage.SetPrice(49.99m, "USD");
+                    customPackage.SetPrice(899.99m, "ZAR");
+                    customPackage.SetPrice(45.99m, "EUR");
+                    customPackage.SetPrice(39.99m, "GBP");
 
                     // Save changes
                     await context.SaveChangesAsync();

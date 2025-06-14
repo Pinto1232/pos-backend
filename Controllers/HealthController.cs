@@ -1,13 +1,16 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using PosBackend.Services;
+using PosBackend.Security;
 using System;
 
 namespace PosBackend.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [AllowAnonymous]
+    [Authorize(Policy = SecurityConstants.Policies.AllowAnonymousHealthCheck)]
+    [EnableRateLimiting(SecurityConstants.RateLimiting.HealthCheckPolicy)]
     public class HealthController : ControllerBase
     {
         private readonly ILogger<HealthController> _logger;

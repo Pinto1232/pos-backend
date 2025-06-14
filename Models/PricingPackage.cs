@@ -11,7 +11,10 @@ namespace PosBackend.Models
         public string Description { get; set; } = string.Empty;
         public string Icon { get; set; } = string.Empty;
         public string ExtraDescription { get; set; } = string.Empty;
+        // Deprecated: Use PackagePrices collection instead
+        [Obsolete("Use PackagePrices collection instead")]
         public decimal Price { get; set; }
+        
         public int TestPeriodDays { get; set; }
         public string Type { get; set; } = string.Empty;
 
@@ -22,11 +25,16 @@ namespace PosBackend.Models
 
         public int TierLevel { get; set; } = 1; // 1-5 for quick access, default to 1
 
-        // default/base currency (e.g., "USD").
+        // Deprecated: Use PackagePrices collection instead
+        [Obsolete("Use PackagePrices collection instead")]
         public string Currency { get; set; } = "";
 
-        // JSON string to store prices for multiple currencies.
+        // Deprecated: Use PackagePrices collection instead
+        [Obsolete("Use PackagePrices collection instead")]
         public string MultiCurrencyPrices { get; set; } = "{}";
+        
+        // New pricing relationship
+        public ICollection<PackagePrice> Prices { get; set; } = new List<PackagePrice>();
 
         // Stripe integration fields
         public string? StripeProductId { get; set; }
@@ -53,6 +61,50 @@ namespace PosBackend.Models
         public ICollection<CustomPackageSelectedFeature>? SelectedFeatures { get; set; }
         public ICollection<CustomPackageSelectedAddOn>? SelectedAddOns { get; set; }
         public ICollection<CustomPackageUsageBasedPricing>? SelectedUsageBasedPricing { get; set; }
+
+        // Helper methods to work with the new PackagePrices collection
+        public decimal GetPrice(string currency = "USD")
+        {
+            var packagePrice = Prices?.FirstOrDefault(p => p.Currency == currency);
+            return packagePrice?.Price ?? 0;
+        }
+
+        public void SetPrice(decimal price, string currency = "USD")
+        {
+            var existingPrice = Prices?.FirstOrDefault(p => p.Currency == currency);
+            if (existingPrice != null)
+            {
+                existingPrice.Price = price;
+            }
+            else
+            {
+                if (Prices == null)
+                    Prices = new List<PackagePrice>();
+                
+                Prices.Add(new PackagePrice
+                {
+                    PackageId = Id,
+                    Currency = currency,
+                    Price = price,
+                    CreatedAt = DateTime.UtcNow
+                });
+            }
+        }
+
+        public string GetPrimaryCurrency()
+        {
+            return Prices?.FirstOrDefault()?.Currency ?? "USD";
+        }
+
+        public List<string> GetAvailableCurrencies()
+        {
+            return Prices?.Select(p => p.Currency).ToList() ?? new List<string>();
+        }
+
+        public Dictionary<string, decimal> GetAllPrices()
+        {
+            return Prices?.ToDictionary(p => p.Currency, p => p.Price) ?? new Dictionary<string, decimal>();
+        }
     }
 
     public class Feature

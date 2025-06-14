@@ -1,11 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using PosBackend.Application.Services.Caching;
 using PosBackend.Models;
 using PosBackend.Services;
+using PosBackend.Security;
 using System.Text.Json;
 using System.ComponentModel.DataAnnotations;
 using AppCacheKeys = PosBackend.Application.Services.Caching.CacheKeys;
@@ -14,8 +16,8 @@ namespace PosBackend.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(AuthenticationSchemes = "Bearer")]
-    public class PricingPackagesController : ControllerBase
+    [EnableRateLimiting(SecurityConstants.RateLimiting.AnonymousUserPolicy)]
+    public class PricingPackagesController : PublicReadOnlyController
     {
         private readonly PosDbContext _context;
         private readonly GeoLocationService _geoService;
@@ -58,7 +60,6 @@ namespace PosBackend.Controllers
         }
 
         [HttpGet]
-        [AllowAnonymous]
         public async Task<ActionResult<object>> GetAll([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             try
@@ -85,6 +86,7 @@ namespace PosBackend.Controllers
 
                     var packagesData = await _context.PricingPackages
                         .Include(p => p.Tier)
+                        .Include(p => p.Prices)
                         .OrderBy(p => p.TierLevel)
                         .ThenBy(p => p.Id)
                         .Skip((pageNumber - 1) * pageSize)
@@ -93,13 +95,10 @@ namespace PosBackend.Controllers
 
                     var packages = packagesData.Select(p =>
                     {
-                        var multiPrices = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, decimal>>(p.MultiCurrencyPrices)
-                            ?? new Dictionary<string, decimal>();
-
-                        var finalPrice = p.Price;
-                        if (multiPrices.TryGetValue(userCurrency, out decimal currencyPrice))
+                        var finalPrice = p.GetPrice(userCurrency);
+                        if (finalPrice == 0)
                         {
-                            finalPrice = currencyPrice;
+                            finalPrice = p.GetPrice(); // fallback to default currency
                         }
 
                         return new PricingPackageDto
@@ -114,8 +113,8 @@ namespace PosBackend.Controllers
                             Type = p.Type,
                             DescriptionList = p.Description.Split(';').ToList(),
                             IsCustomizable = p.Type.ToLower() == "custom" || p.Type.ToLower() == "custom-pro",
-                            Currency = userCurrency,
-                            MultiCurrencyPrices = p.MultiCurrencyPrices,
+                            Currency = p.GetPrice(userCurrency) > 0 ? userCurrency : p.GetPrimaryCurrency(),
+                            MultiCurrencyPrices = System.Text.Json.JsonSerializer.Serialize(p.GetAllPrices()),
                             TierId = p.TierId,
                             TierLevel = p.TierLevel,
                             TierName = p.Tier?.Name,
@@ -138,7 +137,6 @@ namespace PosBackend.Controllers
         }
 
         [HttpGet("{id}")]
-        [AllowAnonymous]
         public async Task<ActionResult<PricingPackageDto>> GetById(int id)
         {
             try
@@ -151,6 +149,7 @@ namespace PosBackend.Controllers
 
                     var package = await _context.PricingPackages
                         .Include(p => p.Tier)
+                        .Include(p => p.Prices)
                         .FirstOrDefaultAsync(p => p.Id == id);
 
                     if (package == null)
@@ -165,21 +164,10 @@ namespace PosBackend.Controllers
                         ? _countryToCurrency[countryCode]
                         : "USD";
 
-                    decimal finalPrice = package.Price;
-
-                    if (userCurrency != package.Currency && !string.IsNullOrEmpty(package.MultiCurrencyPrices))
+                    decimal finalPrice = package.GetPrice(userCurrency);
+                    if (finalPrice == 0)
                     {
-                        try
-                        {
-                            var prices = JsonSerializer.Deserialize<Dictionary<string, decimal>>(package.MultiCurrencyPrices);
-                            if (prices != null && prices.TryGetValue(userCurrency, out decimal currencyPrice))
-                            {
-                                finalPrice = currencyPrice;
-                            }
-                        }
-                        catch (JsonException)
-                        {
-                        }
+                        finalPrice = package.GetPrice(); // fallback to default currency
                     }
 
                     return Ok(new PricingPackageDto
@@ -194,8 +182,8 @@ namespace PosBackend.Controllers
                         Type = package.Type,
                         DescriptionList = package.Description.Split(';').ToList(),
                         IsCustomizable = package.Type.ToLower() == "custom" || package.Type.ToLower() == "custom-pro",
-                        Currency = userCurrency,
-                        MultiCurrencyPrices = package.MultiCurrencyPrices,
+                        Currency = package.GetPrice(userCurrency) > 0 ? userCurrency : package.GetPrimaryCurrency(),
+                        MultiCurrencyPrices = System.Text.Json.JsonSerializer.Serialize(package.GetAllPrices()),
                         TierId = package.TierId,
                         TierLevel = package.TierLevel,
                         TierName = package.Tier?.Name,
@@ -295,11 +283,13 @@ namespace PosBackend.Controllers
         [AllowAnonymous]
         public async Task<ActionResult<object>> CalculateCustomPrice([FromBody] CustomPricingRequest request)
         {
-            var package = await _context.PricingPackages.FirstOrDefaultAsync(p => p.Id == request.PackageId);
+            var package = await _context.PricingPackages
+                .Include(p => p.Prices)
+                .FirstOrDefaultAsync(p => p.Id == request.PackageId);
             if (package == null)
                 return BadRequest("Invalid package");
 
-            decimal basePrice = package.Price;
+            decimal basePrice = package.GetPrice();
             decimal totalPrice = basePrice;
 
             var selectedFeatures = await _context.CoreFeatures
@@ -355,14 +345,15 @@ namespace PosBackend.Controllers
                     Description = packageDto.Description,
                     Icon = packageDto.Icon,
                     ExtraDescription = packageDto.ExtraDescription,
-                    Price = packageDto.Price,
                     TestPeriodDays = packageDto.TestPeriodDays,
-                    Type = packageDto.Type,
-                    Currency = packageDto.Currency,
-                    MultiCurrencyPrices = packageDto.MultiCurrencyPrices
+                    Type = packageDto.Type
                 };
 
                 _context.PricingPackages.Add(newPackage);
+                await _context.SaveChangesAsync();
+
+                // Add price using the new structure
+                newPackage.SetPrice(packageDto.Price, packageDto.Currency ?? "USD");
                 await _context.SaveChangesAsync();
 
                 // Invalidate cache for all packages
@@ -379,13 +370,13 @@ namespace PosBackend.Controllers
                         Description = newPackage.Description,
                         Icon = newPackage.Icon,
                         ExtraDescription = newPackage.ExtraDescription,
-                        Price = newPackage.Price,
+                        Price = newPackage.GetPrice(),
                         TestPeriodDays = newPackage.TestPeriodDays,
                         Type = newPackage.Type,
                         DescriptionList = newPackage.Description.Split(';').ToList(),
                         IsCustomizable = newPackage.Type.ToLower() == "custom" || newPackage.Type.ToLower() == "custom-pro",
-                        Currency = newPackage.Currency,
-                        MultiCurrencyPrices = newPackage.MultiCurrencyPrices
+                        Currency = newPackage.GetPrimaryCurrency(),
+                        MultiCurrencyPrices = System.Text.Json.JsonSerializer.Serialize(newPackage.GetAllPrices())
                     });
             }
             catch (Exception ex)
@@ -407,7 +398,9 @@ namespace PosBackend.Controllers
         {
             try
             {
-                var package = await _context.PricingPackages.FindAsync(id);
+                var package = await _context.PricingPackages
+                    .Include(p => p.Prices)
+                    .FirstOrDefaultAsync(p => p.Id == id);
 
                 if (package == null)
                 {
@@ -431,11 +424,11 @@ namespace PosBackend.Controllers
                 package.Description = packageDto.Description;
                 package.Icon = packageDto.Icon;
                 package.ExtraDescription = packageDto.ExtraDescription;
-                package.Price = packageDto.Price;
                 package.TestPeriodDays = packageDto.TestPeriodDays;
                 package.Type = packageDto.Type;
-                package.Currency = packageDto.Currency;
-                package.MultiCurrencyPrices = packageDto.MultiCurrencyPrices;
+                
+                // Update price using the new structure
+                package.SetPrice(packageDto.Price, packageDto.Currency ?? "USD");
 
                 await _context.SaveChangesAsync();
 
@@ -463,7 +456,9 @@ namespace PosBackend.Controllers
         {
             try
             {
-                var package = await _context.PricingPackages.FindAsync(id);
+                var package = await _context.PricingPackages
+                    .Include(p => p.Prices)
+                    .FirstOrDefaultAsync(p => p.Id == id);
 
                 if (package == null)
                 {
