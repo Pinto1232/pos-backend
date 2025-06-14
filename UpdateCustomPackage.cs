@@ -77,13 +77,14 @@ namespace PosBackend
                                     ""TestPeriodDays"" INTEGER NOT NULL,
                                     ""Type"" TEXT NOT NULL,
                                     ""Currency"" TEXT NOT NULL,
-                                    ""MultiCurrencyPrices"" TEXT NOT NULL
+                                    ""MultiCurrencyPrices"" TEXT NOT NULL,
+                                    ""TierLevel"" INTEGER DEFAULT 1
                                 );
 
-                                INSERT INTO ""PricingPackages"" (""Title"", ""Description"", ""Icon"", ""ExtraDescription"", ""Price"", ""TestPeriodDays"", ""Type"", ""Currency"", ""MultiCurrencyPrices"")
-                                VALUES ('Custom', 'Build your own package;Select only what you need;Flexible pricing;Scalable solution;Pay for what you use', 'MUI:SettingsIcon', 'Create a custom solution that fits your exact needs', 49.99, 14, 'custom', 'USD', '{""ZAR"": 899.99, ""EUR"": 45.99, ""GBP"": 39.99}')
+                                INSERT INTO ""PricingPackages"" (""Title"", ""Description"", ""Icon"", ""ExtraDescription"", ""Price"", ""TestPeriodDays"", ""Type"", ""Currency"", ""MultiCurrencyPrices"", ""TierLevel"")
+                                VALUES ('Custom Pro', 'Flexible solutions tailored to unique requirements;Customizable features;Industry specific;Flexible scaling;Personalized onboarding;Custom workflows;Advanced integrations;Priority support', 'MUI:CustomIcon', 'Tailored solutions for unique business requirements', 149.99, 14, 'custom-pro', 'USD', '{""ZAR"": 2749.99, ""EUR"": 139.99, ""GBP"": 119.99}', 3)
                                 ON CONFLICT (""Type"") DO UPDATE
-                                SET ""Price"" = 49.99, ""MultiCurrencyPrices"" = '{""ZAR"": 899.99, ""EUR"": 45.99, ""GBP"": 39.99}';
+                                SET ""Price"" = 149.99, ""MultiCurrencyPrices"" = '{""ZAR"": 2749.99, ""EUR"": 139.99, ""GBP"": 119.99}';
                             ");
                             Console.WriteLine("Successfully created PricingPackages table and inserted Custom package.");
                         }
@@ -94,38 +95,39 @@ namespace PosBackend
                     }
                     else
                     {
-                        // Find the Custom package
+                        // Find the Custom Pro package
                         var customPackage = await context.PricingPackages
                             .Include(p => p.Prices)
-                            .FirstOrDefaultAsync(p => p.Type == "custom");
+                            .FirstOrDefaultAsync(p => p.Type == "custom-pro");
 
                         if (customPackage != null)
                         {
-                            Console.WriteLine($"Found Custom package with current price: {customPackage.GetPrice()}");
+                            Console.WriteLine($"Found Custom Pro package with current price: {customPackage.GetPrice()}");
 
                             // Update the prices using the new collection
-                            customPackage.SetPrice(49.99m, "USD");
-                            customPackage.SetPrice(899.99m, "ZAR");
-                            customPackage.SetPrice(45.99m, "EUR");
-                            customPackage.SetPrice(39.99m, "GBP");
+                            customPackage.SetPrice(149.99m, "USD");
+                            customPackage.SetPrice(2749.99m, "ZAR");
+                            customPackage.SetPrice(139.99m, "EUR");
+                            customPackage.SetPrice(119.99m, "GBP");
 
                             // Save changes
                             await context.SaveChangesAsync();
-                            Console.WriteLine("Custom package price updated successfully to 49.99.");
+                            Console.WriteLine("Custom Pro package price updated successfully to 149.99.");
                         }
                         else
                         {
-                            Console.WriteLine("Custom package not found in the database. Trying to insert it...");
+                            Console.WriteLine("Custom Pro package not found in the database. Trying to insert it...");
 
-                            // Create a new Custom package
+                            // Create a new Custom Pro package
                             var newCustomPackage = new PricingPackage
                             {
-                                Title = "Custom",
-                                Description = "Build your own package;Select only what you need;Flexible pricing;Scalable solution;Pay for what you use",
-                                Icon = "MUI:SettingsIcon",
-                                ExtraDescription = "Create a custom solution that fits your exact needs",
+                                Title = "Custom Pro",
+                                Description = "Flexible solutions tailored to unique requirements;Customizable features;Industry specific;Flexible scaling;Personalized onboarding;Custom workflows;Advanced integrations;Priority support",
+                                Icon = "MUI:CustomIcon",
+                                ExtraDescription = "Tailored solutions for unique business requirements",
                                 TestPeriodDays = 14,
-                                Type = "custom"
+                                Type = "custom-pro",
+                                TierLevel = 3
                             };
 
                             // Add and save the new package
@@ -133,13 +135,13 @@ namespace PosBackend
                             await context.SaveChangesAsync();
                             
                             // Now add the prices
-                            newCustomPackage.SetPrice(49.99m, "USD");
-                            newCustomPackage.SetPrice(899.99m, "ZAR");
-                            newCustomPackage.SetPrice(45.99m, "EUR");
-                            newCustomPackage.SetPrice(39.99m, "GBP");
+                            newCustomPackage.SetPrice(149.99m, "USD");
+                            newCustomPackage.SetPrice(2749.99m, "ZAR");
+                            newCustomPackage.SetPrice(139.99m, "EUR");
+                            newCustomPackage.SetPrice(119.99m, "GBP");
                             
                             await context.SaveChangesAsync();
-                            Console.WriteLine("Custom package created successfully with price 49.99.");
+                            Console.WriteLine("Custom Pro package created successfully with price 149.99.");
                         }
                     }
                 }

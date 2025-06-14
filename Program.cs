@@ -585,22 +585,131 @@ using (var scope = app.Services.CreateScope())
         await PackageTierSeeder.SeedPackageTiers(context);
 
         // Check if there are any pricing packages
-        if (!context.PricingPackages.Any())
+        var existingPackages = context.PricingPackages.Include(p => p.Prices).ToList();
+        if (!existingPackages.Any())
         {
             Console.WriteLine("No pricing packages found. Seeding initial data...");
 
             var packages = new List<PricingPackage>
             {
-
+                new PricingPackage
+                {
+                    Title = "Starter Plus",
+                    Description = "Essential features for small businesses;Basic POS functionality;Single store support;Email support;Basic reporting;Customer database;Simple analytics",
+                    Icon = "MUI:StarterIcon",
+                    ExtraDescription = "Perfect for new businesses starting their POS journey",
+                    TestPeriodDays = 14,
+                    Type = "starter-plus",
+                    TierLevel = 1
+                },
+                new PricingPackage
+                {
+                    Title = "Growth Pro",
+                    Description = "Advanced features for growing businesses;Everything in Starter;Advanced inventory;Loyalty program;Marketing automation;Staff tracking;Custom dashboards;Mobile app",
+                    Icon = "MUI:GrowthIcon",
+                    ExtraDescription = "Designed for expanding businesses with growing needs",
+                    TestPeriodDays = 14,
+                    Type = "growth-pro",
+                    TierLevel = 2
+                },
+                new PricingPackage
+                {
+                    Title = "Custom Pro",
+                    Description = "Flexible solutions tailored to unique requirements;Customizable features;Industry specific;Flexible scaling;Personalized onboarding;Custom workflows;Advanced integrations;Priority support",
+                    Icon = "MUI:CustomIcon",
+                    ExtraDescription = "Tailored solutions for unique business requirements",
+                    TestPeriodDays = 14,
+                    Type = "custom-pro",
+                    TierLevel = 3
+                },
+                new PricingPackage
+                {
+                    Title = "Enterprise Elite",
+                    Description = "Comprehensive solutions for large organizations;All features included;Multi-location management;Enterprise analytics;Custom API integrations;White-label options;Dedicated account manager;Priority 24/7 support",
+                    Icon = "MUI:EnterpriseIcon",
+                    ExtraDescription = "Complete enterprise-grade POS solution",
+                    TestPeriodDays = 30,
+                    Type = "enterprise-elite",
+                    TierLevel = 4
+                },
+                new PricingPackage
+                {
+                    Title = "Premium Plus",
+                    Description = "Ultimate POS experience with cutting-edge AI;Everything in Enterprise;AI-powered analytics;Predictive inventory;Omnichannel integration;VIP support;Quarterly reviews;Custom reporting;Advanced AI insights",
+                    Icon = "MUI:PremiumIcon",
+                    ExtraDescription = "The ultimate POS experience with AI and premium services",
+                    TestPeriodDays = 30,
+                    Type = "premium-plus",
+                    TierLevel = 5
+                }
             };
 
             context.PricingPackages.AddRange(packages);
             context.SaveChanges();
             Console.WriteLine($"Added {packages.Count} pricing packages.");
+
+            // Add pricing for each package in multiple currencies
+            var packagePrices = new Dictionary<string, Dictionary<string, decimal>>
+            {
+                { "starter-plus", new Dictionary<string, decimal> { { "USD", 29.99m }, { "EUR", 27.99m }, { "GBP", 23.99m }, { "ZAR", 549.99m } } },
+                { "growth-pro", new Dictionary<string, decimal> { { "USD", 79.99m }, { "EUR", 74.99m }, { "GBP", 63.99m }, { "ZAR", 1479.99m } } },
+                { "custom-pro", new Dictionary<string, decimal> { { "USD", 149.99m }, { "EUR", 139.99m }, { "GBP", 119.99m }, { "ZAR", 2749.99m } } },
+                { "enterprise-elite", new Dictionary<string, decimal> { { "USD", 249.99m }, { "EUR", 229.99m }, { "GBP", 199.99m }, { "ZAR", 4599.99m } } },
+                { "premium-plus", new Dictionary<string, decimal> { { "USD", 399.99m }, { "EUR", 369.99m }, { "GBP", 319.99m }, { "ZAR", 7399.99m } } }
+            };
+
+            foreach (var package in packages)
+            {
+                if (packagePrices.ContainsKey(package.Type))
+                {
+                    foreach (var priceData in packagePrices[package.Type])
+                    {
+                        package.SetPrice(priceData.Value, priceData.Key);
+                    }
+                }
+            }
+            
+            context.SaveChanges();
+            Console.WriteLine("Added pricing data for all packages.");
         }
         else
         {
             Console.WriteLine("Pricing packages already exist in the database.");
+            
+            // Check if existing packages have proper pricing
+            var packagesWithoutPrices = existingPackages.Where(p => !p.Prices.Any()).ToList();
+            if (packagesWithoutPrices.Any())
+            {
+                Console.WriteLine($"Found {packagesWithoutPrices.Count} packages without pricing. Adding prices...");
+                
+                var packagePrices = new Dictionary<string, Dictionary<string, decimal>>
+                {
+                    { "starter-plus", new Dictionary<string, decimal> { { "USD", 29.99m }, { "EUR", 27.99m }, { "GBP", 23.99m }, { "ZAR", 549.99m } } },
+                    { "growth-pro", new Dictionary<string, decimal> { { "USD", 79.99m }, { "EUR", 74.99m }, { "GBP", 63.99m }, { "ZAR", 1479.99m } } },
+                    { "custom-pro", new Dictionary<string, decimal> { { "USD", 149.99m }, { "EUR", 139.99m }, { "GBP", 119.99m }, { "ZAR", 2749.99m } } },
+                    { "enterprise-elite", new Dictionary<string, decimal> { { "USD", 249.99m }, { "EUR", 229.99m }, { "GBP", 199.99m }, { "ZAR", 4599.99m } } },
+                    { "premium-plus", new Dictionary<string, decimal> { { "USD", 399.99m }, { "EUR", 369.99m }, { "GBP", 319.99m }, { "ZAR", 7399.99m } } }
+                };
+
+                foreach (var package in packagesWithoutPrices)
+                {
+                    if (packagePrices.ContainsKey(package.Type))
+                    {
+                        foreach (var priceData in packagePrices[package.Type])
+                        {
+                            package.SetPrice(priceData.Value, priceData.Key);
+                        }
+                        Console.WriteLine($"Added pricing for {package.Type}");
+                    }
+                }
+                
+                context.SaveChanges();
+                Console.WriteLine("Finished adding pricing data to existing packages.");
+            }
+            else
+            {
+                Console.WriteLine("All packages already have pricing data.");
+            }
         }
 
         if (!context.CoreFeatures.Any())
