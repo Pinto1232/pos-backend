@@ -7,6 +7,8 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.RateLimiting;
 using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.ResponseCompression;
+using System.IO.Compression;
 using PosBackend.Application.Interfaces;
 using PosBackend.Application.Services;
 using PosBackend.Application.Services.Caching;
@@ -37,7 +39,7 @@ Log.Logger = new LoggerConfiguration()
         rollingInterval: RollingInterval.Day,
         outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}",
         retainedFileCountLimit: 7,
-        fileSizeLimitBytes: 10 * 1024 * 1024) // 10MB
+        fileSizeLimitBytes: 10 * 1024 * 1024) 
     .CreateLogger();
 
 // Use Serilog for logging
@@ -50,9 +52,9 @@ builder.Services.AddCors(options =>
     {
         policy
             .WithOrigins(
-                "http://localhost:3000",  // React dev server
-                "http://localhost:8080",   // Keycloak
-                "http://localhost:8282"    // Keycloak alternative port
+                "http://localhost:3000",  
+                "http://localhost:8080",   
+                "http://localhost:8282"    
             )
             .AllowAnyMethod()
             .AllowAnyHeader()
@@ -322,8 +324,39 @@ builder.Services.AddSwaggerGen(c =>
 // Serilog is already configured above and will handle all logging
 
 
-// Register response compression
-builder.Services.AddResponseCompression();
+// Enhanced Response Compression Configuration
+builder.Services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+    options.Providers.Add<BrotliCompressionProvider>();
+    options.Providers.Add<GzipCompressionProvider>();
+    
+    // MIME types to compress
+    options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[]
+    {
+        "application/json",
+        "application/xml",
+        "text/xml",
+        "text/json",
+        "text/plain",
+        "text/css",
+        "text/html",
+        "application/javascript",
+        "text/javascript",
+        "image/svg+xml"
+    });
+});
+
+// Configure compression levels
+builder.Services.Configure<BrotliCompressionProviderOptions>(options =>
+{
+    options.Level = System.IO.Compression.CompressionLevel.Optimal;
+});
+
+builder.Services.Configure<GzipCompressionProviderOptions>(options =>
+{
+    options.Level = System.IO.Compression.CompressionLevel.Optimal;
+});
 
 // Enhanced Rate Limiting Configuration
 builder.Services.AddRateLimiter(options =>
@@ -436,6 +469,9 @@ app.UseAuthorization();
 
 // Enable response compression
 app.UseResponseCompression();
+
+// Add response caching middleware
+app.UseMiddleware<ResponseCachingMiddleware>();
 
 // Enable serving static files
 app.UseStaticFiles();

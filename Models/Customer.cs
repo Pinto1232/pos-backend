@@ -10,8 +10,12 @@ namespace PosBackend.Models
         public int CustomerId { get; set; }
 
         [Required]
-        [StringLength(100)]
-        public required string Name { get; set; }
+        [StringLength(50)]
+        public required string FirstName { get; set; }
+
+        [Required]
+        [StringLength(50)]
+        public required string LastName { get; set; }
 
         [EmailAddress]
         [StringLength(100)]
@@ -24,11 +28,17 @@ namespace PosBackend.Models
         [StringLength(200)]
         public required string Address { get; set; }
 
+        public DateTime? DateOfBirth { get; set; }
+
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        public DateTime LastVisit { get; set; } = DateTime.UtcNow;
+
         // Navigation properties
         public ICollection<Sale> Sales { get; set; } = new List<Sale>();
         public ICollection<Order> Orders { get; set; } = new List<Order>();
         public ICollection<CustomerGroupMember> CustomerGroupMembers { get; set; } = new List<CustomerGroupMember>();
         public ICollection<CustomerFeedback> CustomerFeedbacks { get; set; } = new List<CustomerFeedback>();
-        public required LoyaltyPoint LoyaltyPoint { get; set; }
+        public LoyaltyPoint? LoyaltyPoint { get; set; }
     }
 }

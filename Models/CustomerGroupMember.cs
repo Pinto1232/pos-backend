@@ -16,5 +16,7 @@ namespace PosBackend.Models
         [ForeignKey("CustomerGroup")]
         public int GroupId { get; set; }
         public required CustomerGroup CustomerGroup { get; set; }
+
+        public DateTime JoinedAt { get; set; } = DateTime.UtcNow;
     }
 }
